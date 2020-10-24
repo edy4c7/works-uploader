@@ -1,0 +1,337 @@
+openapi: "3.0.2"
+info:
+  title: 闇鍋学園Works
+  version: "1.0"
+components:
+  schemas:
+    WorkId:
+      description: 作品ID
+      type: string
+    Timestamp:
+      type: string
+      format: date-time
+      description: タイムスタンプ
+    User:
+      type: object
+      description: ユーザーアカウントの情報
+      properties:
+        localId:
+          type: string
+          description: ユーザー識別のために一意に割り当ててられる文字列
+        displayName:
+          type: string
+          description: 画面に表示されるユーザー名
+        photoUrl:
+          type: string
+          format: url
+          description: アバター用画像ファイルのURL
+    Work:
+      type: object
+      description: 作品データ
+      properties:
+        id:
+          $ref: "#/components/schemas/WorkId"
+        author:
+          description: 作者
+          allOf: 
+            - $ref: "#/components/schemas/User"
+        title:
+          description: タイトル
+          type: string
+        description:
+          description: 説明文
+          type: string
+        thumbnailUrl:
+          description: サムネイルのURL
+          type: string
+          format: url
+        contentUrl:
+          description: 作品本体のURL
+          type: string
+          format: url
+        createdAt:
+          description: 作成日
+          allOf:
+            - $ref: "#/components/schemas/Timestamp"
+        updatededAt:
+          description: 更新日
+          allOf:
+            - $ref: "#/components/schemas/Timestamp"
+    Activity:
+      description: 
+        活動履歴データ。
+        「誰がいつ何をどうした」を表す。
+      type: object
+      properties:
+        id:
+          description: アクティビティID
+          type: string
+        user:
+          description: アクティビティを発生させたユーザー
+          allOf:
+            - $ref: "#/components/schemas/User"
+        type:
+          description: アクティビティの種別
+          type: integer
+          format: int32
+        target:
+          description: アクティビティに関連する作品
+          allOf:
+            - $ref: "#/components/schemas/Work"
+        timestamp:
+          description: アクティビティの発生日
+          allOf:
+            - $ref: "#/components/schemas/Timestamp"
+    Error:
+      description: エラー情報
+      type: object
+      properties:
+        code:
+          description: エラーコード
+          type: string
+        message:
+          description: エラーメッセージ
+          type: string
+  parameters:
+    workId:
+      description: 作品ID
+      name: id
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/WorkId"
+    offset:
+      description: 開始行数
+      name: offset
+      in: query
+      schema:
+        type: integer
+        format: int32
+    limit:
+      description: 取得件数
+      name: limit
+      in: query
+      schema:
+        type: integer
+        format: int32
+  requestBodies:
+    Work:
+      description: アップロードする作品データ
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              title:
+                description: タイトル
+                type: string
+              description:
+                description: 説明文
+                type: string
+              contentUrl:
+                description: 作品本体のUrl(PixivとかYoutubeとか)
+                type: string
+                format: url
+          examples:
+           default:
+              value:
+                title: 作品名
+                description: 説明文
+                contentUrl: https://example.com
+        multipart/form-data:
+          schema:
+            type: object
+            properties:
+              title:
+                description: タイトル
+                type: string
+              description:
+                description: 説明文
+                type: string
+              thumbnail:
+                description: サムネイル
+                type: string
+                format: binary
+              content:
+                description: 作品本体のファイル
+                type: string
+                format: binary
+  responses:
+    OK:
+      description: "OK"
+    BadRequest:
+      description: "リクエストパラメータ不正"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          examples:
+            missingRequired:
+              summary: 必須項目が入力されていない
+              value:
+                code: DPWE01
+                message: XXXは必ず入力してください。
+    NotFound:
+      description: "リソースが見つからない"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          examples:
+            notFound:
+              value:
+                code: DPWE02
+                message: 指定されたリソースが存在しません。
+  securitySchemes:
+    Bearer:
+      type: http
+      scheme: bearer
+      description: Bearer token
+security:
+  - Bearer: []
+paths:
+  /works:
+    get:
+      summary: 作品データ取得
+      parameters:
+        - $ref: "#/components/parameters/offset"
+        - $ref: "#/components/parameters/limit"
+      responses:
+        200:
+          description: "作品データ"
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: "#/components/schemas/Work"
+              examples:
+                default:
+                  value:
+                    - id: 1
+                      author:
+                        localId: abcd1234
+                        displayName: 太郎
+                        photoUrl: https://example.com
+                      title: 作品01
+                      description: 小説だよ
+                      thumbnailUrl: https://example.com
+                      contentUrl: https://example.com
+                      createdAt: 2019-08-24T14:15:22Z
+                      updatedAt: 2019-08-24T14:15:22Z
+                    - id: 2
+                      author:
+                        localId: efgh5678
+                        displayName: 花子
+                        photoUrl: https://example.com
+                      title: 作品02
+                      description: 絵画でございますわ
+                      thumbnailUrl: https://example.com
+                      contentUrl: https://example.com
+                      createdAt: 2019-08-24T14:15:22Z
+                      updatedAt: 2019-08-24T14:15:22Z
+        400: 
+          $ref: "#/components/responses/BadRequest"
+    post:
+      summary: 作品データ投稿
+      requestBody:
+        $ref: "#/components/requestBodies/Work"
+      responses:
+        200: 
+          $ref: "#/components/responses/OK"
+        400: 
+          $ref: "#/components/responses/BadRequest"
+  /works/{id}:
+    get:
+      summary: 作品データ個別取得
+      parameters:
+        - $ref: "#/components/parameters/workId"
+      responses:
+        200:
+          description: 作品データ
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Work"
+              examples:
+                default:
+                  value:
+                    id: 1
+                    author:
+                      localId: abcd1234
+                      displayName: 太郎
+                      photoUrl: https://example.com
+                    title: 作品01
+                    description: 小説だよ
+                    thumbnailUrl: https://example.com
+                    contentUrl: https://example.com
+                    createdAt: 2019-08-24T14:15:22Z
+                    updatedAt: 2019-08-24T14:15:22Z
+        404: 
+          $ref: "#/components/responses/NotFound"
+    put:
+      summary: 作品データ修正
+      parameters:
+        - $ref: "#/components/parameters/workId"
+      requestBody:
+        $ref: "#/components/requestBodies/Work"
+      responses:
+        200: 
+          $ref: "#/components/responses/OK"
+        400: 
+          $ref: "#/components/responses/BadRequest"
+        404: 
+          $ref: "#/components/responses/NotFound"
+    delete:
+      summary: 作品データ削除
+      parameters:
+        - $ref: "#/components/parameters/workId"
+      responses:
+        200: 
+          $ref: "#/components/responses/OK"
+        404: 
+          $ref: "#/components/responses/NotFound"
+  /activities:
+    get:
+      summary: アクティビティデータ取得
+      parameters:
+        - $ref: "#/components/parameters/offset"
+        - $ref: "#/components/parameters/limit"
+        - name: user
+          description: アクティビティを取得したいユーザーのID
+          in: query
+          schema:
+            type: string
+      responses:
+        200:
+          description: アクティビティデータ
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Activity"
+              examples:
+                default:
+                  value:
+                    id: 1
+                    user:
+                      localId: abcd1234
+                      displayName: 太郎
+                      photoUrl: https://example.com
+                    type: 0
+                    target:
+                      id: 1
+                      author:
+                        localId: abcd1234
+                        displayName: 太郎
+                        photoUrl: https://example.com
+                      title: 作品01
+                      description: 小説だよ
+                      thumbnailUrl: https://example.com
+                      contentUrl: https://example.com
+                      createdAt: 2019-08-24T14:15:22Z
+                      updatedAt: 2019-08-24T14:15:22Z
+                    timestamp: 2019-08-24T14:15:22Z
+        404: 
+          $ref: "#/components/responses/NotFound"
