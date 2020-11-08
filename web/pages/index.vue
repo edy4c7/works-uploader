@@ -1,6 +1,6 @@
 <template>
   <div class="p-index">
-    <v-parallax dark :src="require('~/assets/image.jpg')" class="fill-height">
+    <v-parallax dark :src="require('~/assets/image.jpg')">
       <v-container>
         <v-row justify="center" align="center">
           <h1>Title</h1>
@@ -18,11 +18,11 @@
       </v-row>
       <v-row justify="center" align="center">
         <v-carousel>
-          <v-carousel-item v-for="item in items" :key="item">
-            <v-row class="fill-height" align="center" justify="center">
-              <v-img :src="require('~/assets/image.jpg')" />
-            </v-row>
-          </v-carousel-item>
+          <v-carousel-item
+            v-for="item in items"
+            :key="item"
+            :src="require('~/assets/image.jpg')"
+          />
         </v-carousel>
       </v-row>
       <v-row>
