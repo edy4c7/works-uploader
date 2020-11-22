@@ -1,0 +1,8 @@
+html {
+  background: #121212;
+}
+
+html.--locked {
+  overflow-x: visible;
+  overflow-y: visible;
+}
