@@ -6,5 +6,5 @@ all:
 	&& yarn \
 	&& yarn build
 
-deploy: all
-	firebase deploy
+emulator: all
+	firebase emulators:start
