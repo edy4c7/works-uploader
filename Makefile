@@ -1,3 +1,4 @@
+.PHONY: all
 all:	
 	cd web \
 	&& yarn \
@@ -8,3 +9,8 @@ all:
 
 emulator: all
 	firebase emulators:start
+	&& yarn run build
+
+.PHONY: test
+test:
+	cd web && yarn test
