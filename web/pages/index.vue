@@ -1,6 +1,10 @@
 <template>
   <div class="p-index">
-    <v-parallax dark :src="require('~/assets/image.jpg')">
+    <v-parallax
+      v-if="typeof window !== 'undefined'"
+      dark
+      :src="require('~/assets/image.jpg')"
+    >
       <v-container class="title">
         <v-row justify="center" align="center">
           <h1>Title</h1>
@@ -18,7 +22,7 @@
       </v-row>
       <v-row justify="center" align="center">
         <v-col cols="12">
-          <v-carousel>
+          <v-carousel v-if="typeof window !== 'undefined'">
             <v-carousel-item
               v-for="item in items"
               :key="item"
