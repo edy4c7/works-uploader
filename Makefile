@@ -4,4 +4,7 @@ all:
 	&& yarn generate
 	cd functions \
 	&& yarn \
-	&& yarn run build
+	&& yarn build
+
+deploy: all
+	firebase deploy
