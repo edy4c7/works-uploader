@@ -2,7 +2,6 @@
   <v-overlay
     ref="refOl"
     v-model="isVisible"
-    v-resized="onWindowResized"
     :style="{ cursor: canOverlayClose ? 'pointer' : 'default' }"
     @click.native="overlayClose"
   >
@@ -78,11 +77,6 @@ export default defineComponent({
       return props.maxWidth
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    function onWindowResized(evt: UIEvent, el: HTMLElement) {
-      ctx.emit('resized')
-    }
-
     watch(
       () => props.isVisible,
       () => {
@@ -105,7 +99,6 @@ export default defineComponent({
       close,
       overlayClose,
       maxWidthOfCloseButton,
-      onWindowResized,
     }
   },
 })

@@ -1,12 +1,14 @@
 <template>
   <div class="p-index">
-    <v-parallax dark :src="require('~/assets/image.jpg')">
-      <v-container class="title">
-        <v-row justify="center" align="center">
-          <h1>Title</h1>
-        </v-row>
-      </v-container>
-    </v-parallax>
+    <client-only>
+      <v-parallax dark :src="require('~/assets/image.jpg')">
+        <v-container class="title">
+          <v-row justify="center" align="center">
+            <h1>Title</h1>
+          </v-row>
+        </v-container>
+      </v-parallax>
+    </client-only>
     <v-container>
       <v-row class="outline pa-4 pa-sm-8 pa-lg-16">
         居留地女の間で
@@ -18,13 +20,15 @@
       </v-row>
       <v-row justify="center" align="center">
         <v-col cols="12">
-          <v-carousel>
-            <v-carousel-item
-              v-for="item in items"
-              :key="item"
-              :src="require('~/assets/image.jpg')"
-            />
-          </v-carousel>
+          <client-only>
+            <v-carousel>
+              <v-carousel-item
+                v-for="item in items"
+                :key="item"
+                :src="require('~/assets/image.jpg')"
+              />
+            </v-carousel>
+          </client-only>
         </v-col>
       </v-row>
       <v-row>
