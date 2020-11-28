@@ -3,7 +3,6 @@ import express from 'express'
 //@ts-ignore  
 import basicAuth from 'basic-auth-connect'
 import { compareSync } from 'bcrypt'
-import { join } from 'path'
 
 const app = express()
 
@@ -12,6 +11,6 @@ app.all('/*', basicAuth((user: string, password: string) => {
   && compareSync(password, functions.config().basic.password)
 }))
 
-app.use(express.static(join(__dirname, '../web/dist')))
+app.use(express.static('./static'))
 
 exports.app = functions.https.onRequest(app)
