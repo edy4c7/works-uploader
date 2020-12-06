@@ -45,7 +45,9 @@ describe('actions', () => {
     store.$api = new ApiMock()
 
     await store.dispatch('fetchWorks')
+    expect(store.state.works).toEqual(data)
 
+    await store.dispatch('fetchWorks')
     expect(store.state.works).toEqual(data)
   })
 })

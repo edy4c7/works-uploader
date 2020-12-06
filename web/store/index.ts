@@ -17,11 +17,14 @@ export const mutations: MutationTree<State> = {
       s.works.push(payload.works)
     }
   },
+  setWorks(s, payload: { works: Work[] }) {
+    s.works = payload.works
+  },
 }
 
 export const actions: ActionTree<State, State> = {
   async fetchWorks() {
-    this.commit('addWorks', {
+    this.commit('setWorks', {
       works: await this.$api.getWorks(),
     })
   },
