@@ -13,5 +13,9 @@ module.exports = {
   ],
   plugins: ['prettier'],
   // add your custom rules here
-  rules: {},
+  rules: {
+    // unused-varsは@typescript-eslintでチェックするため、
+    // デフォルトの方はoffにする
+    'no-unused-vars': 'off',
+  },
 }
