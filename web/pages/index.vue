@@ -89,7 +89,12 @@
 </style>
 
 <script lang="ts">
-import { defineComponent, ref } from '@vue/composition-api'
+import {
+  defineComponent,
+  ref,
+  useContext,
+  useFetch,
+} from '@nuxtjs/composition-api'
 import Logo from '~/components/Logo.vue'
 import VuetifyLogo from '~/components/VuetifyLogo.vue'
 import Work from '~/components/Work.vue'
@@ -104,15 +109,18 @@ export default defineComponent({
   },
 
   setup() {
+    const { store } = useContext()
     const isWorkModalVisible = ref<Boolean>(false)
-    const items = ref<string[]>([
-      'item1',
-      'item2',
-      'item3',
-      'item4',
-      'item5',
-      'item5',
-    ])
+    const items = ref<string[]>(['item1', 'item2', 'item3', 'item4', 'item5'])
+
+    const { fetch, fetchState } = useFetch(async () => {
+      await store.dispatch('fetchWorks')
+    })
+
+    fetch()
+
+    // eslint-disable-next-line no-unused-expressions
+    fetchState
 
     function showWorkModal() {
       isWorkModalVisible.value = true
