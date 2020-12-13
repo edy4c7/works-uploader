@@ -42,26 +42,56 @@ export class ApiClientImpl implements ApiClient {
   }
 }
 
-const mockedApiClient: ApiClient = {
+const apiClient: ApiClient = {
   getWorks() {
-    return Promise.resolve([
+    return Promise.resolve<Work[]>([
       {
-        id: '001',
+        id: '01',
         author: 'taro',
-        title: 'work01',
-        description: 'hoge',
-        thumbnailUrl: 'https://example.com/work01',
-        contentUrl: 'https://example.com/work01',
+        title: 'hoge',
+        description: 'aaaaaaaaaaaaaaaa',
+        thumbnailUrl: 'http://example.com',
+        contentUrl: 'https://example.com',
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
-        id: '002',
-        author: 'jiro',
-        title: 'work02',
-        description: 'fuga',
-        thumbnailUrl: 'https://example.com/work02',
-        contentUrl: 'https://example.com/work02',
+        id: '02',
+        author: 'hanako',
+        title: 'hoge',
+        description: 'aaaaaaaaaaaaaaaa',
+        thumbnailUrl: 'http://example.com',
+        contentUrl: 'https://example.com',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: '03',
+        author: 'taro',
+        title: 'hoge',
+        description: 'aaaaaaaaaaaaaaaa',
+        thumbnailUrl: 'http://example.com',
+        contentUrl: 'https://example.com',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: '04',
+        author: 'taro',
+        title: 'hoge',
+        description: 'aaaaaaaaaaaaaaaa',
+        thumbnailUrl: 'http://example.com',
+        contentUrl: 'https://example.com',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: '05',
+        author: 'taro',
+        title: 'hoge',
+        description: 'aaaaaaaaaaaaaaaa',
+        thumbnailUrl: 'http://example.com',
+        contentUrl: 'https://example.com',
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -69,10 +99,10 @@ const mockedApiClient: ApiClient = {
   },
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const apiPlugin: Plugin = ({ $axios }, inject) => {
+  $axios.setBaseURL(process.env.apiUrl!)
   // inject('api', new ApiClientImpl($axios))
-  inject('api', mockedApiClient)
+  inject('api', apiClient)
 }
 
 export default apiPlugin
