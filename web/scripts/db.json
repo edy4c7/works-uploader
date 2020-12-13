@@ -1,0 +1,54 @@
+{
+  "works" : [
+    {
+      "id": "001",
+      "author": "taro",
+      "title": "work01",
+      "description": "hoge",
+      "thumbnailUrl": "https://example.com/work01",
+      "contentUrl": "https://example.com/work01",
+      "createdAt": "2020-12-10T03:15:45.000Z",
+      "updatedAt": "2020-12-10T03:15:45.000Z"
+    },
+    {
+      "id": "002",
+      "author": "jiro",
+      "title": "work02",
+      "description": "fuga",
+      "thumbnailUrl": "https://example.com/work02",
+      "contentUrl": "https://example.com/work02",
+      "createdAt": "2020-12-10T03:15:45.000Z",
+      "updatedAt": "2020-12-10T03:15:45.000Z"
+    },
+    {
+      "id": "003",
+      "author": "saburo",
+      "title": "work03",
+      "description": "fuga",
+      "thumbnailUrl": "https://example.com/work03",
+      "contentUrl": "https://example.com/work03",
+      "createdAt": "2020-12-10T03:15:45.000Z",
+      "updatedAt": "2020-12-10T03:15:45.000Z"
+    },
+    {
+      "id": "004",
+      "author": "shiro",
+      "title": "work04",
+      "description": "fuga",
+      "thumbnailUrl": "https://example.com/work04",
+      "contentUrl": "https://example.com/work04",
+      "createdAt": "2020-12-10T03:15:45.000Z",
+      "updatedAt": "2020-12-10T03:15:45.000Z"
+    },
+    {
+      "id": "005",
+      "author": "goro",
+      "title": "work05",
+      "description": "fuga",
+      "thumbnailUrl": "https://example.com/work05",
+      "contentUrl": "https://example.com/work05",
+      "createdAt": "2020-12-10T03:15:45.000Z",
+      "updatedAt": "2020-12-10T03:15:45.000Z"
+    }
+  ]
+}

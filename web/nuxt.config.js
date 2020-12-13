@@ -15,6 +15,11 @@ export default {
     link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
   },
 
+  env: {
+    apiUrl:
+      process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3001',
+  },
+
   // Global CSS (https://go.nuxtjs.dev/config-css)
   css: ['@/assets/main.css'],
 
@@ -67,6 +72,9 @@ export default {
   build: {},
 
   generate: {
-    dir: '../functions/static',
+    dir:
+      process.env.NODE_ENV === 'production'
+        ? '../public'
+        : '../functions/static',
   },
 }

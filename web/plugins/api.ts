@@ -42,37 +42,9 @@ export class ApiClientImpl implements ApiClient {
   }
 }
 
-const mockedApiClient: ApiClient = {
-  getWorks() {
-    return Promise.resolve([
-      {
-        id: '001',
-        author: 'taro',
-        title: 'work01',
-        description: 'hoge',
-        thumbnailUrl: 'https://example.com/work01',
-        contentUrl: 'https://example.com/work01',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: '002',
-        author: 'jiro',
-        title: 'work02',
-        description: 'fuga',
-        thumbnailUrl: 'https://example.com/work02',
-        contentUrl: 'https://example.com/work02',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    ])
-  },
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const apiPlugin: Plugin = ({ $axios }, inject) => {
-  // inject('api', new ApiClientImpl($axios))
-  inject('api', mockedApiClient)
+  $axios.setBaseURL(process.env.apiUrl!)
+  inject('api', new ApiClientImpl($axios))
 }
 
 export default apiPlugin
