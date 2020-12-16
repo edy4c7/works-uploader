@@ -24,7 +24,7 @@
             <v-carousel>
               <v-carousel-item
                 v-for="item in items"
-                :key="item"
+                :key="item.id"
                 :src="require('~/assets/image.jpg')"
               />
             </v-carousel>
@@ -34,7 +34,7 @@
       <v-row>
         <v-col
           v-for="item in items"
-          :key="item"
+          :key="item.id"
           sm="6"
           lg="3"
           @click="showWorkModal"
@@ -89,11 +89,24 @@
 </style>
 
 <script lang="ts">
-import { defineComponent, ref } from '@vue/composition-api'
+import {
+  computed,
+  defineComponent,
+  ref,
+  useContext,
+  useFetch,
+} from '@nuxtjs/composition-api'
+import { Store } from 'vuex'
 import Logo from '~/components/Logo.vue'
 import VuetifyLogo from '~/components/VuetifyLogo.vue'
 import Work from '~/components/Work.vue'
 import Modal from '~/components/Modal.vue'
+import { State } from '~/store'
+
+function useStore<S>() {
+  const { store } = useContext()
+  return store as Store<S>
+}
 
 export default defineComponent({
   components: {
@@ -104,15 +117,13 @@ export default defineComponent({
   },
 
   setup() {
+    const store = useStore<State>()
     const isWorkModalVisible = ref<Boolean>(false)
-    const items = ref<string[]>([
-      'item1',
-      'item2',
-      'item3',
-      'item4',
-      'item5',
-      'item5',
-    ])
+    const items = computed(() => store.state.works)
+
+    useFetch(async () => {
+      await store.dispatch('fetchWorks')
+    })
 
     function showWorkModal() {
       isWorkModalVisible.value = true
