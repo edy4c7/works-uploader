@@ -76,5 +76,9 @@ export default {
       process.env.NODE_ENV === 'production'
         ? '../public'
         : '../functions/static',
+    routes: ['/works/01', '/works/02', '/works/03', '/works/04', '/works/05'],
+  },
+  router: {
+    middleware: ['worksMiddleware'],
   },
 }
