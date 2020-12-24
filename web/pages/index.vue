@@ -25,7 +25,7 @@
               <v-carousel-item
                 v-for="item in items"
                 :key="item.id"
-                :src="require('~/assets/image.jpg')"
+                :src="item.thumbnailUrl"
               />
             </v-carousel>
           </client-only>
@@ -37,19 +37,19 @@
           :key="item.id"
           sm="6"
           lg="3"
-          @click="showWorkModal"
+          @click="showWorkModal(item)"
         >
           <v-hover v-slot="{ hover }">
             <v-card class="card">
               <v-img
                 class="thumbnail"
                 :class="{ 'on-hover': hover }"
-                :src="require('~/assets/image.jpg')"
+                :src="item.thumbnailUrl"
               >
                 <v-row class="fill-height mx-0" align="end">
                   <div>
-                    <v-card-title>Title</v-card-title>
-                    <v-card-subtitle>author</v-card-subtitle>
+                    <v-card-title>{{ item.title }}</v-card-title>
+                    <v-card-subtitle>{{ item.author }}</v-card-subtitle>
                   </div>
                 </v-row>
               </v-img>
