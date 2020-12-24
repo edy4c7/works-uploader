@@ -30,6 +30,7 @@
     "@nuxtjs/vuetify": "^1.11.2",
     "@testing-library/vue": "^5.6.1",
     "@types/body-scroll-lock": "^2.6.1",
+    "@vue/test-utils": "^1.1.2",
     "babel-core": "7.0.0-bridge.0",
     "babel-eslint": "^10.1.0",
     "babel-jest": "^26.5.0",
@@ -43,7 +44,7 @@
     "stylelint": "^13.7.2",
     "stylelint-config-prettier": "^8.0.2",
     "stylelint-config-standard": "^20.0.0",
-    "ts-jest": "^26.4.1",
+    "ts-jest": "^26.4.4",
     "vue-jest": "^3.0.4"
   }
 }

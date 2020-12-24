@@ -1,4 +1,4 @@
-import { MutationTree, ActionTree } from 'vuex'
+import { GetterTree, MutationTree, ActionTree } from 'vuex'
 import { Work } from '~/plugins/api'
 
 export interface State {
@@ -8,6 +8,12 @@ export interface State {
 export const state: () => State = () => ({
   works: [],
 })
+
+export const getters: GetterTree<State, State> = {
+  getWorkById(s) {
+    return (id: string) => s.works.find((i) => i.id === id)
+  },
+}
 
 export const mutations: MutationTree<State> = {
   addWorks(s, payload: { works: Work | Work[] }) {

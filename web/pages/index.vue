@@ -25,7 +25,7 @@
               <v-carousel-item
                 v-for="item in items"
                 :key="item.id"
-                :src="require('~/assets/image.jpg')"
+                :src="item.thumbnailUrl"
               />
             </v-carousel>
           </client-only>
@@ -37,19 +37,19 @@
           :key="item.id"
           sm="6"
           lg="3"
-          @click="showWorkModal"
+          @click="showWorkModal(item)"
         >
           <v-hover v-slot="{ hover }">
             <v-card class="card">
               <v-img
                 class="thumbnail"
                 :class="{ 'on-hover': hover }"
-                :src="require('~/assets/image.jpg')"
+                :src="item.thumbnailUrl"
               >
                 <v-row class="fill-height mx-0" align="end">
                   <div>
-                    <v-card-title>Title</v-card-title>
-                    <v-card-subtitle>author</v-card-subtitle>
+                    <v-card-title>{{ item.title }}</v-card-title>
+                    <v-card-subtitle>{{ item.author }}</v-card-subtitle>
                   </div>
                 </v-row>
               </v-img>
@@ -58,8 +58,28 @@
         </v-col>
       </v-row>
     </v-container>
-    <modal :is-visible.sync="isWorkModalVisible">
-      <work class="work" />
+    <modal :is-visible.sync="localState.isWorkModalVisible">
+      <v-btn
+        v-if="currentIndex > 0"
+        slot="previousButton"
+        icon
+        large
+        dark
+        @click="seek(-1)"
+      >
+        <v-icon> mdi-chevron-left </v-icon>
+      </v-btn>
+      <work slot="content" class="work" :content="localState.modalContent" />
+      <v-btn
+        v-if="currentIndex < countOfItems - 1"
+        slot="nextButton"
+        icon
+        large
+        dark
+        @click="seek(1)"
+      >
+        <v-icon> mdi-chevron-right </v-icon>
+      </v-btn>
     </modal>
   </div>
 </template>
@@ -92,47 +112,56 @@
 import {
   computed,
   defineComponent,
-  ref,
-  useContext,
-  useFetch,
+  getCurrentInstance,
+  reactive,
 } from '@nuxtjs/composition-api'
-import { Store } from 'vuex'
-import Logo from '~/components/Logo.vue'
-import VuetifyLogo from '~/components/VuetifyLogo.vue'
 import Work from '~/components/Work.vue'
+import { Work as IWork } from '~/plugins/api'
 import Modal from '~/components/Modal.vue'
-import { State } from '~/store'
-
-function useStore<S>() {
-  const { store } = useContext()
-  return store as Store<S>
-}
 
 export default defineComponent({
   components: {
-    Logo,
-    VuetifyLogo,
     Work,
     Modal,
   },
-
   setup() {
-    const store = useStore<State>()
-    const isWorkModalVisible = ref<Boolean>(false)
-    const items = computed(() => store.state.works)
-
-    useFetch(async () => {
-      await store.dispatch('fetchWorks')
+    const self = getCurrentInstance()
+    const items = computed(() => self?.$store.state.works)
+    const currentIndex = computed(() =>
+      self?.$store.state.works.indexOf(localState.modalContent)
+    )
+    const countOfItems = computed(() => self?.$store.state.works.length)
+    const localState = reactive({
+      isWorkModalVisible: false,
+      modalContent: {
+        id: '',
+        author: '',
+        title: '',
+        description: '',
+        thumbnailUrl: '',
+        contentUrl: '',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
     })
 
-    function showWorkModal() {
-      isWorkModalVisible.value = true
+    function showWorkModal(content: IWork) {
+      localState.modalContent = content
+      localState.isWorkModalVisible = true
+    }
+
+    function seek(delta: number) {
+      localState.modalContent =
+        self?.$store.state.works[currentIndex.value + delta]
     }
 
     return {
       items,
-      isWorkModalVisible,
+      currentIndex,
+      countOfItems,
+      localState,
       showWorkModal,
+      seek,
     }
   },
 })

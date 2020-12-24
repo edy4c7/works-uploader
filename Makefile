@@ -13,7 +13,6 @@ emulator: all
 
 .PHONY: dev
 dev:
-	json-server web/scripts/db.json --watch --port 3001 &
 	cd web && yarn dev
 
 .PHONY: test

@@ -13,13 +13,22 @@
       <v-btn icon large dark class="close" @click="close">
         <v-icon> mdi-close </v-icon>
       </v-btn>
-      <slot />
+      <div class="prev">
+        <slot name="previousButton" />
+      </div>
+      <slot name="content" />
+      <div class="next">
+        <slot name="nextButton" />
+      </div>
     </div>
   </v-overlay>
 </template>
 
 <style scoped>
 .modal {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 100vw;
   max-height: 100vh;
   padding: 44px;
@@ -32,6 +41,20 @@
   text-align: center;
   z-index: 10;
   cursor: pointer;
+}
+
+.prev {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  text-align: center;
+}
+
+.next {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  text-align: center;
 }
 </style>
 
