@@ -131,6 +131,15 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
+.env
 .envrc
 
 .runtimeconfig.json
+
+go.sum
+
+cover.html
+
+google-application-credentials.json
+
+.vscode/settings.json
