@@ -1,5 +1,6 @@
 {
   "projects": {
-    "develop": "darkpot-school-works-dev"
+    "develop": "darkpot-school-works-dev",
+    "default": "darkpot-school-works-dev"
   }
 }
