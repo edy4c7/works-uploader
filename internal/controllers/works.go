@@ -44,7 +44,7 @@ func get(service services.WorksService) gin.HandlerFunc {
 
 func findByID(service services.WorksService) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+		id, err := extractID(c)
 		if err != nil {
 			c.Error(err)
 			return
@@ -85,7 +85,7 @@ func put(service services.WorksService) gin.HandlerFunc {
 			return
 		}
 
-		id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+		id, err := extractID(c)
 		if err != nil {
 			c.Error(err)
 			return
@@ -102,7 +102,7 @@ func put(service services.WorksService) gin.HandlerFunc {
 
 func delete(service services.WorksService) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+		id, err := extractID(c)
 		if err != nil {
 			c.Error(err)
 			return
@@ -113,4 +113,8 @@ func delete(service services.WorksService) gin.HandlerFunc {
 			return
 		}
 	}
+}
+
+func extractID(c *gin.Context) (uint64, error) {
+	return strconv.ParseUint(c.Param("id"), 10, 64)
 }
