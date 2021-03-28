@@ -13,9 +13,7 @@ import (
 	"github.com/form3tech-oss/jwt-go"
 )
 
-type userKeyType string
-
-const userKey userKeyType = "user"
+const userKey string = "user"
 const subjectKey string = "sub"
 const cannotBeNullMessage = "%s can't be null"
 
