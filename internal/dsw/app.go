@@ -34,7 +34,7 @@ func Run() {
 		panic(err)
 	}
 
-	db.AutoMigrate(entities.Work{})
+	db.AutoMigrate(entities.Work{}, entities.Activity{})
 
 	authMiddleware := middlewares.NewAuthenticationMiddleware(
 		middlewares.NewJWTMiddleware())

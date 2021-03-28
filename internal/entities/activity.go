@@ -10,6 +10,7 @@ type Activity struct {
 	ID        uint64
 	Type      constants.ActivityType
 	User      string
+	WorkID    uint64
 	Work      *Work
 	CreatedAt time.Time
 }
