@@ -41,30 +41,17 @@ func (r *errorBase) FormatError(p xerrors.Printer) error {
 	return r.cause
 }
 
-type DataBaseAccessErrorCode uint
-
-const (
-	RecordNotFound           DataBaseAccessErrorCode = iota
-	OtherDataBaseAccessError DataBaseAccessErrorCode = 99
-)
-
-type DataBaseAccessError struct {
+type RecordNotFoundError struct {
 	*errorBase
-	code DataBaseAccessErrorCode
 }
 
-func NewDataBaseAccessError(code DataBaseAccessErrorCode, message string, cause error) *DataBaseAccessError {
-	err := &DataBaseAccessError{errorBase: newErrorBase()}
+func NewRecordNotFoundError(message string, cause error) *RecordNotFoundError {
+	err := &RecordNotFoundError{errorBase: newErrorBase()}
 
 	err.message = message
 	err.cause = cause
-	err.code = code
 
 	return err
-}
-
-func (r *DataBaseAccessError) Code() DataBaseAccessErrorCode {
-	return r.code
 }
 
 type TimeoutError struct {

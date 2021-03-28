@@ -155,6 +155,12 @@ func TestGetAll(t *testing.T) {
 		result, err := service.GetAll(ctx)
 		assert.Nil(t, result)
 		assert.True(t, errors.Is(err, errExpect))
+		var appErr *myErr.ApplicationError
+		if errors.As(err, &appErr) {
+			assert.Equal(t, myErr.DSWE99, appErr.Code())
+		} else {
+			assert.Failf(t, "Invalid error type", "%w", err)
+		}
 	})
 }
 
@@ -189,7 +195,7 @@ func TestFindByID(t *testing.T) {
 		ctrl, ctx := gomock.WithContext(context.Background(), t)
 		defer ctrl.Finish()
 
-		errExpect := myErr.NewDataBaseAccessError(myErr.RecordNotFound, "", nil)
+		errExpect := myErr.NewRecordNotFoundError("", nil)
 		service := expectWorksService(ctrl,
 			func(wso *worksServiceOptions) {
 				wso.worksRepository.EXPECT().FindByID(gomock.Eq(ctx), gomock.Any()).Return(nil, errExpect)
@@ -211,7 +217,7 @@ func TestFindByID(t *testing.T) {
 		ctrl, ctx := gomock.WithContext(context.Background(), t)
 		defer ctrl.Finish()
 
-		errExpect := myErr.NewDataBaseAccessError(myErr.OtherDataBaseAccessError, "", nil)
+		errExpect := errors.New("error")
 		service := expectWorksService(ctrl,
 			func(wso *worksServiceOptions) {
 				wso.worksRepository.EXPECT().FindByID(gomock.Eq(ctx), gomock.Any()).Return(nil, errExpect)
@@ -586,7 +592,7 @@ func TestSave(t *testing.T) {
 			},
 		}
 
-		expect := myErr.NewDataBaseAccessError(myErr.RecordNotFound, "", nil)
+		expect := myErr.NewRecordNotFoundError("", nil)
 		service := expectWorksService(ctrl,
 			func(wso *worksServiceOptions) {
 				wso.uuidGenerator.EXPECT().Generate().AnyTimes()
@@ -736,7 +742,7 @@ func TestDeleteByID(t *testing.T) {
 		ctrl, ctx := gomock.WithContext(context.Background(), t)
 		defer ctrl.Finish()
 
-		expect := myErr.NewDataBaseAccessError(myErr.RecordNotFound, "Not found", nil)
+		expect := myErr.NewRecordNotFoundError("Not found", nil)
 
 		service := expectWorksService(ctrl,
 			func(wso *worksServiceOptions) {

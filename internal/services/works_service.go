@@ -70,7 +70,11 @@ func NewWorksServiceImpl(
 
 //GetAll は、作品の全件取得を行う
 func (r *WorksServiceImpl) GetAll(ctx context.Context) ([]*entities.Work, error) {
-	return r.worksRepository.GetAll(ctx)
+	result, err := r.worksRepository.GetAll(ctx)
+	if err != nil {
+		return nil, myErr.NewApplicationError(myErr.Code(myErr.DSWE99), myErr.Cause(err))
+	}
+	return result, err
 }
 
 //FindByID は、指定したIDの作品を取得する
@@ -78,12 +82,9 @@ func (r *WorksServiceImpl) FindByID(ctx context.Context, id uint64) (*entities.W
 	result, err := r.worksRepository.FindByID(ctx, id)
 
 	if err != nil {
-		var dbErr *myErr.DataBaseAccessError
+		var dbErr *myErr.RecordNotFoundError
 		if errors.As(err, &dbErr) {
-			switch dbErr.Code() {
-			case myErr.RecordNotFound:
-				return nil, myErr.NewApplicationError(myErr.Code(myErr.DSWE01), myErr.Cause(err))
-			}
+			return nil, myErr.NewApplicationError(myErr.Code(myErr.DSWE01), myErr.Cause(err))
 		}
 
 		return nil, myErr.NewApplicationError(myErr.Code(myErr.DSWE99), myErr.Cause(err))
@@ -156,12 +157,9 @@ func (r *WorksServiceImpl) Save(ctx context.Context, id uint64, bean *beans.Work
 	})
 
 	if err != nil {
-		var dbErr *myErr.DataBaseAccessError
+		var dbErr *myErr.RecordNotFoundError
 		if errors.As(err, &dbErr) {
-			switch dbErr.Code() {
-			case myErr.RecordNotFound:
-				return myErr.NewApplicationError(myErr.Code(myErr.DSWE01), myErr.Cause(err))
-			}
+			return myErr.NewApplicationError(myErr.Code(myErr.DSWE01), myErr.Cause(err))
 		}
 		return myErr.NewApplicationError(myErr.Code(myErr.DSWE99), myErr.Cause(err))
 	}
@@ -173,12 +171,9 @@ func (r *WorksServiceImpl) Save(ctx context.Context, id uint64, bean *beans.Work
 func (r *WorksServiceImpl) DeleteByID(ctx context.Context, id uint64) error {
 	w, err := r.worksRepository.FindByID(ctx, id)
 	if err != nil {
-		var dbErr *myErr.DataBaseAccessError
+		var dbErr *myErr.RecordNotFoundError
 		if errors.As(err, &dbErr) {
-			switch dbErr.Code() {
-			case myErr.RecordNotFound:
-				return myErr.NewApplicationError(myErr.Code(myErr.DSWE01), myErr.Cause(err))
-			}
+			return myErr.NewApplicationError(myErr.Code(myErr.DSWE01), myErr.Cause(err))
 		}
 
 		return myErr.NewApplicationError(myErr.Code(myErr.DSWE99), myErr.Cause(err))
