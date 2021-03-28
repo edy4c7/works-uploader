@@ -14,6 +14,7 @@ import (
 	"testing"
 
 	"github.com/edy4c7/darkpot-school-works/internal/beans"
+	"github.com/edy4c7/darkpot-school-works/internal/common/constants"
 	"github.com/edy4c7/darkpot-school-works/internal/entities"
 	"github.com/edy4c7/darkpot-school-works/internal/mocks"
 	"github.com/edy4c7/darkpot-school-works/internal/test/testutil"
@@ -27,18 +28,18 @@ const contentTypeKey string = "Content-Type"
 
 var data = []*entities.Work{
 	{
-		ID:                0,
-		Title:             "hoge",
-		Description:       "hogehoge",
-		ThumbnailFileName: "https://example.com",
-		ContentFileName:   "https://example.com",
+		ID:           0,
+		Title:        "hoge",
+		Description:  "hogehoge",
+		ThumbnailURL: "https://example.com",
+		ContentURL:   "https://example.com",
 	},
 	{
-		ID:                1,
-		Title:             "hoge",
-		Description:       "hogehoge",
-		ThumbnailFileName: "https://example.com",
-		ContentFileName:   "https://example.com",
+		ID:           1,
+		Title:        "hoge",
+		Description:  "hogehoge",
+		ThumbnailURL: "https://example.com",
+		ContentURL:   "https://example.com",
 	},
 }
 
@@ -207,8 +208,13 @@ func TestGetWorkById(t *testing.T) {
 	})
 }
 
-func TestPostWorks(t *testing.T) {
+func TestPostWorksWithURL(t *testing.T) {
 	const endpoint string = "/works/"
+
+	contentType := constants.WorkType(constants.ContentTypeURL)
+	title := "foo"
+	description := "aaaaaaaaaaaaaa"
+	url := "https://example.com"
 
 	t.Run("Is valid", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
@@ -217,11 +223,7 @@ func TestPostWorks(t *testing.T) {
 		buff := new(bytes.Buffer)
 		mw := multipart.NewWriter(buff)
 
-		title := "foo"
-		description := "aaaaaaaaaaaaaa"
-		thumbnail := []byte{0x12, 0x34}
-		content := []byte{0xab, 0xcd}
-		createFormRequestBody(mw, title, description, thumbnail, content)
+		createFormRequestBody(mw, contentType, title, description, url, nil, nil)
 		mw.Close()
 
 		req, _ := http.NewRequest(http.MethodPost, endpoint, buff)
@@ -247,54 +249,14 @@ func TestPostWorks(t *testing.T) {
 		assert.Nil(t, errActual, "%T %v", errActual, errActual)
 	})
 
-	t.Run("Is fail(500)", func(t *testing.T) {
+	t.Run("Missing content type", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
 		buff := new(bytes.Buffer)
 		mw := multipart.NewWriter(buff)
 
-		title := "foo"
-		description := "aaaaaaaaaaaaaa"
-		thumbnail := []byte{0x12, 0x34}
-		content := []byte{0xab, 0xcd}
-		createFormRequestBody(mw, title, description, thumbnail, content)
-		mw.Close()
-
-		req, _ := http.NewRequest(http.MethodPost, endpoint, buff)
-		req.Header.Set(contentTypeKey, mw.FormDataContentType())
-
-		errExpect := errors.New("ERROR")
-		var errActual *gin.Error
-		r := expectWorksController(ctrl,
-			func(wco *worksControllerOptions) {
-				wco.service.EXPECT().Save(gomock.Any(), gomock.Any(), gomock.Any()).Return(errExpect)
-				wco.errorMiddleware = func(c *gin.Context) {
-					errActual = c.Errors.Last()
-				}
-			},
-		)
-
-		executeHandler(r, req)
-
-		if errActual != nil {
-			assert.True(t, errors.Is(errActual.Err, errExpect), "%w", errActual.Err)
-		} else {
-			assert.Fail(t, "%v", errActual)
-		}
-	})
-
-	t.Run("Missing to Content", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
-
-		buff := new(bytes.Buffer)
-		mw := multipart.NewWriter(buff)
-
-		title := "foo"
-		description := "aaaaaaaaaaaaaa"
-		thumbnail := []byte{0x12, 0x34}
-		createFormRequestBody(mw, title, description, thumbnail, nil)
+		createFormRequestBody(mw, 0, title, description, url, nil, nil)
 		mw.Close()
 
 		req, _ := http.NewRequest(http.MethodPost, endpoint, buff)
@@ -321,17 +283,47 @@ func TestPostWorks(t *testing.T) {
 		}
 	})
 
-	t.Run("Missing to Thumbnail", func(t *testing.T) {
+	t.Run("Is fail(500)", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
 		buff := new(bytes.Buffer)
 		mw := multipart.NewWriter(buff)
 
-		title := "foo"
-		description := "aaaaaaaaaaaaaa"
-		content := []byte{0xab, 0xcd}
-		createFormRequestBody(mw, title, description, nil, content)
+		createFormRequestBody(mw, contentType, title, description, url, nil, nil)
+		mw.Close()
+
+		req, _ := http.NewRequest(http.MethodPost, endpoint, buff)
+		req.Header.Set(contentTypeKey, mw.FormDataContentType())
+
+		errExpect := errors.New("ERROR")
+		var errActual *gin.Error
+		r := expectWorksController(ctrl,
+			func(wco *worksControllerOptions) {
+				wco.service.EXPECT().Save(gomock.Any(), gomock.Any(), gomock.Any()).Return(errExpect)
+				wco.errorMiddleware = func(c *gin.Context) {
+					errActual = c.Errors.Last()
+				}
+			},
+		)
+
+		executeHandler(r, req)
+
+		if errActual != nil {
+			assert.True(t, errors.Is(errActual.Err, errExpect), "%w", errActual.Err)
+		} else {
+			assert.Fail(t, "%v", errActual)
+		}
+	})
+
+	t.Run("Missing to ContentURL", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		buff := new(bytes.Buffer)
+		mw := multipart.NewWriter(buff)
+
+		createFormRequestBody(mw, contentType, title, description, "", nil, nil)
 		mw.Close()
 
 		req, _ := http.NewRequest(http.MethodPost, endpoint, buff)
@@ -365,10 +357,7 @@ func TestPostWorks(t *testing.T) {
 		buff := new(bytes.Buffer)
 		mw := multipart.NewWriter(buff)
 
-		title := "foo"
-		thumbnail := []byte{0x12, 0x34}
-		content := []byte{0xab, 0xcd}
-		createFormRequestBody(mw, title, "", thumbnail, content)
+		createFormRequestBody(mw, contentType, title, "", url, nil, nil)
 		mw.Close()
 
 		req, _ := http.NewRequest(http.MethodPost, endpoint, buff)
@@ -399,10 +388,7 @@ func TestPostWorks(t *testing.T) {
 		buff := new(bytes.Buffer)
 		mw := multipart.NewWriter(buff)
 
-		description := "aaaaaaaaaaaaaa"
-		thumbnail := []byte{0x12, 0x34}
-		content := []byte{0xab, 0xcd}
-		createFormRequestBody(mw, "", description, thumbnail, content)
+		createFormRequestBody(mw, contentType, "", description, url, nil, nil)
 		mw.Close()
 
 		req, _ := http.NewRequest(http.MethodPost, endpoint, buff)
@@ -430,8 +416,14 @@ func TestPostWorks(t *testing.T) {
 	})
 }
 
-func TestPutWorks(t *testing.T) {
-	const endpoint string = "/works/%d"
+func TestPostWorksWithFile(t *testing.T) {
+	const endpoint string = "/works/"
+
+	contentType := constants.WorkType(constants.ContentTypeFile)
+	title := "foo"
+	description := "aaaaaaaaaaaaaa"
+	thumbnail := []byte{0x12, 0x34}
+	content := []byte{0xab, 0xcd}
 
 	t.Run("Is valid", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
@@ -440,12 +432,250 @@ func TestPutWorks(t *testing.T) {
 		buff := new(bytes.Buffer)
 		mw := multipart.NewWriter(buff)
 
-		targetID := uint64(1234)
-		title := "foo"
-		description := "aaaaaaaaaaaaaa"
-		thumbnail := []byte{0x12, 0x34}
-		content := []byte{0xab, 0xcd}
-		createFormRequestBody(mw, title, description, thumbnail, content)
+		createFormRequestBody(mw, contentType, title, description, "", thumbnail, content)
+		mw.Close()
+
+		req, _ := http.NewRequest(http.MethodPost, endpoint, buff)
+		req.Header.Set(contentTypeKey, mw.FormDataContentType())
+
+		var form beans.WorksFormBean
+		if err := testutil.BindFormToObject(req, &form); err != nil {
+			assert.FailNow(t, err.Error())
+		}
+
+		var errActual *gin.Error
+		r := expectWorksController(ctrl,
+			func(wco *worksControllerOptions) {
+				wco.service.EXPECT().Save(req.Context(), uint64(0), &form).Return(nil)
+				wco.errorMiddleware = func(c *gin.Context) {
+					errActual = c.Errors.Last()
+				}
+			},
+		)
+
+		testutil.ExecuteHandler(r, req)
+
+		assert.Nil(t, errActual, "%T %v", errActual, errActual)
+	})
+
+	t.Run("Missing content type", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		buff := new(bytes.Buffer)
+		mw := multipart.NewWriter(buff)
+
+		createFormRequestBody(mw, 0, title, description, "", thumbnail, content)
+		mw.Close()
+
+		req, _ := http.NewRequest(http.MethodPost, endpoint, buff)
+		req.Header.Set(contentTypeKey, mw.FormDataContentType())
+
+		var errActual *gin.Error
+		r := expectWorksController(ctrl,
+			func(wco *worksControllerOptions) {
+				wco.errorMiddleware = func(c *gin.Context) {
+					errActual = c.Errors.Last()
+				}
+			},
+		)
+
+		testutil.ExecuteHandler(r, req)
+
+		if errActual != nil {
+			var ve validator.ValidationErrors
+			if !errors.As(errActual.Err, &ve) || len(ve) <= 0 {
+				assert.Fail(t, errActual.Err.Error())
+			}
+		} else {
+			assert.Fail(t, "%v", errActual)
+		}
+	})
+
+	t.Run("Is fail(500)", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		buff := new(bytes.Buffer)
+		mw := multipart.NewWriter(buff)
+
+		createFormRequestBody(mw, contentType, title, description, "", thumbnail, content)
+		mw.Close()
+
+		req, _ := http.NewRequest(http.MethodPost, endpoint, buff)
+		req.Header.Set(contentTypeKey, mw.FormDataContentType())
+
+		errExpect := errors.New("ERROR")
+		var errActual *gin.Error
+		r := expectWorksController(ctrl,
+			func(wco *worksControllerOptions) {
+				wco.service.EXPECT().Save(gomock.Any(), gomock.Any(), gomock.Any()).Return(errExpect)
+				wco.errorMiddleware = func(c *gin.Context) {
+					errActual = c.Errors.Last()
+				}
+			},
+		)
+
+		executeHandler(r, req)
+
+		if errActual != nil {
+			assert.True(t, errors.Is(errActual.Err, errExpect), "%w", errActual.Err)
+		} else {
+			assert.Fail(t, "%v", errActual)
+		}
+	})
+
+	t.Run("Missing to Content", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		buff := new(bytes.Buffer)
+		mw := multipart.NewWriter(buff)
+
+		createFormRequestBody(mw, contentType, title, description, "", thumbnail, nil)
+		mw.Close()
+
+		req, _ := http.NewRequest(http.MethodPost, endpoint, buff)
+		req.Header.Set(contentTypeKey, mw.FormDataContentType())
+
+		var errActual *gin.Error
+		r := expectWorksController(ctrl,
+			func(wco *worksControllerOptions) {
+				wco.errorMiddleware = func(c *gin.Context) {
+					errActual = c.Errors.Last()
+				}
+			},
+		)
+
+		testutil.ExecuteHandler(r, req)
+
+		if errActual != nil {
+			var ve validator.ValidationErrors
+			if !errors.As(errActual.Err, &ve) || len(ve) <= 0 {
+				assert.Fail(t, errActual.Err.Error())
+			}
+		} else {
+			assert.Fail(t, "%v", errActual)
+		}
+	})
+
+	t.Run("Missing to Thumbnail", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		buff := new(bytes.Buffer)
+		mw := multipart.NewWriter(buff)
+
+		createFormRequestBody(mw, contentType, title, description, "", nil, content)
+		mw.Close()
+
+		req, _ := http.NewRequest(http.MethodPost, endpoint, buff)
+		req.Header.Set(contentTypeKey, mw.FormDataContentType())
+
+		var errActual *gin.Error
+		r := expectWorksController(ctrl,
+			func(wco *worksControllerOptions) {
+				wco.errorMiddleware = func(c *gin.Context) {
+					errActual = c.Errors.Last()
+				}
+			},
+		)
+
+		testutil.ExecuteHandler(r, req)
+
+		if errActual != nil {
+			var ve validator.ValidationErrors
+			if !errors.As(errActual.Err, &ve) || len(ve) <= 0 {
+				assert.Fail(t, errActual.Err.Error())
+			}
+		} else {
+			assert.Fail(t, "%v", errActual)
+		}
+	})
+
+	t.Run("Missing to Description", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		buff := new(bytes.Buffer)
+		mw := multipart.NewWriter(buff)
+
+		createFormRequestBody(mw, contentType, title, "", "", thumbnail, content)
+		mw.Close()
+
+		req, _ := http.NewRequest(http.MethodPost, endpoint, buff)
+		req.Header.Set(contentTypeKey, mw.FormDataContentType())
+
+		dr, _ := httputil.DumpRequest(req, true)
+		log.Printf("%q", dr)
+
+		var errActual *gin.Error
+		r := expectWorksController(ctrl,
+			func(wco *worksControllerOptions) {
+				wco.service.EXPECT().Save(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+				wco.errorMiddleware = func(c *gin.Context) {
+					errActual = c.Errors.Last()
+				}
+			},
+		)
+
+		testutil.ExecuteHandler(r, req)
+
+		assert.Nil(t, errActual, "%T %v", errActual, errActual)
+	})
+
+	t.Run("Missing to Title", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		buff := new(bytes.Buffer)
+		mw := multipart.NewWriter(buff)
+
+		createFormRequestBody(mw, contentType, "", description, "", thumbnail, content)
+		mw.Close()
+
+		req, _ := http.NewRequest(http.MethodPost, endpoint, buff)
+		req.Header.Set(contentTypeKey, mw.FormDataContentType())
+
+		var errActual *gin.Error
+		r := expectWorksController(ctrl,
+			func(wco *worksControllerOptions) {
+				wco.errorMiddleware = func(c *gin.Context) {
+					errActual = c.Errors.Last()
+				}
+			},
+		)
+
+		testutil.ExecuteHandler(r, req)
+
+		if errActual != nil {
+			var ve validator.ValidationErrors
+			if !errors.As(errActual.Err, &ve) || len(ve) <= 0 {
+				assert.Fail(t, errActual.Err.Error())
+			}
+		} else {
+			assert.Fail(t, "%v", errActual)
+		}
+	})
+}
+
+func TestPutWorksWithURL(t *testing.T) {
+	const endpoint string = "/works/%d"
+
+	targetID := uint64(1234)
+	contentType := constants.WorkType(constants.ContentTypeURL)
+	title := "foo"
+	description := "aaaaaaaaaaaaaa"
+	url := "https://example.com"
+
+	t.Run("Is valid", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		buff := new(bytes.Buffer)
+		mw := multipart.NewWriter(buff)
+
+		createFormRequestBody(mw, contentType, title, description, url, nil, nil)
 		mw.Close()
 
 		req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf(endpoint, targetID), buff)
@@ -471,57 +701,17 @@ func TestPutWorks(t *testing.T) {
 		assert.Nil(t, errActual, "%T %v", errActual, errActual)
 	})
 
-	t.Run("Is fail(500)", func(t *testing.T) {
+	t.Run("Missing content type", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
 		buff := new(bytes.Buffer)
 		mw := multipart.NewWriter(buff)
 
-		title := "foo"
-		description := "aaaaaaaaaaaaaa"
-		thumbnail := []byte{0x12, 0x34}
-		content := []byte{0xab, 0xcd}
-		createFormRequestBody(mw, title, description, thumbnail, content)
+		createFormRequestBody(mw, 0, title, description, url, nil, nil)
 		mw.Close()
 
-		req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf(endpoint, uint64(1234)), buff)
-		req.Header.Set(contentTypeKey, mw.FormDataContentType())
-
-		errExpect := errors.New("ERROR")
-		var errActual *gin.Error
-		r := expectWorksController(ctrl,
-			func(wco *worksControllerOptions) {
-				wco.service.EXPECT().Save(gomock.Any(), gomock.Any(), gomock.Any()).Return(errExpect)
-				wco.errorMiddleware = func(c *gin.Context) {
-					errActual = c.Errors.Last()
-				}
-			},
-		)
-
-		executeHandler(r, req)
-
-		if errActual != nil {
-			assert.True(t, errors.Is(errActual.Err, errExpect), "%w", errActual.Err)
-		} else {
-			assert.Fail(t, "%v", errActual)
-		}
-	})
-
-	t.Run("Missing to Content", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
-
-		buff := new(bytes.Buffer)
-		mw := multipart.NewWriter(buff)
-
-		title := "foo"
-		description := "aaaaaaaaaaaaaa"
-		thumbnail := []byte{0x12, 0x34}
-		createFormRequestBody(mw, title, description, thumbnail, nil)
-		mw.Close()
-
-		req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf(endpoint, uint64(1234)), buff)
+		req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf(endpoint, targetID), buff)
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
 
 		var errActual *gin.Error
@@ -545,20 +735,50 @@ func TestPutWorks(t *testing.T) {
 		}
 	})
 
-	t.Run("Missing to Thumbnail", func(t *testing.T) {
+	t.Run("Is fail(500)", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
 		buff := new(bytes.Buffer)
 		mw := multipart.NewWriter(buff)
 
-		title := "foo"
-		description := "aaaaaaaaaaaaaa"
-		content := []byte{0xab, 0xcd}
-		createFormRequestBody(mw, title, description, nil, content)
+		createFormRequestBody(mw, contentType, title, description, url, nil, nil)
 		mw.Close()
 
-		req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf(endpoint, uint64(1234)), buff)
+		req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf(endpoint, targetID), buff)
+		req.Header.Set(contentTypeKey, mw.FormDataContentType())
+
+		errExpect := errors.New("ERROR")
+		var errActual *gin.Error
+		r := expectWorksController(ctrl,
+			func(wco *worksControllerOptions) {
+				wco.service.EXPECT().Save(gomock.Any(), gomock.Any(), gomock.Any()).Return(errExpect)
+				wco.errorMiddleware = func(c *gin.Context) {
+					errActual = c.Errors.Last()
+				}
+			},
+		)
+
+		executeHandler(r, req)
+
+		if errActual != nil {
+			assert.True(t, errors.Is(errActual.Err, errExpect), "%w", errActual.Err)
+		} else {
+			assert.Fail(t, "%v", errActual)
+		}
+	})
+
+	t.Run("Missing to ContentURL", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		buff := new(bytes.Buffer)
+		mw := multipart.NewWriter(buff)
+
+		createFormRequestBody(mw, contentType, title, description, "", nil, nil)
+		mw.Close()
+
+		req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf(endpoint, targetID), buff)
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
 
 		var errActual *gin.Error
@@ -589,13 +809,10 @@ func TestPutWorks(t *testing.T) {
 		buff := new(bytes.Buffer)
 		mw := multipart.NewWriter(buff)
 
-		title := "foo"
-		thumbnail := []byte{0x12, 0x34}
-		content := []byte{0xab, 0xcd}
-		createFormRequestBody(mw, title, "", thumbnail, content)
+		createFormRequestBody(mw, contentType, title, "", url, nil, nil)
 		mw.Close()
 
-		req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf(endpoint, uint64(1234)), buff)
+		req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf(endpoint, targetID), buff)
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
 
 		dr, _ := httputil.DumpRequest(req, true)
@@ -623,13 +840,10 @@ func TestPutWorks(t *testing.T) {
 		buff := new(bytes.Buffer)
 		mw := multipart.NewWriter(buff)
 
-		description := "aaaaaaaaaaaaaa"
-		thumbnail := []byte{0x12, 0x34}
-		content := []byte{0xab, 0xcd}
-		createFormRequestBody(mw, "", description, thumbnail, content)
+		createFormRequestBody(mw, contentType, "", description, url, nil, nil)
 		mw.Close()
 
-		req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf(endpoint, uint64(1234)), buff)
+		req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf(endpoint, targetID), buff)
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
 
 		var errActual *gin.Error
@@ -654,6 +868,249 @@ func TestPutWorks(t *testing.T) {
 	})
 }
 
+func TestPutWorksWithFile(t *testing.T) {
+	const endpoint string = "/works/%d"
+
+	targetID := uint64(1234)
+	contentType := constants.WorkType(constants.ContentTypeFile)
+	title := "foo"
+	description := "aaaaaaaaaaaaaa"
+	thumbnail := []byte{0x12, 0x34}
+	content := []byte{0xab, 0xcd}
+
+	t.Run("Is valid", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		buff := new(bytes.Buffer)
+		mw := multipart.NewWriter(buff)
+
+		createFormRequestBody(mw, contentType, title, description, "", thumbnail, content)
+		mw.Close()
+
+		req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf(endpoint, targetID), buff)
+		req.Header.Set(contentTypeKey, mw.FormDataContentType())
+
+		var form beans.WorksFormBean
+		if err := testutil.BindFormToObject(req, &form); err != nil {
+			assert.FailNow(t, err.Error())
+		}
+
+		var errActual *gin.Error
+		r := expectWorksController(ctrl,
+			func(wco *worksControllerOptions) {
+				wco.service.EXPECT().Save(req.Context(), targetID, &form).Return(nil)
+				wco.errorMiddleware = func(c *gin.Context) {
+					errActual = c.Errors.Last()
+				}
+			},
+		)
+
+		testutil.ExecuteHandler(r, req)
+
+		assert.Nil(t, errActual, "%T %v", errActual, errActual)
+	})
+
+	t.Run("Missing content type", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		buff := new(bytes.Buffer)
+		mw := multipart.NewWriter(buff)
+
+		createFormRequestBody(mw, 0, title, description, "", thumbnail, content)
+		mw.Close()
+
+		req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf(endpoint, targetID), buff)
+		req.Header.Set(contentTypeKey, mw.FormDataContentType())
+
+		var errActual *gin.Error
+		r := expectWorksController(ctrl,
+			func(wco *worksControllerOptions) {
+				wco.errorMiddleware = func(c *gin.Context) {
+					errActual = c.Errors.Last()
+				}
+			},
+		)
+
+		testutil.ExecuteHandler(r, req)
+
+		if errActual != nil {
+			var ve validator.ValidationErrors
+			if !errors.As(errActual.Err, &ve) || len(ve) <= 0 {
+				assert.Fail(t, errActual.Err.Error())
+			}
+		} else {
+			assert.Fail(t, "%v", errActual)
+		}
+	})
+
+	t.Run("Is fail(500)", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		buff := new(bytes.Buffer)
+		mw := multipart.NewWriter(buff)
+
+		createFormRequestBody(mw, contentType, title, description, "", thumbnail, content)
+		mw.Close()
+
+		req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf(endpoint, targetID), buff)
+		req.Header.Set(contentTypeKey, mw.FormDataContentType())
+
+		errExpect := errors.New("ERROR")
+		var errActual *gin.Error
+		r := expectWorksController(ctrl,
+			func(wco *worksControllerOptions) {
+				wco.service.EXPECT().Save(gomock.Any(), gomock.Any(), gomock.Any()).Return(errExpect)
+				wco.errorMiddleware = func(c *gin.Context) {
+					errActual = c.Errors.Last()
+				}
+			},
+		)
+
+		executeHandler(r, req)
+
+		if errActual != nil {
+			assert.True(t, errors.Is(errActual.Err, errExpect), "%w", errActual.Err)
+		} else {
+			assert.Fail(t, "%v", errActual)
+		}
+	})
+
+	t.Run("Missing to Content", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		buff := new(bytes.Buffer)
+		mw := multipart.NewWriter(buff)
+
+		createFormRequestBody(mw, contentType, title, description, "", thumbnail, nil)
+		mw.Close()
+
+		req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf(endpoint, targetID), buff)
+		req.Header.Set(contentTypeKey, mw.FormDataContentType())
+
+		var errActual *gin.Error
+		r := expectWorksController(ctrl,
+			func(wco *worksControllerOptions) {
+				wco.errorMiddleware = func(c *gin.Context) {
+					errActual = c.Errors.Last()
+				}
+			},
+		)
+
+		testutil.ExecuteHandler(r, req)
+
+		if errActual != nil {
+			var ve validator.ValidationErrors
+			if !errors.As(errActual.Err, &ve) || len(ve) <= 0 {
+				assert.Fail(t, errActual.Err.Error())
+			}
+		} else {
+			assert.Fail(t, "%v", errActual)
+		}
+	})
+
+	t.Run("Missing to Thumbnail", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		buff := new(bytes.Buffer)
+		mw := multipart.NewWriter(buff)
+
+		createFormRequestBody(mw, contentType, title, description, "", nil, content)
+		mw.Close()
+
+		req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf(endpoint, targetID), buff)
+		req.Header.Set(contentTypeKey, mw.FormDataContentType())
+
+		var errActual *gin.Error
+		r := expectWorksController(ctrl,
+			func(wco *worksControllerOptions) {
+				wco.errorMiddleware = func(c *gin.Context) {
+					errActual = c.Errors.Last()
+				}
+			},
+		)
+
+		testutil.ExecuteHandler(r, req)
+
+		if errActual != nil {
+			var ve validator.ValidationErrors
+			if !errors.As(errActual.Err, &ve) || len(ve) <= 0 {
+				assert.Fail(t, errActual.Err.Error())
+			}
+		} else {
+			assert.Fail(t, "%v", errActual)
+		}
+	})
+
+	t.Run("Missing to Description", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		buff := new(bytes.Buffer)
+		mw := multipart.NewWriter(buff)
+
+		createFormRequestBody(mw, contentType, title, "", "", thumbnail, content)
+		mw.Close()
+
+		req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf(endpoint, targetID), buff)
+		req.Header.Set(contentTypeKey, mw.FormDataContentType())
+
+		dr, _ := httputil.DumpRequest(req, true)
+		log.Printf("%q", dr)
+
+		var errActual *gin.Error
+		r := expectWorksController(ctrl,
+			func(wco *worksControllerOptions) {
+				wco.service.EXPECT().Save(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+				wco.errorMiddleware = func(c *gin.Context) {
+					errActual = c.Errors.Last()
+				}
+			},
+		)
+
+		testutil.ExecuteHandler(r, req)
+
+		assert.Nil(t, errActual, "%T %v", errActual, errActual)
+	})
+
+	t.Run("Missing to Title", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		buff := new(bytes.Buffer)
+		mw := multipart.NewWriter(buff)
+
+		createFormRequestBody(mw, contentType, "", description, "", thumbnail, content)
+		mw.Close()
+
+		req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf(endpoint, targetID), buff)
+		req.Header.Set(contentTypeKey, mw.FormDataContentType())
+
+		var errActual *gin.Error
+		r := expectWorksController(ctrl,
+			func(wco *worksControllerOptions) {
+				wco.errorMiddleware = func(c *gin.Context) {
+					errActual = c.Errors.Last()
+				}
+			},
+		)
+
+		testutil.ExecuteHandler(r, req)
+
+		if errActual != nil {
+			var ve validator.ValidationErrors
+			if !errors.As(errActual.Err, &ve) || len(ve) <= 0 {
+				assert.Fail(t, errActual.Err.Error())
+			}
+		} else {
+			assert.Fail(t, "%v", errActual)
+		}
+	})
+}
 func TestDeleteWorks(t *testing.T) {
 	const endpoint string = "/works/%d"
 
@@ -750,9 +1207,17 @@ func expectWorksController(ctrl *gomock.Controller, options ...func(*worksContro
 	return r
 }
 
-func createFormRequestBody(w *multipart.Writer, title string, description string, thumbnail []byte, content []byte) error {
+func createFormRequestBody(w *multipart.Writer, contentType constants.WorkType, title string, description string, url string, thumbnail []byte, content []byte) error {
+	if contentType >= 0 {
+		w.WriteField("type", fmt.Sprint(contentType))
+	}
+
 	if title != "" {
 		w.WriteField("title", title)
+	}
+
+	if url != "" {
+		w.WriteField("url", url)
 	}
 
 	if description != "" {

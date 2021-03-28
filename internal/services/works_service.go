@@ -108,25 +108,31 @@ func (r *WorksServiceImpl) Save(ctx context.Context, id uint64, bean *beans.Work
 	}
 	author, ok := clm[subjectKey].(string)
 
-	thumbFileName := r.uuidGenerator.Generate()
-	if err := r.fileUploader.Upload(thumbFileName, bean.Thumbnail); err != nil {
-		return myErr.NewApplicationError(myErr.Code(myErr.DSWE99), myErr.Cause(err))
+	w := &entities.Work{
+		ID:          id,
+		Type:        bean.Type,
+		Author:      author,
+		Title:       bean.Title,
+		Description: bean.Description,
 	}
 
-	contentFileName := r.uuidGenerator.Generate()
-	if err := r.fileUploader.Upload(contentFileName, bean.Content); err != nil {
-		return myErr.NewApplicationError(myErr.Code(myErr.DSWE99), myErr.Cause(err))
+	if bean.Type == constants.ContentTypeFile {
+		thumbURL, err := r.fileUploader.Upload(r.uuidGenerator.Generate(), bean.Thumbnail)
+		if err != nil {
+			return myErr.NewApplicationError(myErr.Code(myErr.DSWE99), myErr.Cause(err))
+		}
+		w.ThumbnailURL = thumbURL
+
+		contentURL, err := r.fileUploader.Upload(r.uuidGenerator.Generate(), bean.Content)
+		if err != nil {
+			return myErr.NewApplicationError(myErr.Code(myErr.DSWE99), myErr.Cause(err))
+		}
+		w.ContentURL = contentURL
+	} else {
+		w.ContentURL = bean.ContentURL
 	}
 
 	err := r.transactionRunner.Run(ctx, func(ctx context.Context) error {
-		w := &entities.Work{
-			ID:                id,
-			Author:            author,
-			Title:             bean.Title,
-			Description:       bean.Description,
-			ThumbnailFileName: thumbFileName,
-			ContentFileName:   contentFileName,
-		}
 		if err := r.worksRepository.Save(ctx, w); err != nil {
 			return err
 		}
@@ -180,11 +186,11 @@ func (r *WorksServiceImpl) DeleteByID(ctx context.Context, id uint64) error {
 		return myErr.NewApplicationError(myErr.Code(myErr.DSWE99), myErr.Cause(err))
 	}
 
-	if err := r.fileUploader.Delete(w.ThumbnailFileName); err != nil {
+	if err := r.fileUploader.Delete(w.ThumbnailURL); err != nil {
 		return myErr.NewApplicationError(myErr.Code(myErr.DSWE99), myErr.Cause(err))
 	}
 
-	if err := r.fileUploader.Delete(w.ContentFileName); err != nil {
+	if err := r.fileUploader.Delete(w.ContentURL); err != nil {
 		return myErr.NewApplicationError(myErr.Code(myErr.DSWE99), myErr.Cause(err))
 	}
 

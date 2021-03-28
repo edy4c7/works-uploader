@@ -34,11 +34,12 @@ func (m *MockFileUploader) EXPECT() *MockFileUploaderMockRecorder {
 }
 
 // Upload mocks base method
-func (m *MockFileUploader) Upload(arg0 string, arg1 *multipart.FileHeader) error {
+func (m *MockFileUploader) Upload(arg0 string, arg1 *multipart.FileHeader) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Upload", arg0, arg1)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // Upload indicates an expected call of Upload

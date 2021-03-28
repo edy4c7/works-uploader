@@ -5,6 +5,6 @@ import (
 )
 
 type FileUploader interface {
-	Upload(string, *multipart.FileHeader) error
+	Upload(string, *multipart.FileHeader) (string, error)
 	Delete(string) error
 }

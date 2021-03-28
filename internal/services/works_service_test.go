@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"errors"
+	"fmt"
 	"mime/multipart"
 	"testing"
 
@@ -112,18 +113,18 @@ func TestGetAll(t *testing.T) {
 
 		data := []*entities.Work{
 			{
-				ID:                0,
-				Title:             "hoge",
-				Description:       "hogehoge",
-				ThumbnailFileName: "https://example.com",
-				ContentFileName:   "https://example.com",
+				ID:           0,
+				Title:        "hoge",
+				Description:  "hogehoge",
+				ThumbnailURL: "https://example.com",
+				ContentURL:   "https://example.com",
 			},
 			{
-				ID:                1,
-				Title:             "hoge",
-				Description:       "hogehoge",
-				ThumbnailFileName: "https://example.com",
-				ContentFileName:   "https://example.com",
+				ID:           1,
+				Title:        "hoge",
+				Description:  "hogehoge",
+				ThumbnailURL: "https://example.com",
+				ContentURL:   "https://example.com",
 			},
 		}
 
@@ -165,11 +166,11 @@ func TestFindByID(t *testing.T) {
 
 		var id uint64 = 1
 		data := &entities.Work{
-			ID:                id,
-			Title:             "hoge",
-			Description:       "hogehoge",
-			ThumbnailFileName: "https://example.com",
-			ContentFileName:   "https://example.com",
+			ID:           id,
+			Title:        "hoge",
+			Description:  "hogehoge",
+			ThumbnailURL: "https://example.com",
+			ContentURL:   "https://example.com",
 		}
 
 		service := expectWorksService(ctrl,
@@ -231,12 +232,53 @@ func TestFindByID(t *testing.T) {
 }
 
 func TestSave(t *testing.T) {
-	t.Run("New", func(t *testing.T) {
+	t.Run("New with URL", func(t *testing.T) {
 		ctrl, ctx := gomock.WithContext(context.Background(), t)
 		defer ctrl.Finish()
 		ctx = setupContext(ctx)
 
 		form := &beans.WorksFormBean{
+			Type:        constants.ContentTypeURL,
+			Title:       "hoge",
+			Description: "hogehoge",
+			ContentURL:  "https://example.com",
+		}
+
+		service := expectWorksService(ctrl,
+			func(wso *worksServiceOptions) {
+				wso.transactionRunner.
+					EXPECT().
+					Run(gomock.Eq(ctx), gomock.Any()).
+					DoAndReturn(func(ctx context.Context, tranFunc repositories.TransactionFunction) error {
+						return tranFunc(ctx)
+					})
+				work := &entities.Work{
+					Type:        form.Type,
+					Title:       form.Title,
+					Author:      subject,
+					Description: form.Description,
+					ContentURL:  form.ContentURL,
+				}
+				wso.worksRepository.EXPECT().Save(gomock.Eq(ctx), work)
+				wso.activittyRepository.EXPECT().Save(gomock.Eq(ctx), &entities.Activity{
+					Type: constants.ActivityAdded,
+					User: subject,
+					Work: work,
+				})
+			},
+		)
+
+		assert.Nil(t, service.Save(ctx, 0, form))
+
+	})
+
+	t.Run("New with file", func(t *testing.T) {
+		ctrl, ctx := gomock.WithContext(context.Background(), t)
+		defer ctrl.Finish()
+		ctx = setupContext(ctx)
+
+		form := &beans.WorksFormBean{
+			Type:        constants.ContentTypeFile,
 			Title:       "hoge",
 			Description: "hogehoge",
 			Thumbnail: &multipart.FileHeader{
@@ -250,14 +292,16 @@ func TestSave(t *testing.T) {
 		}
 
 		thumbnailFileName := "abcde12345"
+		thumbnailURL := fmt.Sprintf("https://example.com/%s", thumbnailFileName)
 		contentFileName := "fghij67890"
+		contentURL := fmt.Sprintf("https://example.com/%s", contentFileName)
 
 		service := expectWorksService(ctrl,
 			func(wso *worksServiceOptions) {
 				wso.uuidGenerator.EXPECT().Generate().Return(thumbnailFileName)
-				wso.fileUploader.EXPECT().Upload(thumbnailFileName, form.Thumbnail).Return(nil)
+				wso.fileUploader.EXPECT().Upload(thumbnailFileName, form.Thumbnail).Return(thumbnailURL, nil)
 				wso.uuidGenerator.EXPECT().Generate().Return(contentFileName)
-				wso.fileUploader.EXPECT().Upload(contentFileName, form.Content).Return(nil)
+				wso.fileUploader.EXPECT().Upload(contentFileName, form.Content).Return(contentURL, nil)
 				wso.transactionRunner.
 					EXPECT().
 					Run(gomock.Eq(ctx), gomock.Any()).
@@ -265,11 +309,12 @@ func TestSave(t *testing.T) {
 						return tranFunc(ctx)
 					})
 				work := &entities.Work{
-					Title:             "hoge",
-					Author:            subject,
-					Description:       "hogehoge",
-					ThumbnailFileName: thumbnailFileName,
-					ContentFileName:   contentFileName,
+					Type:         form.Type,
+					Title:        form.Title,
+					Author:       subject,
+					Description:  form.Description,
+					ThumbnailURL: thumbnailURL,
+					ContentURL:   contentURL,
 				}
 				wso.worksRepository.EXPECT().Save(gomock.Eq(ctx), work)
 				wso.activittyRepository.EXPECT().Save(gomock.Eq(ctx), &entities.Activity{
@@ -283,22 +328,19 @@ func TestSave(t *testing.T) {
 		assert.Nil(t, service.Save(ctx, 0, form))
 	})
 
-	t.Run("Update", func(t *testing.T) {
+	t.Run("Update with URL", func(t *testing.T) {
 		ctrl, ctx := gomock.WithContext(context.Background(), t)
 		defer ctrl.Finish()
 		ctx = setupContext(ctx)
 
 		form := &beans.WorksFormBean{
-			Thumbnail: &multipart.FileHeader{},
-			Content:   &multipart.FileHeader{},
+			Type: constants.ContentTypeURL,
 		}
 
 		var id uint64 = 12345
 
 		service := expectWorksService(ctrl,
 			func(wso *worksServiceOptions) {
-				wso.uuidGenerator.EXPECT().Generate().AnyTimes()
-				wso.fileUploader.EXPECT().Upload(gomock.Any(), gomock.Any()).AnyTimes()
 				wso.transactionRunner.
 					EXPECT().
 					Run(gomock.Any(), gomock.Any()).
@@ -306,8 +348,58 @@ func TestSave(t *testing.T) {
 						return tranFunc(ctx)
 					})
 				work := &entities.Work{
+					Type:   form.Type,
 					ID:     id,
 					Author: subject,
+				}
+				wso.worksRepository.EXPECT().Save(gomock.Any(), work)
+				wso.activittyRepository.EXPECT().Save(gomock.Any(), &entities.Activity{
+					Type: constants.ActivityUpdated,
+					User: subject,
+					Work: work,
+				})
+			},
+		)
+
+		assert.Nil(t, service.Save(ctx, id, form))
+	})
+
+	t.Run("Update with file", func(t *testing.T) {
+		ctrl, ctx := gomock.WithContext(context.Background(), t)
+		defer ctrl.Finish()
+		ctx = setupContext(ctx)
+
+		form := &beans.WorksFormBean{
+			Type:      constants.ContentTypeFile,
+			Thumbnail: &multipart.FileHeader{},
+			Content:   &multipart.FileHeader{},
+		}
+
+		var id uint64 = 12345
+
+		thumbnailFileName := "abcde12345"
+		thumbnailURL := fmt.Sprintf("https://example.com/%s", thumbnailFileName)
+		contentFileName := "fghij67890"
+		contentURL := fmt.Sprintf("https://example.com/%s", contentFileName)
+
+		service := expectWorksService(ctrl,
+			func(wso *worksServiceOptions) {
+				wso.uuidGenerator.EXPECT().Generate().Return(thumbnailFileName)
+				wso.fileUploader.EXPECT().Upload(thumbnailFileName, form.Thumbnail).Return(thumbnailURL, nil)
+				wso.uuidGenerator.EXPECT().Generate().Return(contentFileName)
+				wso.fileUploader.EXPECT().Upload(contentFileName, form.Content).Return(contentURL, nil)
+				wso.transactionRunner.
+					EXPECT().
+					Run(gomock.Any(), gomock.Any()).
+					DoAndReturn(func(ctx context.Context, tranFunc repositories.TransactionFunction) error {
+						return tranFunc(ctx)
+					})
+				work := &entities.Work{
+					Type:         form.Type,
+					ID:           id,
+					Author:       subject,
+					ThumbnailURL: thumbnailURL,
+					ContentURL:   contentURL,
 				}
 				wso.worksRepository.EXPECT().Save(gomock.Any(), work)
 				wso.activittyRepository.EXPECT().Save(gomock.Any(), &entities.Activity{
@@ -362,6 +454,7 @@ func TestSave(t *testing.T) {
 		ctx = setupContext(ctx)
 
 		form := &beans.WorksFormBean{
+			Type:        constants.ContentTypeFile,
 			Title:       "hoge",
 			Description: "hogehoge",
 			Thumbnail: &multipart.FileHeader{
@@ -379,7 +472,7 @@ func TestSave(t *testing.T) {
 		service := expectWorksService(ctrl,
 			func(wso *worksServiceOptions) {
 				wso.uuidGenerator.EXPECT().Generate()
-				wso.fileUploader.EXPECT().Upload(gomock.Any(), gomock.Any()).Return(expect)
+				wso.fileUploader.EXPECT().Upload(gomock.Any(), gomock.Any()).Return("", expect)
 			},
 		)
 
@@ -400,6 +493,7 @@ func TestSave(t *testing.T) {
 		ctx = setupContext(ctx)
 
 		form := &beans.WorksFormBean{
+			Type:        constants.ContentTypeFile,
 			Title:       "hoge",
 			Description: "hogehoge",
 			Thumbnail: &multipart.FileHeader{
@@ -416,9 +510,9 @@ func TestSave(t *testing.T) {
 		service := expectWorksService(ctrl,
 			func(wso *worksServiceOptions) {
 				wso.uuidGenerator.EXPECT().Generate()
-				wso.fileUploader.EXPECT().Upload(gomock.Any(), gomock.Any()).Return(nil)
+				wso.fileUploader.EXPECT().Upload(gomock.Any(), gomock.Any()).Return("https://example.com", nil)
 				wso.uuidGenerator.EXPECT().Generate()
-				wso.fileUploader.EXPECT().Upload(gomock.Any(), gomock.Any()).Return(expect)
+				wso.fileUploader.EXPECT().Upload(gomock.Any(), gomock.Any()).Return("", expect)
 			},
 		)
 
@@ -620,8 +714,8 @@ func TestDeleteByID(t *testing.T) {
 		service := expectWorksService(ctrl,
 			func(wso *worksServiceOptions) {
 				wso.worksRepository.EXPECT().FindByID(gomock.Eq(ctx), id).Return(&entities.Work{
-					ThumbnailFileName: thumbFileName,
-					ContentFileName:   contentFileName,
+					ThumbnailURL: thumbFileName,
+					ContentURL:   contentFileName,
 				}, nil)
 				wso.fileUploader.EXPECT().Delete(thumbFileName)
 				wso.fileUploader.EXPECT().Delete(contentFileName)

@@ -1,10 +1,10 @@
 package constants
 
-type ContentType int
+type WorkType int
 
 const (
-	ContentTypeFile = iota
-	ContentTypeURL
+	ContentTypeURL WorkType = iota + 1
+	ContentTypeFile
 )
 
 type ActivityType int

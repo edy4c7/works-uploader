@@ -1,14 +1,19 @@
 package entities
 
-import "time"
+import (
+	"time"
+
+	"github.com/edy4c7/darkpot-school-works/internal/common/constants"
+)
 
 type Work struct {
-	ID                uint64
-	Title             string
-	Author            string
-	Description       string
-	ThumbnailFileName string
-	ContentFileName   string
-	CreatedAt         time.Time
-	UpdatedAt         time.Time
+	ID           uint64
+	Type         constants.WorkType
+	Title        string
+	Author       string
+	Description  string
+	ThumbnailURL string
+	ContentURL   string
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }
