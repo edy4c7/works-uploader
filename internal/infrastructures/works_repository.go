@@ -8,6 +8,8 @@ import (
 	"gorm.io/gorm"
 )
 
+const notInTransactionMessage = "not in transaction"
+
 type WorksRepositoryImpl struct {
 	db *gorm.DB
 }
@@ -36,12 +38,12 @@ func (r *WorksRepositoryImpl) Save(ctx context.Context, work *entities.Work) err
 	if tx, ok := ctx.Value(transactionKey).(*gorm.DB); ok {
 		return tx.Save(work).Error
 	}
-	return errors.New("Not in transaction")
+	return errors.New(notInTransactionMessage)
 }
 
 func (r *WorksRepositoryImpl) DeleteByID(ctx context.Context, id uint64) error {
 	if tx, ok := ctx.Value(transactionKey).(*gorm.DB); ok {
 		return tx.Delete(&entities.Work{}, id).Error
 	}
-	return errors.New("Not in transaction")
+	return errors.New(notInTransactionMessage)
 }

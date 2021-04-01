@@ -18,8 +18,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type contextKey string
-
 func TestNewWorksServiceImpl(t *testing.T) {
 	t.Run("Is valid", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
@@ -439,6 +437,7 @@ func TestSave(t *testing.T) {
 	t.Run("Fail to extract subject", func(t *testing.T) {
 		ctrl, ctx := gomock.WithContext(context.Background(), t)
 		defer ctrl.Finish()
+		//lint:ignore SA1029 can use string only
 		ctx = context.WithValue(ctx, userKey, &jwt.Token{})
 
 		service := expectWorksService(ctrl)
@@ -896,27 +895,12 @@ func TestDeleteByID(t *testing.T) {
 const subject string = "subABC12345"
 
 func setupContext(ctx context.Context) context.Context {
+	//lint:ignore SA1029 can use string only
 	return context.WithValue(ctx, userKey, &jwt.Token{
 		Claims: jwt.MapClaims{
 			"sub": subject,
 		},
 	})
-}
-
-func setupMocks(ctrl *gomock.Controller) (
-	*mocks.MockTransactionRunner,
-	*mocks.MockWorksRepository,
-	*mocks.MockActivitiesRepository,
-	*mocks.MockUUIDGenerator,
-	*mocks.MockFileUploader,
-) {
-	runner := mocks.NewMockTransactionRunner(ctrl)
-	workRepo := mocks.NewMockWorksRepository(ctrl)
-	actRepo := mocks.NewMockActivitiesRepository(ctrl)
-	uuidGenerator := mocks.NewMockUUIDGenerator(ctrl)
-	uploader := mocks.NewMockFileUploader(ctrl)
-
-	return runner, workRepo, actRepo, uuidGenerator, uploader
 }
 
 type worksServiceOptions struct {

@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/edy4c7/darkpot-school-works/internal/beans"
 	"github.com/edy4c7/darkpot-school-works/internal/common/constants"
@@ -16,6 +17,11 @@ import (
 const userKey string = "user"
 const subjectKey string = "sub"
 const cannotBeNullMessage = "%s can't be null"
+const msgTransactionRunner = "transaction runner"
+const msgWorksRepository = "works repository"
+const msgActivitiesRepository = "activities repository"
+const msgUUIDGenerator = "UUID generator"
+const msgFileUploader = "file uploader"
 
 //WorksService は、作品管理機能のインターフェースを定義する
 type WorksService interface {
@@ -44,19 +50,19 @@ func NewWorksServiceImpl(
 ) *WorksServiceImpl {
 
 	if tranRnr == nil {
-		panic("Transaction runner can't be nil")
+		panic(fmt.Sprintf(cannotBeNullMessage, msgTransactionRunner))
 	}
 	if worksRepo == nil {
-		panic("Works repository can't be nil")
+		panic(fmt.Sprintf(cannotBeNullMessage, msgWorksRepository))
 	}
 	if activitiesRepo == nil {
-		panic("Activities repository can't be nil")
+		panic(fmt.Sprintf(cannotBeNullMessage, msgActivitiesRepository))
 	}
 	if uuidGenerator == nil {
-		panic("UUID generator can't be nil")
+		panic(fmt.Sprintf(cannotBeNullMessage, msgUUIDGenerator))
 	}
 	if fileUploader == nil {
-		panic("File uploader can't be nil")
+		panic(fmt.Sprintf(cannotBeNullMessage, msgFileUploader))
 	}
 
 	return &WorksServiceImpl{
@@ -97,15 +103,16 @@ func (r *WorksServiceImpl) FindByID(ctx context.Context, id uint64) (*entities.W
 func (r *WorksServiceImpl) Save(ctx context.Context, id uint64, bean *beans.WorksFormBean) error {
 	token, ok := ctx.Value(userKey).(*jwt.Token)
 	if !ok {
-		return myErr.NewApplicationError(myErr.Code(myErr.DSWE99),
-			myErr.Message("Failed to load JWT"))
+		return myErr.NewApplicationError(myErr.Code(myErr.DSWE99))
 	}
 	clm, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return myErr.NewApplicationError(myErr.Code(myErr.DSWE99),
-			myErr.Message("Failed to load Claims"))
+		return myErr.NewApplicationError(myErr.Code(myErr.DSWE99))
 	}
 	author, ok := clm[subjectKey].(string)
+	if !ok {
+		return myErr.NewApplicationError(myErr.Code(myErr.DSWE99))
+	}
 
 	w := &entities.Work{
 		ID:          id,
