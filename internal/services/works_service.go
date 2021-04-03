@@ -22,12 +22,14 @@ const msgWorksRepository = "works repository"
 const msgActivitiesRepository = "activities repository"
 const msgUUIDGenerator = "UUID generator"
 const msgFileUploader = "file uploader"
+const initialVersion uint = 1
 
 //WorksService は、作品管理機能のインターフェースを定義する
 type WorksService interface {
 	GetAll(context.Context) ([]*entities.Work, error)
 	FindByID(context.Context, uint64) (*entities.Work, error)
-	Save(context.Context, uint64, *beans.WorksFormBean) error
+	Create(context.Context, *beans.WorksFormBean) error
+	Update(context.Context, uint64, *beans.WorksFormBean) error
 	DeleteByID(context.Context, uint64) error
 }
 
@@ -99,8 +101,7 @@ func (r *WorksServiceImpl) FindByID(ctx context.Context, id uint64) (*entities.W
 	return result, nil
 }
 
-//Save は、作品の投稿及び更新を行う
-func (r *WorksServiceImpl) Save(ctx context.Context, id uint64, bean *beans.WorksFormBean) error {
+func (r *WorksServiceImpl) Create(ctx context.Context, bean *beans.WorksFormBean) error {
 	token, ok := ctx.Value(userKey).(*jwt.Token)
 	if !ok {
 		return myErr.NewApplicationError(myErr.Code(myErr.DSWE99))
@@ -115,11 +116,11 @@ func (r *WorksServiceImpl) Save(ctx context.Context, id uint64, bean *beans.Work
 	}
 
 	w := &entities.Work{
-		ID:          id,
 		Type:        bean.Type,
 		Author:      author,
 		Title:       bean.Title,
 		Description: bean.Description,
+		Version:     initialVersion,
 	}
 
 	if bean.Type == constants.ContentTypeFile {
@@ -143,16 +144,8 @@ func (r *WorksServiceImpl) Save(ctx context.Context, id uint64, bean *beans.Work
 			return err
 		}
 
-		actType := constants.ActivityType(0)
-
-		if id == 0 {
-			actType = constants.ActivityAdded
-		} else {
-			actType = constants.ActivityUpdated
-		}
-
 		act := &entities.Activity{
-			Type: actType,
+			Type: constants.ActivityAdded,
 			User: author,
 			Work: w,
 		}
@@ -167,6 +160,89 @@ func (r *WorksServiceImpl) Save(ctx context.Context, id uint64, bean *beans.Work
 		var dbErr *myErr.RecordNotFoundError
 		if errors.As(err, &dbErr) {
 			return myErr.NewApplicationError(myErr.Code(myErr.DSWE01), myErr.Cause(err))
+		}
+		return myErr.NewApplicationError(myErr.Code(myErr.DSWE99), myErr.Cause(err))
+	}
+
+	return nil
+}
+
+//Update は、作品の投稿及び更新を行う
+func (r *WorksServiceImpl) Update(ctx context.Context, id uint64, bean *beans.WorksFormBean) error {
+	token, ok := ctx.Value(userKey).(*jwt.Token)
+	if !ok {
+		return myErr.NewApplicationError(myErr.Code(myErr.DSWE99))
+	}
+	clm, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return myErr.NewApplicationError(myErr.Code(myErr.DSWE99))
+	}
+	author, ok := clm[subjectKey].(string)
+	if !ok {
+		return myErr.NewApplicationError(myErr.Code(myErr.DSWE99))
+	}
+
+	var thumbURL string
+	var contentURL string
+	if bean.Type == constants.ContentTypeFile {
+		var err error
+		thumbURL, err = r.fileUploader.Upload(r.uuidGenerator.Generate(), bean.Thumbnail)
+		if err != nil {
+			return myErr.NewApplicationError(myErr.Code(myErr.DSWE99), myErr.Cause(err))
+		}
+
+		contentURL, err = r.fileUploader.Upload(r.uuidGenerator.Generate(), bean.Content)
+		if err != nil {
+			return myErr.NewApplicationError(myErr.Code(myErr.DSWE99), myErr.Cause(err))
+		}
+	} else {
+		contentURL = bean.ContentURL
+	}
+
+	err := r.transactionRunner.Run(ctx, func(ctx context.Context) error {
+		w, err := r.worksRepository.FindByID(ctx, id)
+
+		if err != nil {
+			var rnfErr *myErr.RecordNotFoundError
+			if errors.As(err, &rnfErr) {
+				return myErr.NewApplicationError(myErr.Code(myErr.DSWE01), myErr.Cause(err))
+			}
+
+			return myErr.NewApplicationError(myErr.Code(myErr.DSWE99), myErr.Cause(err))
+		}
+
+		if w.Version != bean.Version {
+			return myErr.NewApplicationError(myErr.Code(myErr.DSWE02))
+		}
+
+		w.Type = bean.Type
+		w.Author = author
+		w.Title = bean.Title
+		w.Description = bean.Description
+		w.ThumbnailURL = thumbURL
+		w.ContentURL = contentURL
+		w.Version = w.Version + 1
+
+		if err := r.worksRepository.Save(ctx, w); err != nil {
+			return myErr.NewApplicationError(myErr.Code(myErr.DSWE99), myErr.Cause(err))
+		}
+
+		act := &entities.Activity{
+			Type: constants.ActivityUpdated,
+			User: author,
+			Work: w,
+		}
+		if err := r.activitiesRepository.Save(ctx, act); err != nil {
+			return myErr.NewApplicationError(myErr.Code(myErr.DSWE99), myErr.Cause(err))
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		var appErr *myErr.ApplicationError
+		if errors.As(err, &appErr) {
+			return err
 		}
 		return myErr.NewApplicationError(myErr.Code(myErr.DSWE99), myErr.Cause(err))
 	}

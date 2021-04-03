@@ -14,6 +14,7 @@ type Work struct {
 	Description  string
 	ThumbnailURL string
 	ContentURL   string
+	Version      uint
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 }

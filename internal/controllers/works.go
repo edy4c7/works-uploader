@@ -68,7 +68,7 @@ func post(service services.WorksService) gin.HandlerFunc {
 			return
 		}
 
-		if err := service.Save(c.Request.Context(), 0, form); err != nil {
+		if err := service.Create(c.Request.Context(), form); err != nil {
 			c.Error(err)
 			return
 		}
@@ -91,7 +91,7 @@ func put(service services.WorksService) gin.HandlerFunc {
 			return
 		}
 
-		if err := service.Save(c.Request.Context(), id, form); err != nil {
+		if err := service.Update(c.Request.Context(), id, form); err != nil {
 			c.Error(err)
 			return
 		}

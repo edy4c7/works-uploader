@@ -65,18 +65,32 @@ func (mr *MockWorksServiceMockRecorder) FindByID(arg0, arg1 interface{}) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByID", reflect.TypeOf((*MockWorksService)(nil).FindByID), arg0, arg1)
 }
 
-// Save mocks base method
-func (m *MockWorksService) Save(arg0 context.Context, arg1 uint64, arg2 *beans.WorksFormBean) error {
+// Create mocks base method
+func (m *MockWorksService) Create(arg0 context.Context, arg1 *beans.WorksFormBean) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Save", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "Create", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// Save indicates an expected call of Save
-func (mr *MockWorksServiceMockRecorder) Save(arg0, arg1, arg2 interface{}) *gomock.Call {
+// Create indicates an expected call of Create
+func (mr *MockWorksServiceMockRecorder) Create(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Save", reflect.TypeOf((*MockWorksService)(nil).Save), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockWorksService)(nil).Create), arg0, arg1)
+}
+
+// Update mocks base method
+func (m *MockWorksService) Update(arg0 context.Context, arg1 uint64, arg2 *beans.WorksFormBean) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Update", arg0, arg1, arg2)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Update indicates an expected call of Update
+func (mr *MockWorksServiceMockRecorder) Update(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockWorksService)(nil).Update), arg0, arg1, arg2)
 }
 
 // DeleteByID mocks base method

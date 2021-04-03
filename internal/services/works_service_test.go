@@ -234,8 +234,7 @@ func TestFindByID(t *testing.T) {
 		}
 	})
 }
-
-func TestSave(t *testing.T) {
+func TestCreate(t *testing.T) {
 	t.Run("New with URL", func(t *testing.T) {
 		ctrl, ctx := gomock.WithContext(context.Background(), t)
 		defer ctrl.Finish()
@@ -262,6 +261,7 @@ func TestSave(t *testing.T) {
 					Author:      subject,
 					Description: form.Description,
 					ContentURL:  form.ContentURL,
+					Version:     initialVersion,
 				}
 				wso.worksRepository.EXPECT().Save(gomock.Eq(ctx), work)
 				wso.activittyRepository.EXPECT().Save(gomock.Eq(ctx), &entities.Activity{
@@ -272,8 +272,7 @@ func TestSave(t *testing.T) {
 			},
 		)
 
-		assert.Nil(t, service.Save(ctx, 0, form))
-
+		assert.Nil(t, service.Create(ctx, form))
 	})
 
 	t.Run("New with file", func(t *testing.T) {
@@ -319,6 +318,7 @@ func TestSave(t *testing.T) {
 					Description:  form.Description,
 					ThumbnailURL: thumbnailURL,
 					ContentURL:   contentURL,
+					Version:      initialVersion,
 				}
 				wso.worksRepository.EXPECT().Save(gomock.Eq(ctx), work)
 				wso.activittyRepository.EXPECT().Save(gomock.Eq(ctx), &entities.Activity{
@@ -328,93 +328,7 @@ func TestSave(t *testing.T) {
 				})
 			},
 		)
-
-		assert.Nil(t, service.Save(ctx, 0, form))
-	})
-
-	t.Run("Update with URL", func(t *testing.T) {
-		ctrl, ctx := gomock.WithContext(context.Background(), t)
-		defer ctrl.Finish()
-		ctx = setupContext(ctx)
-
-		form := &beans.WorksFormBean{
-			Type: constants.ContentTypeURL,
-		}
-
-		var id uint64 = 12345
-
-		service := expectWorksService(ctrl,
-			func(wso *worksServiceOptions) {
-				wso.transactionRunner.
-					EXPECT().
-					Run(gomock.Any(), gomock.Any()).
-					DoAndReturn(func(ctx context.Context, tranFunc repositories.TransactionFunction) error {
-						return tranFunc(ctx)
-					})
-				work := &entities.Work{
-					Type:   form.Type,
-					ID:     id,
-					Author: subject,
-				}
-				wso.worksRepository.EXPECT().Save(gomock.Any(), work)
-				wso.activittyRepository.EXPECT().Save(gomock.Any(), &entities.Activity{
-					Type: constants.ActivityUpdated,
-					User: subject,
-					Work: work,
-				})
-			},
-		)
-
-		assert.Nil(t, service.Save(ctx, id, form))
-	})
-
-	t.Run("Update with file", func(t *testing.T) {
-		ctrl, ctx := gomock.WithContext(context.Background(), t)
-		defer ctrl.Finish()
-		ctx = setupContext(ctx)
-
-		form := &beans.WorksFormBean{
-			Type:      constants.ContentTypeFile,
-			Thumbnail: &multipart.FileHeader{},
-			Content:   &multipart.FileHeader{},
-		}
-
-		var id uint64 = 12345
-
-		thumbnailFileName := "abcde12345"
-		thumbnailURL := fmt.Sprintf("https://example.com/%s", thumbnailFileName)
-		contentFileName := "fghij67890"
-		contentURL := fmt.Sprintf("https://example.com/%s", contentFileName)
-
-		service := expectWorksService(ctrl,
-			func(wso *worksServiceOptions) {
-				wso.uuidGenerator.EXPECT().Generate().Return(thumbnailFileName)
-				wso.fileUploader.EXPECT().Upload(thumbnailFileName, form.Thumbnail).Return(thumbnailURL, nil)
-				wso.uuidGenerator.EXPECT().Generate().Return(contentFileName)
-				wso.fileUploader.EXPECT().Upload(contentFileName, form.Content).Return(contentURL, nil)
-				wso.transactionRunner.
-					EXPECT().
-					Run(gomock.Any(), gomock.Any()).
-					DoAndReturn(func(ctx context.Context, tranFunc repositories.TransactionFunction) error {
-						return tranFunc(ctx)
-					})
-				work := &entities.Work{
-					Type:         form.Type,
-					ID:           id,
-					Author:       subject,
-					ThumbnailURL: thumbnailURL,
-					ContentURL:   contentURL,
-				}
-				wso.worksRepository.EXPECT().Save(gomock.Any(), work)
-				wso.activittyRepository.EXPECT().Save(gomock.Any(), &entities.Activity{
-					Type: constants.ActivityUpdated,
-					User: subject,
-					Work: work,
-				})
-			},
-		)
-
-		assert.Nil(t, service.Save(ctx, id, form))
+		assert.Nil(t, service.Create(ctx, form))
 	})
 
 	t.Run("Fail to extract token", func(t *testing.T) {
@@ -423,7 +337,7 @@ func TestSave(t *testing.T) {
 
 		service := expectWorksService(ctrl)
 
-		err := service.Save(ctx, 0, nil)
+		err := service.Create(ctx, nil)
 
 		assert.Error(t, err)
 		var appErr *myErr.ApplicationError
@@ -442,7 +356,7 @@ func TestSave(t *testing.T) {
 
 		service := expectWorksService(ctrl)
 
-		err := service.Save(ctx, 0, nil)
+		err := service.Create(ctx, nil)
 
 		assert.Error(t, err)
 		var appErr *myErr.ApplicationError
@@ -481,7 +395,7 @@ func TestSave(t *testing.T) {
 			},
 		)
 
-		actual := service.Save(ctx, 0, form)
+		actual := service.Create(ctx, form)
 
 		assert.True(t, errors.Is(actual, expect))
 		var appErr *myErr.ApplicationError
@@ -521,7 +435,7 @@ func TestSave(t *testing.T) {
 			},
 		)
 
-		actual := service.Save(ctx, 0, form)
+		actual := service.Create(ctx, form)
 
 		assert.True(t, errors.Is(actual, expect))
 		var appErr *myErr.ApplicationError
@@ -564,54 +478,12 @@ func TestSave(t *testing.T) {
 			},
 		)
 
-		actual := service.Save(ctx, 0, form)
+		actual := service.Create(ctx, form)
 
 		assert.True(t, errors.Is(actual, expect))
 		var appErr *myErr.ApplicationError
 		if errors.As(actual, &appErr) {
 			assert.Equal(t, myErr.DSWE99, appErr.Code())
-		} else {
-			assert.Failf(t, "Invalid error type", "%w", actual)
-		}
-	})
-
-	t.Run("Not found", func(t *testing.T) {
-		ctrl, ctx := gomock.WithContext(context.Background(), t)
-		defer ctrl.Finish()
-		ctx = setupContext(ctx)
-
-		form := &beans.WorksFormBean{
-			Thumbnail: &multipart.FileHeader{
-				Filename: "thumb01",
-				Size:     1,
-			},
-			Content: &multipart.FileHeader{
-				Filename: "content01",
-				Size:     1,
-			},
-		}
-
-		expect := myErr.NewRecordNotFoundError("", nil)
-		service := expectWorksService(ctrl,
-			func(wso *worksServiceOptions) {
-				wso.uuidGenerator.EXPECT().Generate().AnyTimes()
-				wso.fileUploader.EXPECT().Upload(gomock.Any(), gomock.Any()).AnyTimes()
-				wso.transactionRunner.
-					EXPECT().
-					Run(gomock.Any(), gomock.Any()).
-					DoAndReturn(func(ctx context.Context, tranFunc repositories.TransactionFunction) error {
-						return tranFunc(ctx)
-					})
-				wso.worksRepository.EXPECT().Save(gomock.Any(), gomock.Any()).Return(expect)
-			},
-		)
-
-		actual := service.Save(ctx, 0, form)
-
-		assert.True(t, errors.Is(actual, expect))
-		var appErr *myErr.ApplicationError
-		if errors.As(actual, &appErr) {
-			assert.Equal(t, myErr.DSWE01, appErr.Code())
 		} else {
 			assert.Failf(t, "Invalid error type", "%w", actual)
 		}
@@ -648,7 +520,7 @@ func TestSave(t *testing.T) {
 			},
 		)
 
-		actual := service.Save(ctx, 0, form)
+		actual := service.Create(ctx, form)
 
 		assert.True(t, errors.Is(actual, expect))
 		var appErr *myErr.ApplicationError
@@ -694,7 +566,436 @@ func TestSave(t *testing.T) {
 			},
 		)
 
-		actual := service.Save(ctx, 0, form)
+		actual := service.Create(ctx, form)
+
+		assert.True(t, errors.Is(actual, expect))
+		var appErr *myErr.ApplicationError
+		if errors.As(actual, &appErr) {
+			assert.Equal(t, myErr.DSWE99, appErr.Code())
+		} else {
+			assert.Failf(t, "Invalid error type", "%w", actual)
+		}
+	})
+}
+
+func TestUpdate(t *testing.T) {
+	version := uint(1)
+
+	t.Run("Update with URL", func(t *testing.T) {
+		ctrl, ctx := gomock.WithContext(context.Background(), t)
+		defer ctrl.Finish()
+		ctx = setupContext(ctx)
+
+		form := &beans.WorksFormBean{
+			Type:    constants.ContentTypeURL,
+			Version: version,
+		}
+
+		var id uint64 = 12345
+
+		service := expectWorksService(ctrl,
+			func(wso *worksServiceOptions) {
+				wso.transactionRunner.
+					EXPECT().
+					Run(gomock.Any(), gomock.Any()).
+					DoAndReturn(func(ctx context.Context, tranFunc repositories.TransactionFunction) error {
+						return tranFunc(ctx)
+					})
+				wso.worksRepository.EXPECT().FindByID(gomock.Any(), id).Return(&entities.Work{
+					ID:      id,
+					Version: version,
+				}, nil)
+				work := &entities.Work{
+					Type:    form.Type,
+					ID:      id,
+					Author:  subject,
+					Version: version + 1,
+				}
+				wso.worksRepository.EXPECT().Save(gomock.Any(), work)
+				wso.activittyRepository.EXPECT().Save(gomock.Any(), &entities.Activity{
+					Type: constants.ActivityUpdated,
+					User: subject,
+					Work: work,
+				})
+			},
+		)
+
+		assert.Nil(t, service.Update(ctx, id, form))
+	})
+
+	t.Run("Update with file", func(t *testing.T) {
+		ctrl, ctx := gomock.WithContext(context.Background(), t)
+		defer ctrl.Finish()
+		ctx = setupContext(ctx)
+
+		form := &beans.WorksFormBean{
+			Type:      constants.ContentTypeFile,
+			Thumbnail: &multipart.FileHeader{},
+			Content:   &multipart.FileHeader{},
+			Version:   version,
+		}
+
+		var id uint64 = 12345
+
+		thumbnailFileName := "abcde12345"
+		thumbnailURL := fmt.Sprintf("https://example.com/%s", thumbnailFileName)
+		contentFileName := "fghij67890"
+		contentURL := fmt.Sprintf("https://example.com/%s", contentFileName)
+
+		service := expectWorksService(ctrl,
+			func(wso *worksServiceOptions) {
+				wso.uuidGenerator.EXPECT().Generate().Return(thumbnailFileName)
+				wso.fileUploader.EXPECT().Upload(thumbnailFileName, form.Thumbnail).Return(thumbnailURL, nil)
+				wso.uuidGenerator.EXPECT().Generate().Return(contentFileName)
+				wso.fileUploader.EXPECT().Upload(contentFileName, form.Content).Return(contentURL, nil)
+				wso.transactionRunner.
+					EXPECT().
+					Run(gomock.Any(), gomock.Any()).
+					DoAndReturn(func(ctx context.Context, tranFunc repositories.TransactionFunction) error {
+						return tranFunc(ctx)
+					})
+				wso.worksRepository.EXPECT().FindByID(gomock.Any(), id).Return(&entities.Work{
+					ID:      id,
+					Version: version,
+				}, nil)
+				work := &entities.Work{
+					Type:         form.Type,
+					ID:           id,
+					Author:       subject,
+					ThumbnailURL: thumbnailURL,
+					ContentURL:   contentURL,
+					Version:      version + 1,
+				}
+				wso.worksRepository.EXPECT().Save(gomock.Any(), work)
+				wso.activittyRepository.EXPECT().Save(gomock.Any(), &entities.Activity{
+					Type: constants.ActivityUpdated,
+					User: subject,
+					Work: work,
+				})
+			},
+		)
+
+		assert.Nil(t, service.Update(ctx, id, form))
+	})
+
+	t.Run("conflicted", func(t *testing.T) {
+		ctrl, ctx := gomock.WithContext(context.Background(), t)
+		defer ctrl.Finish()
+		ctx = setupContext(ctx)
+
+		form := &beans.WorksFormBean{
+			Type:    constants.ContentTypeURL,
+			Version: version,
+		}
+
+		var id uint64 = 12345
+
+		service := expectWorksService(ctrl,
+			func(wso *worksServiceOptions) {
+				wso.transactionRunner.
+					EXPECT().
+					Run(gomock.Any(), gomock.Any()).
+					DoAndReturn(func(ctx context.Context, tranFunc repositories.TransactionFunction) error {
+						return tranFunc(ctx)
+					})
+				wso.worksRepository.EXPECT().FindByID(gomock.Any(), id).Return(&entities.Work{
+					ID:      id,
+					Version: version + 1,
+				}, nil)
+			},
+		)
+
+		err := service.Update(ctx, id, form)
+
+		assert.Error(t, err)
+		var appErr *myErr.ApplicationError
+		if errors.As(err, &appErr) {
+			assert.Equal(t, myErr.DSWE02, appErr.Code())
+		} else {
+			assert.Failf(t, "Invalid error type", "%w", err)
+		}
+	})
+
+	t.Run("Fail to extract token", func(t *testing.T) {
+		ctrl, ctx := gomock.WithContext(context.Background(), t)
+		defer ctrl.Finish()
+
+		service := expectWorksService(ctrl)
+
+		err := service.Update(ctx, 0, nil)
+
+		assert.Error(t, err)
+		var appErr *myErr.ApplicationError
+		if errors.As(err, &appErr) {
+			assert.Equal(t, myErr.DSWE99, appErr.Code())
+		} else {
+			assert.Failf(t, "Invalid error type", "%w", err)
+		}
+	})
+
+	t.Run("Fail to extract subject", func(t *testing.T) {
+		ctrl, ctx := gomock.WithContext(context.Background(), t)
+		defer ctrl.Finish()
+		//lint:ignore SA1029 can use string only
+		ctx = context.WithValue(ctx, userKey, &jwt.Token{})
+
+		service := expectWorksService(ctrl)
+
+		err := service.Update(ctx, 0, nil)
+
+		assert.Error(t, err)
+		var appErr *myErr.ApplicationError
+		if errors.As(err, &appErr) {
+			assert.Equal(t, myErr.DSWE99, appErr.Code())
+		} else {
+			assert.Failf(t, "Invalid error type", "%w", err)
+		}
+	})
+
+	t.Run("Fail to upload thumbnail", func(t *testing.T) {
+		ctrl, ctx := gomock.WithContext(context.Background(), t)
+		defer ctrl.Finish()
+		ctx = setupContext(ctx)
+
+		form := &beans.WorksFormBean{
+			Type:        constants.ContentTypeFile,
+			Title:       "hoge",
+			Description: "hogehoge",
+			Thumbnail: &multipart.FileHeader{
+				Filename: "thumb01",
+				Size:     1,
+			},
+			Content: &multipart.FileHeader{
+				Filename: "content01",
+				Size:     1,
+			},
+		}
+
+		expect := errors.New("Failed to upload")
+
+		service := expectWorksService(ctrl,
+			func(wso *worksServiceOptions) {
+				wso.uuidGenerator.EXPECT().Generate()
+				wso.fileUploader.EXPECT().Upload(gomock.Any(), gomock.Any()).Return("", expect)
+			},
+		)
+
+		actual := service.Update(ctx, 0, form)
+
+		assert.True(t, errors.Is(actual, expect))
+		var appErr *myErr.ApplicationError
+		if errors.As(actual, &appErr) {
+			assert.Equal(t, myErr.DSWE99, appErr.Code())
+		} else {
+			assert.Failf(t, "Invalid error type", "%w", actual)
+		}
+	})
+
+	t.Run("Fail to upload content", func(t *testing.T) {
+		ctrl, ctx := gomock.WithContext(context.Background(), t)
+		defer ctrl.Finish()
+		ctx = setupContext(ctx)
+
+		form := &beans.WorksFormBean{
+			Type:        constants.ContentTypeFile,
+			Title:       "hoge",
+			Description: "hogehoge",
+			Thumbnail: &multipart.FileHeader{
+				Filename: "thumb01",
+				Size:     1,
+			},
+			Content: &multipart.FileHeader{
+				Filename: "content01",
+				Size:     1,
+			},
+		}
+
+		expect := errors.New("Failed to upload")
+		service := expectWorksService(ctrl,
+			func(wso *worksServiceOptions) {
+				wso.uuidGenerator.EXPECT().Generate()
+				wso.fileUploader.EXPECT().Upload(gomock.Any(), gomock.Any()).Return("https://example.com", nil)
+				wso.uuidGenerator.EXPECT().Generate()
+				wso.fileUploader.EXPECT().Upload(gomock.Any(), gomock.Any()).Return("", expect)
+			},
+		)
+
+		actual := service.Update(ctx, 0, form)
+
+		assert.True(t, errors.Is(actual, expect))
+		var appErr *myErr.ApplicationError
+		if errors.As(actual, &appErr) {
+			assert.Equal(t, myErr.DSWE99, appErr.Code())
+		} else {
+			assert.Failf(t, "Invalid error type", "%w", actual)
+		}
+	})
+
+	t.Run("Fail to run transaction", func(t *testing.T) {
+		ctrl, ctx := gomock.WithContext(context.Background(), t)
+		defer ctrl.Finish()
+		ctx = setupContext(ctx)
+
+		form := &beans.WorksFormBean{
+			Title:       "hoge",
+			Description: "hogehoge",
+			Thumbnail: &multipart.FileHeader{
+				Filename: "thumb01",
+				Size:     1,
+			},
+			Content: &multipart.FileHeader{
+				Filename: "content01",
+				Size:     1,
+			},
+		}
+
+		expect := errors.New("error")
+		service := expectWorksService(ctrl,
+			func(wso *worksServiceOptions) {
+				wso.uuidGenerator.EXPECT().Generate().AnyTimes()
+				wso.fileUploader.EXPECT().Upload(gomock.Any(), gomock.Any()).AnyTimes()
+				wso.transactionRunner.
+					EXPECT().
+					Run(gomock.Any(), gomock.Any()).
+					DoAndReturn(func(ctx context.Context, tranFunc repositories.TransactionFunction) error {
+						return expect
+					})
+			},
+		)
+
+		actual := service.Update(ctx, 0, form)
+
+		assert.True(t, errors.Is(actual, expect))
+		var appErr *myErr.ApplicationError
+		if errors.As(actual, &appErr) {
+			assert.Equal(t, myErr.DSWE99, appErr.Code())
+		} else {
+			assert.Failf(t, "Invalid error type", "%w", actual)
+		}
+	})
+
+	t.Run("Not found", func(t *testing.T) {
+		ctrl, ctx := gomock.WithContext(context.Background(), t)
+		defer ctrl.Finish()
+		ctx = setupContext(ctx)
+
+		form := &beans.WorksFormBean{
+			Thumbnail: &multipart.FileHeader{
+				Filename: "thumb01",
+				Size:     1,
+			},
+			Content: &multipart.FileHeader{
+				Filename: "content01",
+				Size:     1,
+			},
+		}
+
+		expect := myErr.NewRecordNotFoundError("", nil)
+		service := expectWorksService(ctrl,
+			func(wso *worksServiceOptions) {
+				wso.uuidGenerator.EXPECT().Generate().AnyTimes()
+				wso.fileUploader.EXPECT().Upload(gomock.Any(), gomock.Any()).AnyTimes()
+				wso.transactionRunner.
+					EXPECT().
+					Run(gomock.Any(), gomock.Any()).
+					DoAndReturn(func(ctx context.Context, tranFunc repositories.TransactionFunction) error {
+						return tranFunc(ctx)
+					})
+				wso.worksRepository.EXPECT().FindByID(gomock.Any(), gomock.Any()).Return(nil, expect)
+			},
+		)
+
+		actual := service.Update(ctx, 0, form)
+
+		assert.True(t, errors.Is(actual, expect))
+		var appErr *myErr.ApplicationError
+		if errors.As(actual, &appErr) {
+			assert.Equal(t, myErr.DSWE01, appErr.Code())
+		} else {
+			assert.Failf(t, "Invalid error type", "%w", actual)
+		}
+	})
+
+	t.Run("Fail to save work", func(t *testing.T) {
+		ctrl, ctx := gomock.WithContext(context.Background(), t)
+		defer ctrl.Finish()
+		ctx = setupContext(ctx)
+
+		form := &beans.WorksFormBean{
+			Thumbnail: &multipart.FileHeader{
+				Filename: "thumb01",
+				Size:     1,
+			},
+			Content: &multipart.FileHeader{
+				Filename: "content01",
+				Size:     1,
+			},
+		}
+
+		expect := errors.New("error")
+		service := expectWorksService(ctrl,
+			func(wso *worksServiceOptions) {
+				wso.uuidGenerator.EXPECT().Generate().AnyTimes()
+				wso.fileUploader.EXPECT().Upload(gomock.Any(), gomock.Any()).AnyTimes()
+				wso.transactionRunner.
+					EXPECT().
+					Run(gomock.Any(), gomock.Any()).
+					DoAndReturn(func(ctx context.Context, tranFunc repositories.TransactionFunction) error {
+						return tranFunc(ctx)
+					})
+				wso.worksRepository.EXPECT().FindByID(gomock.Any(), gomock.Any()).Return(&entities.Work{}, nil)
+				wso.worksRepository.EXPECT().Save(gomock.Any(), gomock.Any()).Return(expect)
+			},
+		)
+
+		actual := service.Update(ctx, 0, form)
+
+		assert.True(t, errors.Is(actual, expect))
+		var appErr *myErr.ApplicationError
+		if errors.As(actual, &appErr) {
+			assert.Equal(t, myErr.DSWE99, appErr.Code())
+		} else {
+			assert.Failf(t, "Invalid error type", "%w", actual)
+		}
+	})
+
+	t.Run("Fail to save activity", func(t *testing.T) {
+		ctrl, ctx := gomock.WithContext(context.Background(), t)
+		defer ctrl.Finish()
+		ctx = setupContext(ctx)
+
+		form := &beans.WorksFormBean{
+			Thumbnail: &multipart.FileHeader{
+				Filename: "thumb01",
+				Size:     1,
+			},
+			Content: &multipart.FileHeader{
+				Filename: "content01",
+				Size:     1,
+			},
+		}
+
+		expect := errors.New("error")
+		service := expectWorksService(ctrl,
+			func(wso *worksServiceOptions) {
+				wso.uuidGenerator.EXPECT().Generate().AnyTimes()
+				wso.fileUploader.EXPECT().Upload(gomock.Any(), gomock.Any()).AnyTimes()
+				wso.transactionRunner.
+					EXPECT().
+					Run(gomock.Any(), gomock.Any()).
+					DoAndReturn(func(ctx context.Context, tranFunc repositories.TransactionFunction) error {
+						return tranFunc(ctx)
+					})
+				wso.worksRepository.EXPECT().FindByID(gomock.Any(), gomock.Any()).Return(&entities.Work{}, nil)
+				wso.worksRepository.EXPECT().Save(gomock.Any(), gomock.Any())
+				wso.activittyRepository.
+					EXPECT().
+					Save(gomock.Any(), gomock.Any()).
+					Return(expect)
+			},
+		)
+
+		actual := service.Update(ctx, 0, form)
 
 		assert.True(t, errors.Is(actual, expect))
 		var appErr *myErr.ApplicationError

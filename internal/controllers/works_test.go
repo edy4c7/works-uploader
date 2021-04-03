@@ -237,7 +237,7 @@ func TestPostWorksWithURL(t *testing.T) {
 		var errActual *gin.Error
 		r := expectWorksController(ctrl,
 			func(wco *worksControllerOptions) {
-				wco.service.EXPECT().Save(req.Context(), uint64(0), &form).Return(nil)
+				wco.service.EXPECT().Create(req.Context(), &form).Return(nil)
 				wco.errorMiddleware = func(c *gin.Context) {
 					errActual = c.Errors.Last()
 				}
@@ -300,7 +300,7 @@ func TestPostWorksWithURL(t *testing.T) {
 		var errActual *gin.Error
 		r := expectWorksController(ctrl,
 			func(wco *worksControllerOptions) {
-				wco.service.EXPECT().Save(gomock.Any(), gomock.Any(), gomock.Any()).Return(errExpect)
+				wco.service.EXPECT().Create(gomock.Any(), gomock.Any()).Return(errExpect)
 				wco.errorMiddleware = func(c *gin.Context) {
 					errActual = c.Errors.Last()
 				}
@@ -369,7 +369,7 @@ func TestPostWorksWithURL(t *testing.T) {
 		var errActual *gin.Error
 		r := expectWorksController(ctrl,
 			func(wco *worksControllerOptions) {
-				wco.service.EXPECT().Save(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+				wco.service.EXPECT().Create(gomock.Any(), gomock.Any()).Return(nil)
 				wco.errorMiddleware = func(c *gin.Context) {
 					errActual = c.Errors.Last()
 				}
@@ -446,7 +446,7 @@ func TestPostWorksWithFile(t *testing.T) {
 		var errActual *gin.Error
 		r := expectWorksController(ctrl,
 			func(wco *worksControllerOptions) {
-				wco.service.EXPECT().Save(req.Context(), uint64(0), &form).Return(nil)
+				wco.service.EXPECT().Create(req.Context(), &form).Return(nil)
 				wco.errorMiddleware = func(c *gin.Context) {
 					errActual = c.Errors.Last()
 				}
@@ -509,7 +509,7 @@ func TestPostWorksWithFile(t *testing.T) {
 		var errActual *gin.Error
 		r := expectWorksController(ctrl,
 			func(wco *worksControllerOptions) {
-				wco.service.EXPECT().Save(gomock.Any(), gomock.Any(), gomock.Any()).Return(errExpect)
+				wco.service.EXPECT().Create(gomock.Any(), gomock.Any()).Return(errExpect)
 				wco.errorMiddleware = func(c *gin.Context) {
 					errActual = c.Errors.Last()
 				}
@@ -612,7 +612,7 @@ func TestPostWorksWithFile(t *testing.T) {
 		var errActual *gin.Error
 		r := expectWorksController(ctrl,
 			func(wco *worksControllerOptions) {
-				wco.service.EXPECT().Save(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+				wco.service.EXPECT().Create(gomock.Any(), gomock.Any()).Return(nil)
 				wco.errorMiddleware = func(c *gin.Context) {
 					errActual = c.Errors.Last()
 				}
@@ -689,7 +689,7 @@ func TestPutWorksWithURL(t *testing.T) {
 		var errActual *gin.Error
 		r := expectWorksController(ctrl,
 			func(wco *worksControllerOptions) {
-				wco.service.EXPECT().Save(req.Context(), targetID, &form).Return(nil)
+				wco.service.EXPECT().Update(req.Context(), targetID, &form).Return(nil)
 				wco.errorMiddleware = func(c *gin.Context) {
 					errActual = c.Errors.Last()
 				}
@@ -752,7 +752,7 @@ func TestPutWorksWithURL(t *testing.T) {
 		var errActual *gin.Error
 		r := expectWorksController(ctrl,
 			func(wco *worksControllerOptions) {
-				wco.service.EXPECT().Save(gomock.Any(), gomock.Any(), gomock.Any()).Return(errExpect)
+				wco.service.EXPECT().Update(gomock.Any(), gomock.Any(), gomock.Any()).Return(errExpect)
 				wco.errorMiddleware = func(c *gin.Context) {
 					errActual = c.Errors.Last()
 				}
@@ -821,7 +821,7 @@ func TestPutWorksWithURL(t *testing.T) {
 		var errActual *gin.Error
 		r := expectWorksController(ctrl,
 			func(wco *worksControllerOptions) {
-				wco.service.EXPECT().Save(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+				wco.service.EXPECT().Update(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 				wco.errorMiddleware = func(c *gin.Context) {
 					errActual = c.Errors.Last()
 				}
@@ -899,7 +899,7 @@ func TestPutWorksWithFile(t *testing.T) {
 		var errActual *gin.Error
 		r := expectWorksController(ctrl,
 			func(wco *worksControllerOptions) {
-				wco.service.EXPECT().Save(req.Context(), targetID, &form).Return(nil)
+				wco.service.EXPECT().Update(req.Context(), targetID, &form).Return(nil)
 				wco.errorMiddleware = func(c *gin.Context) {
 					errActual = c.Errors.Last()
 				}
@@ -962,7 +962,7 @@ func TestPutWorksWithFile(t *testing.T) {
 		var errActual *gin.Error
 		r := expectWorksController(ctrl,
 			func(wco *worksControllerOptions) {
-				wco.service.EXPECT().Save(gomock.Any(), gomock.Any(), gomock.Any()).Return(errExpect)
+				wco.service.EXPECT().Update(gomock.Any(), gomock.Any(), gomock.Any()).Return(errExpect)
 				wco.errorMiddleware = func(c *gin.Context) {
 					errActual = c.Errors.Last()
 				}
@@ -1065,7 +1065,7 @@ func TestPutWorksWithFile(t *testing.T) {
 		var errActual *gin.Error
 		r := expectWorksController(ctrl,
 			func(wco *worksControllerOptions) {
-				wco.service.EXPECT().Save(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+				wco.service.EXPECT().Update(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 				wco.errorMiddleware = func(c *gin.Context) {
 					errActual = c.Errors.Last()
 				}
