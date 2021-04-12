@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func CreateRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
+func NewRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 	r := gin.New()
 
 	r.Use(func(c *gin.Context) {
