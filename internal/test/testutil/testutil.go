@@ -38,7 +38,7 @@ func ExtractLastError(err *error) gin.HandlerFunc {
 	}
 }
 
-func CreateErrorMiddleware(handler gin.HandlerFunc) gin.HandlerFunc {
+func HandleError(handler gin.HandlerFunc) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Next()
 		handler(c)

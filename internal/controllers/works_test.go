@@ -51,7 +51,7 @@ func TestGetWorks(t *testing.T) {
 		defer ctrl.Finish()
 
 		var err error
-		r := testutil.CreateRouter(testutil.CreateErrorMiddleware(func(c *gin.Context) {
+		r := testutil.CreateRouter(testutil.HandleError(func(c *gin.Context) {
 			err = c.Errors.Last()
 		}))
 		service := mocks.NewMockWorksService(ctrl)
@@ -74,7 +74,7 @@ func TestGetWorks(t *testing.T) {
 		defer ctrl.Finish()
 
 		var err error
-		r := testutil.CreateRouter(testutil.CreateErrorMiddleware(func(c *gin.Context) {
+		r := testutil.CreateRouter(testutil.HandleError(func(c *gin.Context) {
 			err = c.Errors.Last()
 		}))
 		service := mocks.NewMockWorksService(ctrl)
@@ -99,7 +99,7 @@ func TestGetWorks(t *testing.T) {
 
 		errExpect := errors.New("ERROR")
 		var errActual *gin.Error
-		r := testutil.CreateRouter(testutil.CreateErrorMiddleware(func(c *gin.Context) {
+		r := testutil.CreateRouter(testutil.HandleError(func(c *gin.Context) {
 			errActual = c.Errors.Last()
 		}))
 		service := mocks.NewMockWorksService(ctrl)
@@ -125,7 +125,7 @@ func TestGetWorkById(t *testing.T) {
 		defer ctrl.Finish()
 
 		var err error
-		r := testutil.CreateRouter(testutil.CreateErrorMiddleware(func(c *gin.Context) {
+		r := testutil.CreateRouter(testutil.HandleError(func(c *gin.Context) {
 			err = c.Errors.Last()
 		}))
 		service := mocks.NewMockWorksService(ctrl)
@@ -149,7 +149,7 @@ func TestGetWorkById(t *testing.T) {
 
 		var err error
 		called := false
-		r := testutil.CreateRouter(testutil.CreateErrorMiddleware(func(c *gin.Context) {
+		r := testutil.CreateRouter(testutil.HandleError(func(c *gin.Context) {
 			err = c.Errors.Last()
 		}))
 		service := mocks.NewMockWorksService(ctrl)
@@ -172,7 +172,7 @@ func TestGetWorkById(t *testing.T) {
 		defer ctrl.Finish()
 
 		var errActual *gin.Error
-		r := testutil.CreateRouter(testutil.CreateErrorMiddleware(func(c *gin.Context) {
+		r := testutil.CreateRouter(testutil.HandleError(func(c *gin.Context) {
 			errActual = c.Errors.Last()
 		}))
 		service := mocks.NewMockWorksService(ctrl)
@@ -205,7 +205,7 @@ func TestPostWorksWithURL(t *testing.T) {
 		defer ctrl.Finish()
 
 		var err error
-		r := testutil.CreateRouter(testutil.CreateErrorMiddleware(func(c *gin.Context) {
+		r := testutil.CreateRouter(testutil.HandleError(func(c *gin.Context) {
 			err = c.Errors.Last()
 		}))
 		buff := new(bytes.Buffer)
@@ -235,7 +235,7 @@ func TestPostWorksWithURL(t *testing.T) {
 		defer ctrl.Finish()
 
 		var errActual *gin.Error
-		r := testutil.CreateRouter(testutil.CreateErrorMiddleware(func(c *gin.Context) {
+		r := testutil.CreateRouter(testutil.HandleError(func(c *gin.Context) {
 			errActual = c.Errors.Last()
 		}))
 		buff := new(bytes.Buffer)
@@ -264,7 +264,7 @@ func TestPostWorksWithURL(t *testing.T) {
 		defer ctrl.Finish()
 
 		var errActual *gin.Error
-		r := testutil.CreateRouter(testutil.CreateErrorMiddleware(func(c *gin.Context) {
+		r := testutil.CreateRouter(testutil.HandleError(func(c *gin.Context) {
 			errActual = c.Errors.Last()
 		}))
 		buff := new(bytes.Buffer)
@@ -292,7 +292,7 @@ func TestPostWorksWithURL(t *testing.T) {
 		defer ctrl.Finish()
 
 		var errActual *gin.Error
-		r := testutil.CreateRouter(testutil.CreateErrorMiddleware(func(c *gin.Context) {
+		r := testutil.CreateRouter(testutil.HandleError(func(c *gin.Context) {
 			errActual = c.Errors.Last()
 		}))
 		buff := new(bytes.Buffer)
@@ -321,7 +321,7 @@ func TestPostWorksWithURL(t *testing.T) {
 		defer ctrl.Finish()
 
 		var err error
-		r := testutil.CreateRouter(testutil.CreateErrorMiddleware(func(c *gin.Context) {
+		r := testutil.CreateRouter(testutil.HandleError(func(c *gin.Context) {
 			err = c.Errors.Last()
 		}))
 		buff := new(bytes.Buffer)
@@ -345,7 +345,7 @@ func TestPostWorksWithURL(t *testing.T) {
 		defer ctrl.Finish()
 
 		var errActual *gin.Error
-		r := testutil.CreateRouter(testutil.CreateErrorMiddleware(func(c *gin.Context) {
+		r := testutil.CreateRouter(testutil.HandleError(func(c *gin.Context) {
 			errActual = c.Errors.Last()
 		}))
 		buff := new(bytes.Buffer)
@@ -384,7 +384,7 @@ func TestPostWorksWithFile(t *testing.T) {
 		defer ctrl.Finish()
 
 		var err error
-		r := testutil.CreateRouter(testutil.CreateErrorMiddleware(func(c *gin.Context) {
+		r := testutil.CreateRouter(testutil.HandleError(func(c *gin.Context) {
 			err = c.Errors.Last()
 		}))
 		buff := new(bytes.Buffer)
@@ -413,7 +413,7 @@ func TestPostWorksWithFile(t *testing.T) {
 		defer ctrl.Finish()
 
 		var errActual *gin.Error
-		r := testutil.CreateRouter(testutil.CreateErrorMiddleware(func(c *gin.Context) {
+		r := testutil.CreateRouter(testutil.HandleError(func(c *gin.Context) {
 			errActual = c.Errors.Last()
 		}))
 		buff := new(bytes.Buffer)
@@ -442,7 +442,7 @@ func TestPostWorksWithFile(t *testing.T) {
 		defer ctrl.Finish()
 
 		var errActual *gin.Error
-		r := testutil.CreateRouter(testutil.CreateErrorMiddleware(func(c *gin.Context) {
+		r := testutil.CreateRouter(testutil.HandleError(func(c *gin.Context) {
 			errActual = c.Errors.Last()
 		}))
 		buff := new(bytes.Buffer)
@@ -470,7 +470,7 @@ func TestPostWorksWithFile(t *testing.T) {
 		defer ctrl.Finish()
 
 		var errActual *gin.Error
-		r := testutil.CreateRouter(testutil.CreateErrorMiddleware(func(c *gin.Context) {
+		r := testutil.CreateRouter(testutil.HandleError(func(c *gin.Context) {
 			errActual = c.Errors.Last()
 		}))
 		buff := new(bytes.Buffer)
@@ -499,7 +499,7 @@ func TestPostWorksWithFile(t *testing.T) {
 		defer ctrl.Finish()
 
 		var errActual *gin.Error
-		r := testutil.CreateRouter(testutil.CreateErrorMiddleware(func(c *gin.Context) {
+		r := testutil.CreateRouter(testutil.HandleError(func(c *gin.Context) {
 			errActual = c.Errors.Last()
 		}))
 		buff := new(bytes.Buffer)
@@ -528,7 +528,7 @@ func TestPostWorksWithFile(t *testing.T) {
 		defer ctrl.Finish()
 
 		var err error
-		r := testutil.CreateRouter(testutil.CreateErrorMiddleware(func(c *gin.Context) {
+		r := testutil.CreateRouter(testutil.HandleError(func(c *gin.Context) {
 			err = c.Errors.Last()
 		}))
 		buff := new(bytes.Buffer)
@@ -552,7 +552,7 @@ func TestPostWorksWithFile(t *testing.T) {
 		defer ctrl.Finish()
 
 		var errActual *gin.Error
-		r := testutil.CreateRouter(testutil.CreateErrorMiddleware(func(c *gin.Context) {
+		r := testutil.CreateRouter(testutil.HandleError(func(c *gin.Context) {
 			errActual = c.Errors.Last()
 		}))
 		buff := new(bytes.Buffer)
@@ -591,7 +591,7 @@ func TestPutWorksWithURL(t *testing.T) {
 		defer ctrl.Finish()
 
 		var err error
-		r := testutil.CreateRouter(testutil.CreateErrorMiddleware(func(c *gin.Context) {
+		r := testutil.CreateRouter(testutil.HandleError(func(c *gin.Context) {
 			err = c.Errors.Last()
 		}))
 		buff := new(bytes.Buffer)
@@ -620,7 +620,7 @@ func TestPutWorksWithURL(t *testing.T) {
 		defer ctrl.Finish()
 
 		var errActual *gin.Error
-		r := testutil.CreateRouter(testutil.CreateErrorMiddleware(func(c *gin.Context) {
+		r := testutil.CreateRouter(testutil.HandleError(func(c *gin.Context) {
 			errActual = c.Errors.Last()
 		}))
 		buff := new(bytes.Buffer)
@@ -649,7 +649,7 @@ func TestPutWorksWithURL(t *testing.T) {
 		defer ctrl.Finish()
 
 		var errActual *gin.Error
-		r := testutil.CreateRouter(testutil.CreateErrorMiddleware(func(c *gin.Context) {
+		r := testutil.CreateRouter(testutil.HandleError(func(c *gin.Context) {
 			errActual = c.Errors.Last()
 		}))
 		buff := new(bytes.Buffer)
@@ -677,7 +677,7 @@ func TestPutWorksWithURL(t *testing.T) {
 		defer ctrl.Finish()
 
 		var errActual *gin.Error
-		r := testutil.CreateRouter(testutil.CreateErrorMiddleware(func(c *gin.Context) {
+		r := testutil.CreateRouter(testutil.HandleError(func(c *gin.Context) {
 			errActual = c.Errors.Last()
 		}))
 		buff := new(bytes.Buffer)
@@ -706,7 +706,7 @@ func TestPutWorksWithURL(t *testing.T) {
 		defer ctrl.Finish()
 
 		var err error
-		r := testutil.CreateRouter(testutil.CreateErrorMiddleware(func(c *gin.Context) {
+		r := testutil.CreateRouter(testutil.HandleError(func(c *gin.Context) {
 			err = c.Errors.Last()
 		}))
 		buff := new(bytes.Buffer)
@@ -729,7 +729,7 @@ func TestPutWorksWithURL(t *testing.T) {
 		defer ctrl.Finish()
 
 		var errActual *gin.Error
-		r := testutil.CreateRouter(testutil.CreateErrorMiddleware(func(c *gin.Context) {
+		r := testutil.CreateRouter(testutil.HandleError(func(c *gin.Context) {
 			errActual = c.Errors.Last()
 		}))
 		buff := new(bytes.Buffer)
@@ -769,7 +769,7 @@ func TestPutWorksWithFile(t *testing.T) {
 		defer ctrl.Finish()
 
 		var err error
-		r := testutil.CreateRouter(testutil.CreateErrorMiddleware(func(c *gin.Context) {
+		r := testutil.CreateRouter(testutil.HandleError(func(c *gin.Context) {
 			err = c.Errors.Last()
 		}))
 		buff := new(bytes.Buffer)
@@ -798,7 +798,7 @@ func TestPutWorksWithFile(t *testing.T) {
 		defer ctrl.Finish()
 
 		var errActual *gin.Error
-		r := testutil.CreateRouter(testutil.CreateErrorMiddleware(func(c *gin.Context) {
+		r := testutil.CreateRouter(testutil.HandleError(func(c *gin.Context) {
 			errActual = c.Errors.Last()
 		}))
 		buff := new(bytes.Buffer)
@@ -827,7 +827,7 @@ func TestPutWorksWithFile(t *testing.T) {
 		defer ctrl.Finish()
 
 		var errActual *gin.Error
-		r := testutil.CreateRouter(testutil.CreateErrorMiddleware(func(c *gin.Context) {
+		r := testutil.CreateRouter(testutil.HandleError(func(c *gin.Context) {
 			errActual = c.Errors.Last()
 		}))
 		buff := new(bytes.Buffer)
@@ -855,7 +855,7 @@ func TestPutWorksWithFile(t *testing.T) {
 		defer ctrl.Finish()
 
 		var errActual *gin.Error
-		r := testutil.CreateRouter(testutil.CreateErrorMiddleware(func(c *gin.Context) {
+		r := testutil.CreateRouter(testutil.HandleError(func(c *gin.Context) {
 			errActual = c.Errors.Last()
 		}))
 		buff := new(bytes.Buffer)
@@ -884,7 +884,7 @@ func TestPutWorksWithFile(t *testing.T) {
 		defer ctrl.Finish()
 
 		var errActual *gin.Error
-		r := testutil.CreateRouter(testutil.CreateErrorMiddleware(func(c *gin.Context) {
+		r := testutil.CreateRouter(testutil.HandleError(func(c *gin.Context) {
 			errActual = c.Errors.Last()
 		}))
 		buff := new(bytes.Buffer)
@@ -913,7 +913,7 @@ func TestPutWorksWithFile(t *testing.T) {
 		defer ctrl.Finish()
 
 		var err error
-		r := testutil.CreateRouter(testutil.CreateErrorMiddleware(func(c *gin.Context) {
+		r := testutil.CreateRouter(testutil.HandleError(func(c *gin.Context) {
 			err = c.Errors.Last()
 		}))
 		buff := new(bytes.Buffer)
@@ -936,7 +936,7 @@ func TestPutWorksWithFile(t *testing.T) {
 		defer ctrl.Finish()
 
 		var errActual *gin.Error
-		r := testutil.CreateRouter(testutil.CreateErrorMiddleware(func(c *gin.Context) {
+		r := testutil.CreateRouter(testutil.HandleError(func(c *gin.Context) {
 			errActual = c.Errors.Last()
 		}))
 		buff := new(bytes.Buffer)
@@ -971,7 +971,7 @@ func TestDeleteWorks(t *testing.T) {
 		targetID := uint64(1234)
 
 		var err error
-		r := testutil.CreateRouter(testutil.CreateErrorMiddleware(func(c *gin.Context) {
+		r := testutil.CreateRouter(testutil.HandleError(func(c *gin.Context) {
 			err = c.Errors.Last()
 		}))
 		service := mocks.NewMockWorksService(ctrl)
@@ -994,7 +994,7 @@ func TestDeleteWorks(t *testing.T) {
 
 		errExpect := errors.New("ERROR")
 		var errActual *gin.Error
-		r := testutil.CreateRouter(testutil.CreateErrorMiddleware(func(c *gin.Context) {
+		r := testutil.CreateRouter(testutil.HandleError(func(c *gin.Context) {
 			errActual = c.Errors.Last()
 		}))
 		service := mocks.NewMockWorksService(ctrl)
