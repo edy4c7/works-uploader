@@ -3,7 +3,6 @@ package testutil
 import (
 	"log"
 	"net/http"
-	"net/http/httptest"
 	"net/http/httputil"
 
 	"github.com/gin-gonic/gin"
@@ -32,12 +31,6 @@ func AssertCalled(called *bool) gin.HandlerFunc {
 	}
 }
 
-func ExtractLastError(err *error) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		*err = c.Errors.Last()
-	}
-}
-
 func HandleError(handler gin.HandlerFunc) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Next()
@@ -47,12 +40,4 @@ func HandleError(handler gin.HandlerFunc) gin.HandlerFunc {
 
 func BindFormToObject(req *http.Request, obj interface{}) error {
 	return (&gin.Context{Request: req}).ShouldBind(obj)
-}
-
-func ServeHTTP(r *gin.Engine, req *http.Request) *httptest.ResponseRecorder {
-	w := httptest.NewRecorder()
-
-	r.ServeHTTP(w, req)
-
-	return w
 }
