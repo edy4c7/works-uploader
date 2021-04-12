@@ -9,8 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-const tagNameOfForm = "form"
-
 func CreateRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 	r := gin.New()
 
