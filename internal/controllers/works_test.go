@@ -60,7 +60,7 @@ func TestGetWorks(t *testing.T) {
 
 		req, _ := http.NewRequest(http.MethodGet, endpoint, nil)
 		req = req.WithContext(ctx)
-		w := testutil.ExecuteHandler(r, req)
+		w := testutil.ServeHTTP(r, req)
 
 		//公開モードでは、作品情報の取得は認証無しで可能
 		assert.Nil(t, err, "%T %v", err, err)
@@ -84,7 +84,7 @@ func TestGetWorks(t *testing.T) {
 
 		req, _ := http.NewRequest(http.MethodGet, endpoint, nil)
 		req = req.WithContext(ctx)
-		w := testutil.ExecuteHandler(r, req)
+		w := testutil.ServeHTTP(r, req)
 
 		assert.True(t, called)
 		assert.Nil(t, err, "%T %v", err, err)
@@ -107,7 +107,7 @@ func TestGetWorks(t *testing.T) {
 		NewWorksController(r.Group(path), service, testutil.NOPHandler, true)
 
 		req, _ := http.NewRequest(http.MethodGet, endpoint, nil)
-		testutil.ExecuteHandler(r, req)
+		testutil.ServeHTTP(r, req)
 
 		if errActual != nil {
 			assert.True(t, errors.Is(errActual.Err, errExpect), "%w", errActual)
@@ -135,7 +135,7 @@ func TestGetWorkById(t *testing.T) {
 
 		req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf(endpoint, id), nil)
 		req = req.WithContext(ctx)
-		w := testutil.ExecuteHandler(r, req)
+		w := testutil.ServeHTTP(r, req)
 
 		assert.Equal(t, http.StatusOK, w.Code)
 		assert.Nil(t, err, "%T %v", err, err)
@@ -159,7 +159,7 @@ func TestGetWorkById(t *testing.T) {
 
 		req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf(endpoint, id), nil)
 		req = req.WithContext(ctx)
-		w := testutil.ExecuteHandler(r, req)
+		w := testutil.ServeHTTP(r, req)
 
 		assert.True(t, called)
 		assert.Nil(t, err, "%T %v", err, err)
@@ -182,7 +182,7 @@ func TestGetWorkById(t *testing.T) {
 
 		id := uint64(1)
 		req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf(endpoint, id), nil)
-		testutil.ExecuteHandler(r, req)
+		testutil.ServeHTTP(r, req)
 
 		if errActual != nil {
 			assert.True(t, errors.Is(errActual.Err, errExpect), "%w", errActual)
@@ -224,7 +224,7 @@ func TestPostWorksWithURL(t *testing.T) {
 		called := false
 		NewWorksController(r.Group(path), service, testutil.AssertCalled(&called), false)
 
-		testutil.ExecuteHandler(r, req)
+		testutil.ServeHTTP(r, req)
 
 		assert.Nil(t, err, "%T %v", err, err)
 		assert.True(t, called)
@@ -247,7 +247,7 @@ func TestPostWorksWithURL(t *testing.T) {
 		service := mocks.NewMockWorksService(ctrl)
 		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
 
-		testutil.ExecuteHandler(r, req)
+		testutil.ServeHTTP(r, req)
 
 		if errActual != nil {
 			var ve validator.ValidationErrors
@@ -278,7 +278,7 @@ func TestPostWorksWithURL(t *testing.T) {
 		service.EXPECT().Create(gomock.Any(), gomock.Any()).Return(errExpect)
 		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
 
-		testutil.ExecuteHandler(r, req)
+		testutil.ServeHTTP(r, req)
 
 		if errActual != nil {
 			assert.True(t, errors.Is(errActual.Err, errExpect), "%w", errActual.Err)
@@ -304,7 +304,7 @@ func TestPostWorksWithURL(t *testing.T) {
 		service := mocks.NewMockWorksService(ctrl)
 		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
 
-		testutil.ExecuteHandler(r, req)
+		testutil.ServeHTTP(r, req)
 
 		if errActual != nil {
 			var ve validator.ValidationErrors
@@ -335,7 +335,7 @@ func TestPostWorksWithURL(t *testing.T) {
 		called := false
 		NewWorksController(r.Group(path), service, testutil.AssertCalled(&called), false)
 
-		testutil.ExecuteHandler(r, req)
+		testutil.ServeHTTP(r, req)
 
 		assert.Nil(t, err, "%T %v", err, err)
 	})
@@ -357,7 +357,7 @@ func TestPostWorksWithURL(t *testing.T) {
 		service := mocks.NewMockWorksService(ctrl)
 		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
 
-		testutil.ExecuteHandler(r, req)
+		testutil.ServeHTTP(r, req)
 
 		if errActual != nil {
 			var ve validator.ValidationErrors
@@ -403,7 +403,7 @@ func TestPostWorksWithFile(t *testing.T) {
 		called := false
 		NewWorksController(r.Group(path), service, testutil.AssertCalled(&called), false)
 
-		testutil.ExecuteHandler(r, req)
+		testutil.ServeHTTP(r, req)
 
 		assert.Nil(t, err, "%T %v", err, err)
 	})
@@ -425,7 +425,7 @@ func TestPostWorksWithFile(t *testing.T) {
 		service := mocks.NewMockWorksService(ctrl)
 		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
 
-		testutil.ExecuteHandler(r, req)
+		testutil.ServeHTTP(r, req)
 
 		if errActual != nil {
 			var ve validator.ValidationErrors
@@ -456,7 +456,7 @@ func TestPostWorksWithFile(t *testing.T) {
 		service.EXPECT().Create(gomock.Any(), gomock.Any()).Return(errExpect)
 		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
 
-		testutil.ExecuteHandler(r, req)
+		testutil.ServeHTTP(r, req)
 
 		if errActual != nil {
 			assert.True(t, errors.Is(errActual.Err, errExpect), "%w", errActual.Err)
@@ -482,7 +482,7 @@ func TestPostWorksWithFile(t *testing.T) {
 		service := mocks.NewMockWorksService(ctrl)
 		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
 
-		testutil.ExecuteHandler(r, req)
+		testutil.ServeHTTP(r, req)
 
 		if errActual != nil {
 			var ve validator.ValidationErrors
@@ -511,7 +511,7 @@ func TestPostWorksWithFile(t *testing.T) {
 		service := mocks.NewMockWorksService(ctrl)
 		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
 
-		testutil.ExecuteHandler(r, req)
+		testutil.ServeHTTP(r, req)
 
 		if errActual != nil {
 			var ve validator.ValidationErrors
@@ -542,7 +542,7 @@ func TestPostWorksWithFile(t *testing.T) {
 		called := false
 		NewWorksController(r.Group(path), service, testutil.AssertCalled(&called), false)
 
-		testutil.ExecuteHandler(r, req)
+		testutil.ServeHTTP(r, req)
 
 		assert.Nil(t, err, "%T %v", err, err)
 	})
@@ -564,7 +564,7 @@ func TestPostWorksWithFile(t *testing.T) {
 		service := mocks.NewMockWorksService(ctrl)
 		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
 
-		testutil.ExecuteHandler(r, req)
+		testutil.ServeHTTP(r, req)
 
 		if errActual != nil {
 			var ve validator.ValidationErrors
@@ -610,7 +610,7 @@ func TestPutWorksWithURL(t *testing.T) {
 		called := false
 		NewWorksController(r.Group(path), service, testutil.AssertCalled(&called), false)
 
-		testutil.ExecuteHandler(r, req)
+		testutil.ServeHTTP(r, req)
 
 		assert.Nil(t, err, "%T %v", err, err)
 	})
@@ -632,7 +632,7 @@ func TestPutWorksWithURL(t *testing.T) {
 		service := mocks.NewMockWorksService(ctrl)
 		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
 
-		testutil.ExecuteHandler(r, req)
+		testutil.ServeHTTP(r, req)
 
 		if errActual != nil {
 			var ve validator.ValidationErrors
@@ -663,7 +663,7 @@ func TestPutWorksWithURL(t *testing.T) {
 		service.EXPECT().Update(gomock.Any(), gomock.Any(), gomock.Any()).Return(errExpect)
 		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
 
-		testutil.ExecuteHandler(r, req)
+		testutil.ServeHTTP(r, req)
 
 		if errActual != nil {
 			assert.True(t, errors.Is(errActual.Err, errExpect), "%w", errActual.Err)
@@ -689,7 +689,7 @@ func TestPutWorksWithURL(t *testing.T) {
 		service := mocks.NewMockWorksService(ctrl)
 		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
 
-		testutil.ExecuteHandler(r, req)
+		testutil.ServeHTTP(r, req)
 
 		if errActual != nil {
 			var ve validator.ValidationErrors
@@ -719,7 +719,7 @@ func TestPutWorksWithURL(t *testing.T) {
 		service.EXPECT().Update(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
 
-		testutil.ExecuteHandler(r, req)
+		testutil.ServeHTTP(r, req)
 
 		assert.Nil(t, err, "%T %v", err, err)
 	})
@@ -741,7 +741,7 @@ func TestPutWorksWithURL(t *testing.T) {
 		service := mocks.NewMockWorksService(ctrl)
 		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
 
-		testutil.ExecuteHandler(r, req)
+		testutil.ServeHTTP(r, req)
 
 		if errActual != nil {
 			var ve validator.ValidationErrors
@@ -788,7 +788,7 @@ func TestPutWorksWithFile(t *testing.T) {
 		called := false
 		NewWorksController(r.Group(path), service, testutil.AssertCalled(&called), false)
 
-		testutil.ExecuteHandler(r, req)
+		testutil.ServeHTTP(r, req)
 
 		assert.Nil(t, err, "%T %v", err, err)
 	})
@@ -810,7 +810,7 @@ func TestPutWorksWithFile(t *testing.T) {
 		service := mocks.NewMockWorksService(ctrl)
 		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
 
-		testutil.ExecuteHandler(r, req)
+		testutil.ServeHTTP(r, req)
 
 		if errActual != nil {
 			var ve validator.ValidationErrors
@@ -841,7 +841,7 @@ func TestPutWorksWithFile(t *testing.T) {
 		service.EXPECT().Update(gomock.Any(), gomock.Any(), gomock.Any()).Return(errExpect)
 		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
 
-		testutil.ExecuteHandler(r, req)
+		testutil.ServeHTTP(r, req)
 
 		if errActual != nil {
 			assert.True(t, errors.Is(errActual.Err, errExpect), "%w", errActual.Err)
@@ -867,7 +867,7 @@ func TestPutWorksWithFile(t *testing.T) {
 		service := mocks.NewMockWorksService(ctrl)
 		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
 
-		testutil.ExecuteHandler(r, req)
+		testutil.ServeHTTP(r, req)
 
 		if errActual != nil {
 			var ve validator.ValidationErrors
@@ -896,7 +896,7 @@ func TestPutWorksWithFile(t *testing.T) {
 		service := mocks.NewMockWorksService(ctrl)
 		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
 
-		testutil.ExecuteHandler(r, req)
+		testutil.ServeHTTP(r, req)
 
 		if errActual != nil {
 			var ve validator.ValidationErrors
@@ -926,7 +926,7 @@ func TestPutWorksWithFile(t *testing.T) {
 		service.EXPECT().Update(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
 
-		testutil.ExecuteHandler(r, req)
+		testutil.ServeHTTP(r, req)
 
 		assert.Nil(t, err, "%T %v", err, err)
 	})
@@ -948,7 +948,7 @@ func TestPutWorksWithFile(t *testing.T) {
 		service := mocks.NewMockWorksService(ctrl)
 		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
 
-		testutil.ExecuteHandler(r, req)
+		testutil.ServeHTTP(r, req)
 
 		if errActual != nil {
 			var ve validator.ValidationErrors
@@ -981,7 +981,7 @@ func TestDeleteWorks(t *testing.T) {
 
 		req, _ := http.NewRequest(http.MethodDelete, fmt.Sprintf(endpoint, targetID), nil)
 		req = req.WithContext(ctx)
-		testutil.ExecuteHandler(r, req)
+		testutil.ServeHTTP(r, req)
 
 		assert.Nil(t, err, "%T %v", err, err)
 	})
@@ -1002,7 +1002,7 @@ func TestDeleteWorks(t *testing.T) {
 		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
 
 		req, _ := http.NewRequest(http.MethodDelete, fmt.Sprintf(endpoint, targetID), nil)
-		testutil.ExecuteHandler(r, req)
+		testutil.ServeHTTP(r, req)
 
 		if errActual != nil {
 			assert.True(t, errors.Is(errActual.Err, errExpect), "%w", errActual.Err)
