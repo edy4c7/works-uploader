@@ -216,7 +216,7 @@ func TestPostWorksWithURL(t *testing.T) {
 
 		buff := new(bytes.Buffer)
 		mw := multipart.NewWriter(buff)
-		createFormRequestBody(mw, contentType, title, description, url, nil, nil, 0)
+		createWorksFormRequestBody(mw, contentType, title, description, url, nil, nil, 0)
 		mw.Close()
 		req, _ := http.NewRequest(http.MethodPost, endpoint, buff)
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
@@ -247,7 +247,7 @@ func TestPostWorksWithURL(t *testing.T) {
 
 		buff := new(bytes.Buffer)
 		mw := multipart.NewWriter(buff)
-		createFormRequestBody(mw, 0, title, description, url, nil, nil, 0)
+		createWorksFormRequestBody(mw, 0, title, description, url, nil, nil, 0)
 		mw.Close()
 		req, _ := http.NewRequest(http.MethodPost, endpoint, buff)
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
@@ -277,7 +277,7 @@ func TestPostWorksWithURL(t *testing.T) {
 
 		buff := new(bytes.Buffer)
 		mw := multipart.NewWriter(buff)
-		createFormRequestBody(mw, contentType, title, description, url, nil, nil, 0)
+		createWorksFormRequestBody(mw, contentType, title, description, url, nil, nil, 0)
 		mw.Close()
 		req, _ := http.NewRequest(http.MethodPost, endpoint, buff)
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
@@ -306,7 +306,7 @@ func TestPostWorksWithURL(t *testing.T) {
 
 		buff := new(bytes.Buffer)
 		mw := multipart.NewWriter(buff)
-		createFormRequestBody(mw, contentType, title, description, "", nil, nil, 0)
+		createWorksFormRequestBody(mw, contentType, title, description, "", nil, nil, 0)
 		mw.Close()
 		req, _ := http.NewRequest(http.MethodPost, endpoint, buff)
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
@@ -336,7 +336,7 @@ func TestPostWorksWithURL(t *testing.T) {
 
 		buff := new(bytes.Buffer)
 		mw := multipart.NewWriter(buff)
-		createFormRequestBody(mw, contentType, title, "", url, nil, nil, 0)
+		createWorksFormRequestBody(mw, contentType, title, "", url, nil, nil, 0)
 		mw.Close()
 		req, _ := http.NewRequest(http.MethodPost, endpoint, buff)
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
@@ -361,7 +361,7 @@ func TestPostWorksWithURL(t *testing.T) {
 
 		buff := new(bytes.Buffer)
 		mw := multipart.NewWriter(buff)
-		createFormRequestBody(mw, contentType, "", description, url, nil, nil, 0)
+		createWorksFormRequestBody(mw, contentType, "", description, url, nil, nil, 0)
 		mw.Close()
 		req, _ := http.NewRequest(http.MethodPost, endpoint, buff)
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
@@ -401,7 +401,7 @@ func TestPostWorksWithFile(t *testing.T) {
 
 		buff := new(bytes.Buffer)
 		mw := multipart.NewWriter(buff)
-		createFormRequestBody(mw, contentType, title, description, "", thumbnail, content, 0)
+		createWorksFormRequestBody(mw, contentType, title, description, "", thumbnail, content, 0)
 		mw.Close()
 		req, _ := http.NewRequest(http.MethodPost, endpoint, buff)
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
@@ -431,7 +431,7 @@ func TestPostWorksWithFile(t *testing.T) {
 
 		buff := new(bytes.Buffer)
 		mw := multipart.NewWriter(buff)
-		createFormRequestBody(mw, 0, title, description, "", thumbnail, content, 0)
+		createWorksFormRequestBody(mw, 0, title, description, "", thumbnail, content, 0)
 		mw.Close()
 		req, _ := http.NewRequest(http.MethodPost, endpoint, buff)
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
@@ -461,7 +461,7 @@ func TestPostWorksWithFile(t *testing.T) {
 
 		buff := new(bytes.Buffer)
 		mw := multipart.NewWriter(buff)
-		createFormRequestBody(mw, contentType, title, description, "", thumbnail, content, 0)
+		createWorksFormRequestBody(mw, contentType, title, description, "", thumbnail, content, 0)
 		mw.Close()
 		req, _ := http.NewRequest(http.MethodPost, endpoint, buff)
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
@@ -490,7 +490,7 @@ func TestPostWorksWithFile(t *testing.T) {
 
 		buff := new(bytes.Buffer)
 		mw := multipart.NewWriter(buff)
-		createFormRequestBody(mw, contentType, title, description, "", thumbnail, nil, 0)
+		createWorksFormRequestBody(mw, contentType, title, description, "", thumbnail, nil, 0)
 		mw.Close()
 		req, _ := http.NewRequest(http.MethodPost, endpoint, buff)
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
@@ -520,7 +520,7 @@ func TestPostWorksWithFile(t *testing.T) {
 
 		buff := new(bytes.Buffer)
 		mw := multipart.NewWriter(buff)
-		createFormRequestBody(mw, contentType, title, description, "", nil, content, 0)
+		createWorksFormRequestBody(mw, contentType, title, description, "", nil, content, 0)
 		mw.Close()
 		req, _ := http.NewRequest(http.MethodPost, endpoint, buff)
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
@@ -550,7 +550,7 @@ func TestPostWorksWithFile(t *testing.T) {
 
 		buff := new(bytes.Buffer)
 		mw := multipart.NewWriter(buff)
-		createFormRequestBody(mw, contentType, title, "", "", thumbnail, content, 0)
+		createWorksFormRequestBody(mw, contentType, title, "", "", thumbnail, content, 0)
 		mw.Close()
 		req, _ := http.NewRequest(http.MethodPost, endpoint, buff)
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
@@ -575,7 +575,7 @@ func TestPostWorksWithFile(t *testing.T) {
 
 		buff := new(bytes.Buffer)
 		mw := multipart.NewWriter(buff)
-		createFormRequestBody(mw, contentType, "", description, "", thumbnail, content, 0)
+		createWorksFormRequestBody(mw, contentType, "", description, "", thumbnail, content, 0)
 		mw.Close()
 		req, _ := http.NewRequest(http.MethodPost, endpoint, buff)
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
@@ -615,7 +615,7 @@ func TestPutWorksWithURL(t *testing.T) {
 
 		buff := new(bytes.Buffer)
 		mw := multipart.NewWriter(buff)
-		createFormRequestBody(mw, contentType, title, description, url, nil, nil, 1)
+		createWorksFormRequestBody(mw, contentType, title, description, url, nil, nil, 1)
 		mw.Close()
 		req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf(endpoint, targetID), buff)
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
@@ -645,7 +645,7 @@ func TestPutWorksWithURL(t *testing.T) {
 
 		buff := new(bytes.Buffer)
 		mw := multipart.NewWriter(buff)
-		createFormRequestBody(mw, 0, title, description, url, nil, nil, 0)
+		createWorksFormRequestBody(mw, 0, title, description, url, nil, nil, 0)
 		mw.Close()
 		req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf(endpoint, targetID), buff)
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
@@ -675,7 +675,7 @@ func TestPutWorksWithURL(t *testing.T) {
 
 		buff := new(bytes.Buffer)
 		mw := multipart.NewWriter(buff)
-		createFormRequestBody(mw, contentType, title, description, url, nil, nil, 0)
+		createWorksFormRequestBody(mw, contentType, title, description, url, nil, nil, 0)
 		mw.Close()
 		req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf(endpoint, targetID), buff)
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
@@ -704,7 +704,7 @@ func TestPutWorksWithURL(t *testing.T) {
 
 		buff := new(bytes.Buffer)
 		mw := multipart.NewWriter(buff)
-		createFormRequestBody(mw, contentType, title, description, "", nil, nil, 0)
+		createWorksFormRequestBody(mw, contentType, title, description, "", nil, nil, 0)
 		mw.Close()
 		req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf(endpoint, targetID), buff)
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
@@ -734,7 +734,7 @@ func TestPutWorksWithURL(t *testing.T) {
 
 		buff := new(bytes.Buffer)
 		mw := multipart.NewWriter(buff)
-		createFormRequestBody(mw, contentType, title, "", url, nil, nil, 0)
+		createWorksFormRequestBody(mw, contentType, title, "", url, nil, nil, 0)
 		mw.Close()
 		req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf(endpoint, targetID), buff)
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
@@ -758,7 +758,7 @@ func TestPutWorksWithURL(t *testing.T) {
 
 		buff := new(bytes.Buffer)
 		mw := multipart.NewWriter(buff)
-		createFormRequestBody(mw, contentType, "", description, url, nil, nil, 0)
+		createWorksFormRequestBody(mw, contentType, "", description, url, nil, nil, 0)
 		mw.Close()
 		req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf(endpoint, targetID), buff)
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
@@ -799,7 +799,7 @@ func TestPutWorksWithFile(t *testing.T) {
 
 		buff := new(bytes.Buffer)
 		mw := multipart.NewWriter(buff)
-		createFormRequestBody(mw, contentType, title, description, "", thumbnail, content, 0)
+		createWorksFormRequestBody(mw, contentType, title, description, "", thumbnail, content, 0)
 		mw.Close()
 		req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf(endpoint, targetID), buff)
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
@@ -829,7 +829,7 @@ func TestPutWorksWithFile(t *testing.T) {
 
 		buff := new(bytes.Buffer)
 		mw := multipart.NewWriter(buff)
-		createFormRequestBody(mw, 0, title, description, "", thumbnail, content, 0)
+		createWorksFormRequestBody(mw, 0, title, description, "", thumbnail, content, 0)
 		mw.Close()
 		req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf(endpoint, targetID), buff)
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
@@ -859,7 +859,7 @@ func TestPutWorksWithFile(t *testing.T) {
 
 		buff := new(bytes.Buffer)
 		mw := multipart.NewWriter(buff)
-		createFormRequestBody(mw, contentType, title, description, "", thumbnail, content, 0)
+		createWorksFormRequestBody(mw, contentType, title, description, "", thumbnail, content, 0)
 		mw.Close()
 		req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf(endpoint, targetID), buff)
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
@@ -888,7 +888,7 @@ func TestPutWorksWithFile(t *testing.T) {
 
 		buff := new(bytes.Buffer)
 		mw := multipart.NewWriter(buff)
-		createFormRequestBody(mw, contentType, title, description, "", thumbnail, nil, 0)
+		createWorksFormRequestBody(mw, contentType, title, description, "", thumbnail, nil, 0)
 		mw.Close()
 		req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf(endpoint, targetID), buff)
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
@@ -918,7 +918,7 @@ func TestPutWorksWithFile(t *testing.T) {
 
 		buff := new(bytes.Buffer)
 		mw := multipart.NewWriter(buff)
-		createFormRequestBody(mw, contentType, title, description, "", nil, content, 0)
+		createWorksFormRequestBody(mw, contentType, title, description, "", nil, content, 0)
 		mw.Close()
 		req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf(endpoint, targetID), buff)
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
@@ -948,7 +948,7 @@ func TestPutWorksWithFile(t *testing.T) {
 
 		buff := new(bytes.Buffer)
 		mw := multipart.NewWriter(buff)
-		createFormRequestBody(mw, contentType, title, "", "", thumbnail, content, 0)
+		createWorksFormRequestBody(mw, contentType, title, "", "", thumbnail, content, 0)
 		mw.Close()
 		req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf(endpoint, targetID), buff)
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
@@ -972,7 +972,7 @@ func TestPutWorksWithFile(t *testing.T) {
 
 		buff := new(bytes.Buffer)
 		mw := multipart.NewWriter(buff)
-		createFormRequestBody(mw, contentType, "", description, "", thumbnail, content, 0)
+		createWorksFormRequestBody(mw, contentType, "", description, "", thumbnail, content, 0)
 		mw.Close()
 		req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf(endpoint, targetID), buff)
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
@@ -1048,7 +1048,7 @@ func TestDeleteWorks(t *testing.T) {
 	})
 }
 
-func createFormRequestBody(w *multipart.Writer, contentType constants.WorkType, title string, description string, url string, thumbnail []byte, content []byte, version uint) error {
+func createWorksFormRequestBody(w *multipart.Writer, contentType constants.WorkType, title string, description string, url string, thumbnail []byte, content []byte, version uint) error {
 	if contentType >= 0 {
 		w.WriteField("type", fmt.Sprint(contentType))
 	}
