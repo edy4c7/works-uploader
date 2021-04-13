@@ -408,7 +408,7 @@ func TestPostWorksWithFile(t *testing.T) {
 		req = req.WithContext(ctx)
 		ginCtx.Request = req
 		var form beans.WorksFormBean
-		if err := testutil.BindFormToObject(req, &form); err != nil {
+		if err := ginCtx.ShouldBind(&form); err != nil {
 			assert.FailNow(t, err.Error())
 		}
 		service := mocks.NewMockWorksService(ctrl)
@@ -622,7 +622,7 @@ func TestPutWorksWithURL(t *testing.T) {
 		req = req.WithContext(ctx)
 		ginCtx.Request = req
 		var form beans.WorksFormBean
-		if err := testutil.BindFormToObject(req, &form); err != nil {
+		if err := ginCtx.ShouldBind(&form); err != nil {
 			assert.FailNow(t, err.Error())
 		}
 		service := mocks.NewMockWorksService(ctrl)
@@ -806,7 +806,7 @@ func TestPutWorksWithFile(t *testing.T) {
 		req = req.WithContext(ctx)
 		ginCtx.Request = req
 		var form beans.WorksFormBean
-		if err := testutil.BindFormToObject(req, &form); err != nil {
+		if err := ginCtx.ShouldBind(&form); err != nil {
 			assert.FailNow(t, err.Error())
 		}
 		service := mocks.NewMockWorksService(ctrl)
