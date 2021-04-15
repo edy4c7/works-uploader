@@ -15,14 +15,10 @@ const UserProperty = "user"
 
 func NewAuthenticationMiddleware(service services.JWTAuthService) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		abort, err := service.Authenticate(c.Writer, c.Request)
-		if err != nil {
+		if err := service.Authenticate(c.Writer, c.Request); err != nil {
 			c.Error(err)
-			return
-		}
-
-		if abort {
 			c.Abort()
+			return
 		}
 	}
 }
