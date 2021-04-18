@@ -153,10 +153,6 @@ func HasScope(match AuthPredicate, scope string) AuthConfigrator {
 	}
 }
 
-type JWTMiddleware interface {
-	CheckJWT(w http.ResponseWriter, r *http.Request) error
-}
-
 func NewAuthenticationMiddleware(configrators ...AuthConfigrator) gin.HandlerFunc {
 	conf := &authConfig{}
 	for _, c := range configrators {
