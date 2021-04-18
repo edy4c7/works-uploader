@@ -20,7 +20,7 @@ func TestAuthentication(t *testing.T) {
 			IgnoreAuth(func(r *http.Request) bool {
 				return r.URL.Path == "/"
 			}),
-			Authorize(mockJWTMiddleware.CheckJWT),
+			SetAuthorizer(mockJWTMiddleware.CheckJWT),
 		)
 
 		w := httptest.NewRecorder()
@@ -41,7 +41,7 @@ func TestAuthentication(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		mockJWTMiddleware := mocks.NewMockJWTMiddleware(ctrl)
 		middleware := NewAuthenticationMiddleware(
-			Authorize(mockJWTMiddleware.CheckJWT),
+			SetAuthorizer(mockJWTMiddleware.CheckJWT),
 			Authenticate(Path(http.MethodGet, "/"), PermitAll()),
 		)
 
@@ -64,7 +64,7 @@ func TestAuthentication(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		mockJWTMiddleware := mocks.NewMockJWTMiddleware(ctrl)
 		middleware := NewAuthenticationMiddleware(
-			Authorize(mockJWTMiddleware.CheckJWT),
+			SetAuthorizer(mockJWTMiddleware.CheckJWT),
 		)
 
 		w := httptest.NewRecorder()
@@ -86,7 +86,7 @@ func TestAuthentication(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		mockJWTMiddleware := mocks.NewMockJWTMiddleware(ctrl)
 		middleware := NewAuthenticationMiddleware(
-			Authorize(mockJWTMiddleware.CheckJWT),
+			SetAuthorizer(mockJWTMiddleware.CheckJWT),
 		)
 
 		w := httptest.NewRecorder()
@@ -108,7 +108,7 @@ func TestAuthentication(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		mockJWTMiddleware := mocks.NewMockJWTMiddleware(ctrl)
 		middleware := NewAuthenticationMiddleware(
-			Authorize(mockJWTMiddleware.CheckJWT),
+			SetAuthorizer(mockJWTMiddleware.CheckJWT),
 			Authenticate(
 				Path(http.MethodGet, "/"),
 				func(r *http.Request) bool { return false },
@@ -134,7 +134,7 @@ func TestAuthentication(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		mockJWTMiddleware := mocks.NewMockJWTMiddleware(ctrl)
 		middleware := NewAuthenticationMiddleware(
-			Authorize(mockJWTMiddleware.CheckJWT),
+			SetAuthorizer(mockJWTMiddleware.CheckJWT),
 			Authenticate(Path(http.MethodGet, "/"), PermitAll()),
 			Authenticate(Path(http.MethodPost, "/"), func(r *http.Request) bool { return false }),
 		)

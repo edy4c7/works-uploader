@@ -110,7 +110,7 @@ func IgnoreAuth(filter AuthPredicate) AuthConfigrator {
 	}
 }
 
-func Authorize(authorizer Authorizer) AuthConfigrator {
+func SetAuthorizer(authorizer Authorizer) AuthConfigrator {
 	return func(c *authConfig) {
 		c.authorize = authorizer
 	}
