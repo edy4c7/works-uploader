@@ -13,38 +13,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type JWTMiddleware interface {
-	CheckJWT(w http.ResponseWriter, r *http.Request) error
+type Jwks struct {
+	Keys []JSONWebKeys `json:"keys"`
 }
 
-func NewAuthenticationMiddleware(jwtMiddleware JWTMiddleware, configrators ...AuthConfigrator) gin.HandlerFunc {
-	conf := &authConfig{}
-	for _, c := range configrators {
-		c(conf)
-	}
-
-	return func(c *gin.Context) {
-		if conf.ignored != nil && conf.ignored(c.Request) {
-			//認証スキップの条件に一致する場合,終了
-			return
-		}
-
-		if err := jwtMiddleware.CheckJWT(c.Writer, c.Request); err != nil {
-			c.Error(err)
-			c.Abort()
-			return
-		}
-
-		permit := false
-		for _, p := range conf.definitions {
-			permit = p(c.Request)
-		}
-
-		if !permit {
-			c.AbortWithStatus(http.StatusForbidden)
-			return
-		}
-	}
+type JSONWebKeys struct {
+	Kty string   `json:"kty"`
+	Kid string   `json:"kid"`
+	Use string   `json:"use"`
+	N   string   `json:"n"`
+	E   string   `json:"e"`
+	X5c []string `json:"x5c"`
 }
 
 func NewJWTMiddleware(aud string, iss string) *jwtmiddleware.JWTMiddleware {
@@ -71,49 +50,6 @@ func NewJWTMiddleware(aud string, iss string) *jwtmiddleware.JWTMiddleware {
 		},
 		SigningMethod: jwt.SigningMethodRS256,
 	})
-}
-
-type Jwks struct {
-	Keys []JSONWebKeys `json:"keys"`
-}
-
-type JSONWebKeys struct {
-	Kty string   `json:"kty"`
-	Kid string   `json:"kid"`
-	Use string   `json:"use"`
-	N   string   `json:"n"`
-	E   string   `json:"e"`
-	X5c []string `json:"x5c"`
-}
-
-type CustomClaims struct {
-	Scope string `json:"scope"`
-	jwt.StandardClaims
-}
-
-func hasScope(scope string, tokenString string) bool {
-	token, _ := jwt.ParseWithClaims(tokenString, &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
-		cert, err := getPemCert(token)
-		if err != nil {
-			return nil, err
-		}
-		result, _ := jwt.ParseRSAPublicKeyFromPEM([]byte(cert))
-		return result, nil
-	})
-
-	claims, ok := token.Claims.(*CustomClaims)
-
-	hasScope := false
-	if ok && token.Valid {
-		result := strings.Split(claims.Scope, " ")
-		for i := range result {
-			if result[i] == scope {
-				hasScope = true
-			}
-		}
-	}
-
-	return hasScope
 }
 
 func getPemCert(token *jwt.Token) (string, error) {
@@ -144,6 +80,36 @@ func getPemCert(token *jwt.Token) (string, error) {
 	}
 
 	return cert, nil
+}
+
+type CustomClaims struct {
+	Scope string `json:"scope"`
+	jwt.StandardClaims
+}
+
+func hasScope(scope string, tokenString string) bool {
+	token, _ := jwt.ParseWithClaims(tokenString, &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+		cert, err := getPemCert(token)
+		if err != nil {
+			return nil, err
+		}
+		result, _ := jwt.ParseRSAPublicKeyFromPEM([]byte(cert))
+		return result, nil
+	})
+
+	claims, ok := token.Claims.(*CustomClaims)
+
+	hasScope := false
+	if ok && token.Valid {
+		result := strings.Split(claims.Scope, " ")
+		for i := range result {
+			if result[i] == scope {
+				hasScope = true
+			}
+		}
+	}
+
+	return hasScope
 }
 
 type AuthPredicate func(*http.Request) bool
@@ -179,5 +145,39 @@ func HasScope(match AuthPredicate, scope string) AuthConfigrator {
 
 			return hasScope(scope, token)
 		})
+	}
+}
+
+type JWTMiddleware interface {
+	CheckJWT(w http.ResponseWriter, r *http.Request) error
+}
+
+func NewAuthenticationMiddleware(jwtMiddleware JWTMiddleware, configrators ...AuthConfigrator) gin.HandlerFunc {
+	conf := &authConfig{}
+	for _, c := range configrators {
+		c(conf)
+	}
+
+	return func(c *gin.Context) {
+		if conf.ignored != nil && conf.ignored(c.Request) {
+			//認証スキップの条件に一致する場合,終了
+			return
+		}
+
+		if err := jwtMiddleware.CheckJWT(c.Writer, c.Request); err != nil {
+			c.Error(err)
+			c.Abort()
+			return
+		}
+
+		permit := false
+		for _, p := range conf.definitions {
+			permit = p(c.Request)
+		}
+
+		if !permit {
+			c.AbortWithStatus(http.StatusForbidden)
+			return
+		}
 	}
 }
