@@ -16,7 +16,7 @@ func TestAuthentication(t *testing.T) {
 	t.Run("Is valid", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		mockJWTMiddleware := mocks.NewMockJWTMiddleware(ctrl)
-		middleware := NewAuthenticationMiddleware(mockJWTMiddleware)
+		middleware := NewAuthenticationMiddleware(Authorize(mockJWTMiddleware.CheckJWT))
 
 		r := gin.Default()
 		called := false
@@ -36,7 +36,7 @@ func TestAuthentication(t *testing.T) {
 	t.Run("Is invalid", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		mockJWTMiddleware := mocks.NewMockJWTMiddleware(ctrl)
-		middleware := NewAuthenticationMiddleware(mockJWTMiddleware)
+		middleware := NewAuthenticationMiddleware(Authorize(mockJWTMiddleware.CheckJWT))
 
 		r := gin.Default()
 		r.GET("/", middleware, func(c *gin.Context) {

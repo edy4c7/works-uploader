@@ -87,36 +87,14 @@ type CustomClaims struct {
 	jwt.StandardClaims
 }
 
-func hasScope(scope string, tokenString string) bool {
-	token, _ := jwt.ParseWithClaims(tokenString, &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
-		cert, err := getPemCert(token)
-		if err != nil {
-			return nil, err
-		}
-		result, _ := jwt.ParseRSAPublicKeyFromPEM([]byte(cert))
-		return result, nil
-	})
-
-	claims, ok := token.Claims.(*CustomClaims)
-
-	hasScope := false
-	if ok && token.Valid {
-		result := strings.Split(claims.Scope, " ")
-		for i := range result {
-			if result[i] == scope {
-				hasScope = true
-			}
-		}
-	}
-
-	return hasScope
-}
-
 type AuthPredicate func(*http.Request) bool
 
+type Authorizer func(w http.ResponseWriter, r *http.Request) error
+
 type authConfig struct {
-	ignored     AuthPredicate
-	definitions []AuthPredicate
+	ignored      AuthPredicate
+	authorize    Authorizer
+	authenticate []AuthPredicate
 }
 
 type AuthConfigrator func(*authConfig)
@@ -127,23 +105,50 @@ func IgnoreAuth(filter AuthPredicate) AuthConfigrator {
 	}
 }
 
-func DefineAuth(filters ...AuthPredicate) AuthConfigrator {
+func Authorize(authorizer Authorizer) AuthConfigrator {
 	return func(c *authConfig) {
-		c.definitions = append(c.definitions, filters...)
+		c.authorize = authorizer
+	}
+}
+
+func Authenticate(predicates ...AuthPredicate) AuthConfigrator {
+	return func(c *authConfig) {
+		c.authenticate = append(c.authenticate, predicates...)
 	}
 }
 
 func HasScope(match AuthPredicate, scope string) AuthConfigrator {
 	return func(c *authConfig) {
-		c.definitions = append(c.definitions, func(r *http.Request) bool {
+		c.authenticate = append(c.authenticate, func(r *http.Request) bool {
 			if !match(r) {
 				return false
 			}
 
 			authHeaderParts := strings.Split(r.Header.Get("Authorization"), " ")
-			token := authHeaderParts[1]
+			tokenStr := authHeaderParts[1]
 
-			return hasScope(scope, token)
+			token, _ := jwt.ParseWithClaims(tokenStr, &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+				cert, err := getPemCert(token)
+				if err != nil {
+					return nil, err
+				}
+				result, _ := jwt.ParseRSAPublicKeyFromPEM([]byte(cert))
+				return result, nil
+			})
+
+			claims, ok := token.Claims.(*CustomClaims)
+
+			hasScope := false
+			if ok && token.Valid {
+				result := strings.Split(claims.Scope, " ")
+				for i := range result {
+					if result[i] == scope {
+						hasScope = true
+					}
+				}
+			}
+
+			return hasScope
 		})
 	}
 }
@@ -152,7 +157,7 @@ type JWTMiddleware interface {
 	CheckJWT(w http.ResponseWriter, r *http.Request) error
 }
 
-func NewAuthenticationMiddleware(jwtMiddleware JWTMiddleware, configrators ...AuthConfigrator) gin.HandlerFunc {
+func NewAuthenticationMiddleware(configrators ...AuthConfigrator) gin.HandlerFunc {
 	conf := &authConfig{}
 	for _, c := range configrators {
 		c(conf)
@@ -164,14 +169,14 @@ func NewAuthenticationMiddleware(jwtMiddleware JWTMiddleware, configrators ...Au
 			return
 		}
 
-		if err := jwtMiddleware.CheckJWT(c.Writer, c.Request); err != nil {
+		if err := conf.authorize(c.Writer, c.Request); err != nil {
 			c.Error(err)
 			c.Abort()
 			return
 		}
 
 		permit := false
-		for _, p := range conf.definitions {
+		for _, p := range conf.authenticate {
 			permit = p(c.Request)
 		}
 
