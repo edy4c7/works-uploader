@@ -13,12 +13,40 @@ import (
 )
 
 func TestAuthentication(t *testing.T) {
-	t.Run("Is valid", func(t *testing.T) {
+	t.Run("Is ignored", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		mockJWTMiddleware := mocks.NewMockJWTMiddleware(ctrl)
-		middleware := NewAuthenticationMiddleware(Authorize(mockJWTMiddleware.CheckJWT))
+		middleware := NewAuthenticationMiddleware(
+			IgnoreAuth(func(r *http.Request) bool {
+				return r.URL.Path == "/"
+			}),
+			Authorize(mockJWTMiddleware.CheckJWT),
+		)
 
-		r := gin.Default()
+		w := httptest.NewRecorder()
+		c, r := gin.CreateTestContext(w)
+		called := false
+		r.GET("/", middleware, func(c *gin.Context) {
+			called = true
+		})
+
+		req, _ := http.NewRequest(http.MethodGet, "/", nil)
+		c.Request = req
+		r.HandleContext(c)
+
+		assert.True(t, called)
+	})
+
+	t.Run("Authorization and Authentication succeeded", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		mockJWTMiddleware := mocks.NewMockJWTMiddleware(ctrl)
+		middleware := NewAuthenticationMiddleware(
+			Authorize(mockJWTMiddleware.CheckJWT),
+			Authenticate(func(r *http.Request) bool { return true }),
+		)
+
+		w := httptest.NewRecorder()
+		c, r := gin.CreateTestContext(w)
 		called := false
 		r.GET("/", middleware, func(c *gin.Context) {
 			called = true
@@ -26,32 +54,76 @@ func TestAuthentication(t *testing.T) {
 
 		req, _ := http.NewRequest(http.MethodGet, "/", nil)
 		mockJWTMiddleware.EXPECT().CheckJWT(gomock.Any(), req).Return(nil)
-
-		w := httptest.NewRecorder()
-		r.ServeHTTP(w, req)
+		c.Request = req
+		r.HandleContext(c)
 
 		assert.True(t, called)
 	})
 
-	t.Run("Is invalid", func(t *testing.T) {
+	t.Run("Authorization failed", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		mockJWTMiddleware := mocks.NewMockJWTMiddleware(ctrl)
-		middleware := NewAuthenticationMiddleware(Authorize(mockJWTMiddleware.CheckJWT))
+		middleware := NewAuthenticationMiddleware(
+			Authorize(mockJWTMiddleware.CheckJWT),
+		)
 
-		r := gin.Default()
+		w := httptest.NewRecorder()
+		c, r := gin.CreateTestContext(w)
+		called := false
 		r.GET("/", middleware, func(c *gin.Context) {
-			t.FailNow()
+			called = true
 		})
 
 		req, _ := http.NewRequest(http.MethodGet, "/", nil)
-		mockJWTMiddleware.EXPECT().
-			CheckJWT(gomock.Any(), req).
-			DoAndReturn(func(w http.ResponseWriter, r *http.Request) error {
-				w.WriteHeader(http.StatusUnauthorized)
-				return errors.New("error")
-			})
+		mockJWTMiddleware.EXPECT().CheckJWT(gomock.Any(), gomock.Any()).Return(errors.New("error"))
+		c.Request = req
+		r.HandleContext(c)
+
+		assert.False(t, called)
+	})
+
+	t.Run("Authenticator not specified", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		mockJWTMiddleware := mocks.NewMockJWTMiddleware(ctrl)
+		middleware := NewAuthenticationMiddleware(
+			Authorize(mockJWTMiddleware.CheckJWT),
+		)
 
 		w := httptest.NewRecorder()
-		r.ServeHTTP(w, req)
+		c, r := gin.CreateTestContext(w)
+		called := false
+		r.GET("/", middleware, func(c *gin.Context) {
+			called = true
+		})
+
+		req, _ := http.NewRequest(http.MethodGet, "/", nil)
+		mockJWTMiddleware.EXPECT().CheckJWT(gomock.Any(), gomock.Any()).Return(nil)
+		c.Request = req
+		r.HandleContext(c)
+
+		assert.False(t, called)
+	})
+
+	t.Run("Authentication failed", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		mockJWTMiddleware := mocks.NewMockJWTMiddleware(ctrl)
+		middleware := NewAuthenticationMiddleware(
+			Authorize(mockJWTMiddleware.CheckJWT),
+			Authenticate(func(r *http.Request) bool { return false }),
+		)
+
+		w := httptest.NewRecorder()
+		c, r := gin.CreateTestContext(w)
+		called := false
+		r.GET("/", middleware, func(c *gin.Context) {
+			called = true
+		})
+
+		req, _ := http.NewRequest(http.MethodGet, "/", nil)
+		mockJWTMiddleware.EXPECT().CheckJWT(gomock.Any(), gomock.Any()).Return(nil)
+		c.Request = req
+		r.HandleContext(c)
+
+		assert.False(t, called)
 	})
 }
