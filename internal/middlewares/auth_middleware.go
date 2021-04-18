@@ -1,3 +1,4 @@
+// Referenced https://auth0.com/docs/quickstart/backend/golang/01-authorization
 package middlewares
 
 import (
@@ -16,28 +17,48 @@ type JWTMiddleware interface {
 	CheckJWT(w http.ResponseWriter, r *http.Request) error
 }
 
-func NewAuthenticationMiddleware(jwtMiddleware JWTMiddleware) gin.HandlerFunc {
+func NewAuthenticationMiddleware(jwtMiddleware JWTMiddleware, configrators ...AuthConfigrator) gin.HandlerFunc {
+	conf := &authConfig{}
+	for _, c := range configrators {
+		c(conf)
+	}
+
 	return func(c *gin.Context) {
+		if conf.ignored != nil && conf.ignored(c.Request) {
+			//認証スキップの条件に一致する場合,終了
+			return
+		}
+
 		if err := jwtMiddleware.CheckJWT(c.Writer, c.Request); err != nil {
+			c.Error(err)
 			c.Abort()
+			return
+		}
+
+		permit := false
+		for _, p := range conf.definitions {
+			permit = p(c.Request)
+		}
+
+		if !permit {
+			c.AbortWithStatus(http.StatusForbidden)
+			return
 		}
 	}
 }
 
-func NewJWTMiddleware() *jwtmiddleware.JWTMiddleware {
+func NewJWTMiddleware(aud string, iss string) *jwtmiddleware.JWTMiddleware {
 	return jwtmiddleware.New(jwtmiddleware.Options{
 		ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
 			// Verify 'aud' claim
-			aud := os.Getenv("AUTH0_AUDIENCE")
 			checkAud := token.Claims.(jwt.MapClaims).VerifyAudience(aud, false)
 			if !checkAud {
-				return token, errors.New("Invalid audience.")
+				return token, errors.New("invalid audience")
 			}
 			// Verify 'iss' claim
-			iss := "https://" + os.Getenv("AUTH0_DOMAIN") + "/"
 			checkIss := token.Claims.(jwt.MapClaims).VerifyIssuer(iss, false)
 			if !checkIss {
-				return token, errors.New("Invalid issuer.")
+				return token, errors.New("invalid issuer")
 			}
 
 			cert, err := getPemCert(token)
@@ -50,10 +71,6 @@ func NewJWTMiddleware() *jwtmiddleware.JWTMiddleware {
 		},
 		SigningMethod: jwt.SigningMethodRS256,
 	})
-}
-
-type Response struct {
-	Message string `json:"message"`
 }
 
 type Jwks struct {
@@ -69,27 +86,12 @@ type JSONWebKeys struct {
 	X5c []string `json:"x5c"`
 }
 
-func NewAuthorizationMiddleware(scope string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		authHeaderParts := strings.Split(c.GetHeader("Authorization"), " ")
-		token := authHeaderParts[1]
-
-		hasScope := checkScope(scope, token)
-
-		if !hasScope {
-			message := "Insufficient scope."
-			c.AbortWithStatusJSON(http.StatusForbidden, Response{message})
-			return
-		}
-	}
-}
-
 type CustomClaims struct {
 	Scope string `json:"scope"`
 	jwt.StandardClaims
 }
 
-func checkScope(scope string, tokenString string) bool {
+func hasScope(scope string, tokenString string) bool {
 	token, _ := jwt.ParseWithClaims(tokenString, &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
 		cert, err := getPemCert(token)
 		if err != nil {
@@ -130,7 +132,7 @@ func getPemCert(token *jwt.Token) (string, error) {
 		return cert, err
 	}
 
-	for k, _ := range jwks.Keys {
+	for k := range jwks.Keys {
 		if token.Header["kid"] == jwks.Keys[k].Kid {
 			cert = "-----BEGIN CERTIFICATE-----\n" + jwks.Keys[k].X5c[0] + "\n-----END CERTIFICATE-----"
 		}
@@ -142,4 +144,40 @@ func getPemCert(token *jwt.Token) (string, error) {
 	}
 
 	return cert, nil
+}
+
+type AuthPredicate func(*http.Request) bool
+
+type authConfig struct {
+	ignored     AuthPredicate
+	definitions []AuthPredicate
+}
+
+type AuthConfigrator func(*authConfig)
+
+func IgnoreAuth(filter AuthPredicate) AuthConfigrator {
+	return func(c *authConfig) {
+		c.ignored = filter
+	}
+}
+
+func DefineAuth(filters ...AuthPredicate) AuthConfigrator {
+	return func(c *authConfig) {
+		c.definitions = append(c.definitions, filters...)
+	}
+}
+
+func HasScope(match AuthPredicate, scope string) AuthConfigrator {
+	return func(c *authConfig) {
+		c.definitions = append(c.definitions, func(r *http.Request) bool {
+			if !match(r) {
+				return false
+			}
+
+			authHeaderParts := strings.Split(r.Header.Get("Authorization"), " ")
+			token := authHeaderParts[1]
+
+			return hasScope(scope, token)
+		})
+	}
 }
