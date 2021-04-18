@@ -42,7 +42,7 @@ func TestAuthentication(t *testing.T) {
 		mockJWTMiddleware := mocks.NewMockJWTMiddleware(ctrl)
 		middleware := NewAuthenticationMiddleware(
 			Authorize(mockJWTMiddleware.CheckJWT),
-			Authenticate(func(r *http.Request) bool { return true }),
+			Authenticate(Path(http.MethodGet, "/"), PermitAll()),
 		)
 
 		w := httptest.NewRecorder()
@@ -109,7 +109,10 @@ func TestAuthentication(t *testing.T) {
 		mockJWTMiddleware := mocks.NewMockJWTMiddleware(ctrl)
 		middleware := NewAuthenticationMiddleware(
 			Authorize(mockJWTMiddleware.CheckJWT),
-			Authenticate(func(r *http.Request) bool { return false }),
+			Authenticate(
+				Path(http.MethodGet, "/"),
+				func(r *http.Request) bool { return false },
+			),
 		)
 
 		w := httptest.NewRecorder()
@@ -121,6 +124,39 @@ func TestAuthentication(t *testing.T) {
 
 		req, _ := http.NewRequest(http.MethodGet, "/", nil)
 		mockJWTMiddleware.EXPECT().CheckJWT(gomock.Any(), gomock.Any()).Return(nil)
+		c.Request = req
+		r.HandleContext(c)
+
+		assert.False(t, called)
+	})
+
+	t.Run("Specified multiple authenticator", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		mockJWTMiddleware := mocks.NewMockJWTMiddleware(ctrl)
+		middleware := NewAuthenticationMiddleware(
+			Authorize(mockJWTMiddleware.CheckJWT),
+			Authenticate(Path(http.MethodGet, "/"), PermitAll()),
+			Authenticate(Path(http.MethodPost, "/"), func(r *http.Request) bool { return false }),
+		)
+
+		w := httptest.NewRecorder()
+		c, r := gin.CreateTestContext(w)
+		called := false
+		r.GET("/", middleware, func(c *gin.Context) {
+			called = true
+		})
+		r.POST("/", middleware, func(c *gin.Context) {
+			called = true
+		})
+
+		req, _ := http.NewRequest(http.MethodGet, "/", nil)
+		mockJWTMiddleware.EXPECT().CheckJWT(gomock.Any(), gomock.Any()).AnyTimes()
+		c.Request = req
+		r.HandleContext(c)
+		assert.True(t, called)
+
+		called = false
+		req, _ = http.NewRequest(http.MethodPost, "/", nil)
 		c.Request = req
 		r.HandleContext(c)
 
