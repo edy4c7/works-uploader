@@ -15,6 +15,7 @@ import (
 	"github.com/edy4c7/darkpot-school-works/internal/beans"
 	"github.com/edy4c7/darkpot-school-works/internal/common/constants"
 	"github.com/edy4c7/darkpot-school-works/internal/entities"
+	myErr "github.com/edy4c7/darkpot-school-works/internal/errors"
 	"github.com/edy4c7/darkpot-school-works/internal/mocks"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -120,6 +121,34 @@ func TestGetWorkById(t *testing.T) {
 		assert.Nil(t, err, "%T %v", err, err)
 		res, _ := json.Marshal(data[1])
 		assert.Equal(t, res, w.Body.Bytes())
+	})
+
+	t.Run("invalid id", func(t *testing.T) {
+		ctrl, ctx := gomock.WithContext(context.Background(), t)
+		defer ctrl.Finish()
+
+		w := httptest.NewRecorder()
+		ginCtx, r := gin.CreateTestContext(w)
+
+		service := mocks.NewMockWorksService(ctrl)
+		NewWorksController(r.Group(path), service)
+
+		req, _ := http.NewRequest(http.MethodGet, "/works/abc", nil)
+		req = req.WithContext(ctx)
+		ginCtx.Request = req
+		r.HandleContext(ginCtx)
+
+		err := ginCtx.Errors.Last()
+		if err != nil {
+			var appErr *myErr.ApplicationError
+			if !errors.As(err.Err, &appErr) {
+				assert.Fail(t, err.Err.Error())
+			} else {
+				assert.Equal(t, myErr.DSWE01, appErr.Code())
+			}
+		} else {
+			assert.Fail(t, "%v", err)
+		}
 	})
 
 	t.Run("error", func(t *testing.T) {
@@ -579,6 +608,43 @@ func TestPutWorksWithURL(t *testing.T) {
 		assert.Nil(t, err, "%T %v", err, err)
 	})
 
+	t.Run("invalid id", func(t *testing.T) {
+		ctrl, ctx := gomock.WithContext(context.Background(), t)
+		defer ctrl.Finish()
+
+		w := httptest.NewRecorder()
+		ginCtx, r := gin.CreateTestContext(w)
+
+		buff := new(bytes.Buffer)
+		mw := multipart.NewWriter(buff)
+		createWorksFormRequestBody(mw, contentType, title, description, url, nil, nil, 1)
+		mw.Close()
+		req, _ := http.NewRequest(http.MethodPut, "/works/abc", buff)
+		req.Header.Set(contentTypeKey, mw.FormDataContentType())
+		req = req.WithContext(ctx)
+		ginCtx.Request = req
+		var form beans.WorksFormBean
+		if err := ginCtx.ShouldBind(&form); err != nil {
+			assert.FailNow(t, err.Error())
+		}
+		service := mocks.NewMockWorksService(ctrl)
+		NewWorksController(r.Group(path), service)
+
+		r.HandleContext(ginCtx)
+
+		err := ginCtx.Errors.Last()
+		if err != nil {
+			var appErr *myErr.ApplicationError
+			if !errors.As(err.Err, &appErr) {
+				assert.Fail(t, err.Err.Error())
+			} else {
+				assert.Equal(t, myErr.DSWE01, appErr.Code())
+			}
+		} else {
+			assert.Fail(t, "%v", err)
+		}
+	})
+
 	t.Run("Missing content type", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
@@ -760,6 +826,43 @@ func TestPutWorksWithFile(t *testing.T) {
 
 		err := ginCtx.Errors.Last()
 		assert.Nil(t, err, "%T %v", err, err)
+	})
+
+	t.Run("invalid id", func(t *testing.T) {
+		ctrl, ctx := gomock.WithContext(context.Background(), t)
+		defer ctrl.Finish()
+
+		w := httptest.NewRecorder()
+		ginCtx, r := gin.CreateTestContext(w)
+
+		buff := new(bytes.Buffer)
+		mw := multipart.NewWriter(buff)
+		createWorksFormRequestBody(mw, contentType, title, description, "", thumbnail, content, 0)
+		mw.Close()
+		req, _ := http.NewRequest(http.MethodPut, "/works/abc", buff)
+		req.Header.Set(contentTypeKey, mw.FormDataContentType())
+		req = req.WithContext(ctx)
+		ginCtx.Request = req
+		var form beans.WorksFormBean
+		if err := ginCtx.ShouldBind(&form); err != nil {
+			assert.FailNow(t, err.Error())
+		}
+		service := mocks.NewMockWorksService(ctrl)
+		NewWorksController(r.Group(path), service)
+
+		r.HandleContext(ginCtx)
+
+		err := ginCtx.Errors.Last()
+		if err != nil {
+			var appErr *myErr.ApplicationError
+			if !errors.As(err.Err, &appErr) {
+				assert.Fail(t, err.Err.Error())
+			} else {
+				assert.Equal(t, myErr.DSWE01, appErr.Code())
+			}
+		} else {
+			assert.Fail(t, "%v", err)
+		}
 	})
 
 	t.Run("Missing content type", func(t *testing.T) {
@@ -960,6 +1063,35 @@ func TestDeleteWorks(t *testing.T) {
 
 		err := ginCtx.Errors.Last()
 		assert.Nil(t, err, "%T %v", err, err)
+	})
+
+	t.Run("invalid id", func(t *testing.T) {
+		ctrl, ctx := gomock.WithContext(context.Background(), t)
+		defer ctrl.Finish()
+
+		w := httptest.NewRecorder()
+		ginCtx, r := gin.CreateTestContext(w)
+
+		service := mocks.NewMockWorksService(ctrl)
+		NewWorksController(r.Group(path), service)
+
+		req, _ := http.NewRequest(http.MethodDelete, "/works/abc", nil)
+		req = req.WithContext(ctx)
+		ginCtx.Request = req
+
+		r.HandleContext(ginCtx)
+
+		err := ginCtx.Errors.Last()
+		if err != nil {
+			var appErr *myErr.ApplicationError
+			if !errors.As(err.Err, &appErr) {
+				assert.Fail(t, err.Err.Error())
+			} else {
+				assert.Equal(t, myErr.DSWE01, appErr.Code())
+			}
+		} else {
+			assert.Fail(t, "%v", err)
+		}
 	})
 
 	t.Run("Is fail(500)", func(t *testing.T) {
