@@ -55,7 +55,7 @@ func SkipAuthorization(filter policyFunc) authorizationConfigrator {
 	}
 }
 
-func NewAutorizationMiddleware(jwtMiddleware JWTMiddleware, configrators ...authorizationConfigrator) gin.HandlerFunc {
+func NewAuthorizationMiddleware(jwtMiddleware JWTMiddleware, configrators ...authorizationConfigrator) gin.HandlerFunc {
 	conf := &authorizationConfig{}
 	for _, c := range configrators {
 		c(conf)
