@@ -383,11 +383,32 @@ func TestCreate(t *testing.T) {
 		}
 	})
 
-	t.Run("Fail to extract subject", func(t *testing.T) {
+	t.Run("Fail to extract claims", func(t *testing.T) {
 		ctrl, ctx := gomock.WithContext(context.Background(), t)
 		defer ctrl.Finish()
 		//lint:ignore SA1029 can use string only
 		ctx = context.WithValue(ctx, userKey, &jwt.Token{})
+
+		service := &WorksServiceImpl{}
+
+		err := service.Create(ctx, nil)
+
+		assert.Error(t, err)
+		var appErr *myErr.ApplicationError
+		if errors.As(err, &appErr) {
+			assert.Equal(t, myErr.DSWE99, appErr.Code())
+		} else {
+			assert.Failf(t, "Invalid error type", "%w", err)
+		}
+	})
+
+	t.Run("Fail to extract subject", func(t *testing.T) {
+		ctrl, ctx := gomock.WithContext(context.Background(), t)
+		defer ctrl.Finish()
+		//lint:ignore SA1029 can use string only
+		ctx = context.WithValue(ctx, userKey, &jwt.Token{
+			Claims: make(jwt.MapClaims),
+		})
 
 		service := &WorksServiceImpl{}
 
@@ -837,11 +858,32 @@ func TestUpdate(t *testing.T) {
 		}
 	})
 
-	t.Run("Fail to extract subject", func(t *testing.T) {
+	t.Run("Fail to extract claims", func(t *testing.T) {
 		ctrl, ctx := gomock.WithContext(context.Background(), t)
 		defer ctrl.Finish()
 		//lint:ignore SA1029 can use string only
 		ctx = context.WithValue(ctx, userKey, &jwt.Token{})
+
+		service := &WorksServiceImpl{}
+
+		err := service.Update(ctx, 0, nil)
+
+		assert.Error(t, err)
+		var appErr *myErr.ApplicationError
+		if errors.As(err, &appErr) {
+			assert.Equal(t, myErr.DSWE99, appErr.Code())
+		} else {
+			assert.Failf(t, "Invalid error type", "%w", err)
+		}
+	})
+
+	t.Run("Fail to extract subject", func(t *testing.T) {
+		ctrl, ctx := gomock.WithContext(context.Background(), t)
+		defer ctrl.Finish()
+		//lint:ignore SA1029 can use string only
+		ctx = context.WithValue(ctx, userKey, &jwt.Token{
+			Claims: make(jwt.MapClaims),
+		})
 
 		service := &WorksServiceImpl{}
 
@@ -1039,6 +1081,57 @@ func TestUpdate(t *testing.T) {
 		var appErr *myErr.ApplicationError
 		if errors.As(actual, &appErr) {
 			assert.Equal(t, myErr.DSWE01, appErr.Code())
+		} else {
+			assert.Failf(t, "Invalid error type", "%w", actual)
+		}
+	})
+
+	t.Run("faild to find", func(t *testing.T) {
+		ctrl, ctx := gomock.WithContext(context.Background(), t)
+		defer ctrl.Finish()
+		ctx = setupContext(ctx)
+
+		form := &beans.WorksFormBean{
+			Thumbnail: &multipart.FileHeader{
+				Filename: "thumb01",
+				Size:     1,
+			},
+			Content: &multipart.FileHeader{
+				Filename: "content01",
+				Size:     1,
+			},
+		}
+
+		uuidGenerator := mocks.NewMockUUIDGenerator(ctrl)
+		uuidGenerator.EXPECT().Generate().AnyTimes()
+		fileUploader := mocks.NewMockFileUploader(ctrl)
+		fileUploader.EXPECT().Upload(gomock.Any(), gomock.Any()).AnyTimes()
+
+		tranRunner := mocks.NewMockTransactionRunner(ctrl)
+		tranRunner.
+			EXPECT().
+			Run(gomock.Any(), gomock.Any()).
+			DoAndReturn(func(ctx context.Context, tranFunc repositories.TransactionFunction) error {
+				return tranFunc(ctx)
+			})
+
+		worksRepo := mocks.NewMockWorksRepository(ctrl)
+		expect := errors.New("error")
+		worksRepo.EXPECT().FindByID(gomock.Any(), gomock.Any()).Return(nil, expect)
+
+		service := &WorksServiceImpl{
+			uuidGenerator:     uuidGenerator,
+			fileUploader:      fileUploader,
+			transactionRunner: tranRunner,
+			worksRepository:   worksRepo,
+		}
+
+		actual := service.Update(ctx, 0, form)
+
+		assert.True(t, errors.Is(actual, expect))
+		var appErr *myErr.ApplicationError
+		if errors.As(actual, &appErr) {
+			assert.Equal(t, myErr.DSWE99, appErr.Code())
 		} else {
 			assert.Failf(t, "Invalid error type", "%w", actual)
 		}

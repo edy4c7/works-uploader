@@ -157,10 +157,6 @@ func (r *WorksServiceImpl) Create(ctx context.Context, bean *beans.WorksFormBean
 	})
 
 	if err != nil {
-		var dbErr *myErr.RecordNotFoundError
-		if errors.As(err, &dbErr) {
-			return myErr.NewApplicationError(myErr.Code(myErr.DSWE01), myErr.Cause(err))
-		}
 		return myErr.NewApplicationError(myErr.Code(myErr.DSWE99), myErr.Cause(err))
 	}
 
