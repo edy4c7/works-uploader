@@ -36,8 +36,8 @@ func Run() {
 
 	db.AutoMigrate(entities.Work{}, entities.Activity{})
 
-	authMiddleware := middlewares.NewAuthenticationMiddleware(
-		middlewares.NewJWTMiddleware())
+	authMiddleware := middlewares.NewAuthorizationMiddleware(
+		middlewares.NewJWTMiddleware(os.Getenv("AUTH0_AUDIENCE"), os.Getenv("AUTH0_DOMAIN")))
 
 	tranRnr := infrastructures.NewTransactionRunnerImpl(db)
 

@@ -16,7 +16,7 @@ func TestAuthentication(t *testing.T) {
 	t.Run("Is skipped", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		mockJWTMiddleware := mocks.NewMockJWTMiddleware(ctrl)
-		middleware := NewAutorizationMiddleware(
+		middleware := NewAuthorizationMiddleware(
 			mockJWTMiddleware,
 			SkipAuthorization(func(r *http.Request) bool {
 				return r.URL.Path == "/"
@@ -40,7 +40,7 @@ func TestAuthentication(t *testing.T) {
 	t.Run("Authorization succeeded", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		mockJWTMiddleware := mocks.NewMockJWTMiddleware(ctrl)
-		middleware := NewAutorizationMiddleware(mockJWTMiddleware)
+		middleware := NewAuthorizationMiddleware(mockJWTMiddleware)
 
 		w := httptest.NewRecorder()
 		c, r := gin.CreateTestContext(w)
@@ -80,7 +80,7 @@ func TestAuthentication(t *testing.T) {
 	t.Run("Authorization failed", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		mockJWTMiddleware := mocks.NewMockJWTMiddleware(ctrl)
-		middleware := NewAutorizationMiddleware(mockJWTMiddleware)
+		middleware := NewAuthorizationMiddleware(mockJWTMiddleware)
 
 		w := httptest.NewRecorder()
 		c, r := gin.CreateTestContext(w)
