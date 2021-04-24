@@ -10,24 +10,14 @@ import (
 )
 
 //NewWorksController add /works
-func NewWorksController(rg *gin.RouterGroup, service services.WorksService, authMiddleware gin.HandlerFunc, public bool) {
+func NewWorksController(rg *gin.RouterGroup, service services.WorksService) {
 	works := rg.Group("/works")
 
-	if authMiddleware == nil {
-		panic("authMiddleware must not be null")
-	}
-
-	if public {
-		works.GET("/", get(service))
-		works.GET("/:id", findByID(service))
-	} else {
-		works.GET("/", authMiddleware, get(service))
-		works.GET("/:id", authMiddleware, findByID(service))
-	}
-
-	works.POST("/", authMiddleware, post(service))
-	works.PUT("/:id", authMiddleware, put(service))
-	works.DELETE("/:id", authMiddleware, delete(service))
+	works.GET("/", get(service))
+	works.GET("/:id", findByID(service))
+	works.POST("/", post(service))
+	works.PUT("/:id", put(service))
+	works.DELETE("/:id", delete(service))
 }
 
 func get(service services.WorksService) gin.HandlerFunc {

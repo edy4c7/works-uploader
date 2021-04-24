@@ -2,7 +2,9 @@ package dsw
 
 import (
 	"fmt"
+	"net/http"
 	"os"
+	"path"
 	"strconv"
 
 	"gorm.io/driver/postgres"
@@ -36,26 +38,27 @@ func Run() {
 
 	db.AutoMigrate(entities.Work{}, entities.Activity{})
 
-	authMiddleware := middlewares.NewAuthorizationMiddleware(
-		middlewares.NewJWTMiddleware(os.Getenv("AUTH0_AUDIENCE"), os.Getenv("AUTH0_DOMAIN")))
+	jwtMiddleware := middlewares.NewJWTMiddleware(os.Getenv("AUTH0_AUDIENCE"), os.Getenv("AUTH0_DOMAIN"))
+	authorizationMiddleware := middlewares.NewAuthorizationMiddleware(
+		jwtMiddleware, middlewares.SkipAuthorization(func(r *http.Request) bool {
+			match, _ := path.Match("v*/works/*", r.URL.Path)
+			return r.Method == http.MethodGet && match
+		}),
+	)
+
+	r.Use(authorizationMiddleware)
 
 	tranRnr := infrastructures.NewTransactionRunnerImpl(db)
 
-	if err != nil {
-		panic(err)
-	}
-
 	v1 := r.Group("/v1")
-	controllers.NewWorksController(v1,
+	controllers.NewWorksController(v1.Group("/works"),
 		services.NewWorksServiceImpl(
 			tranRnr,
 			infrastructures.NewWorksRepositoryImpl(db),
 			infrastructures.NewActivitiesRepositoryImpl(db),
 			infrastructures.DefaultUUIDGenerator,
 			&infrastructures.FileUploaderImpl{},
-		),
-		authMiddleware,
-		false)
+		))
 
 	port, err := strconv.Atoi(os.Getenv("PORT"))
 	if err != nil {

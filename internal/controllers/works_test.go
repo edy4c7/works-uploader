@@ -16,7 +16,6 @@ import (
 	"github.com/edy4c7/darkpot-school-works/internal/common/constants"
 	"github.com/edy4c7/darkpot-school-works/internal/entities"
 	"github.com/edy4c7/darkpot-school-works/internal/mocks"
-	"github.com/edy4c7/darkpot-school-works/internal/test/testutil"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/golang/mock/gomock"
@@ -56,7 +55,7 @@ func TestGetWorks(t *testing.T) {
 
 		service := mocks.NewMockWorksService(ctrl)
 		service.EXPECT().GetAll(ctx).Return(data, nil)
-		NewWorksController(r.Group(path), service, testutil.NOPHandler, true)
+		NewWorksController(r.Group(path), service)
 
 		req, _ := http.NewRequest(http.MethodGet, endpoint, nil)
 		req = req.WithContext(ctx)
@@ -64,31 +63,6 @@ func TestGetWorks(t *testing.T) {
 		r.HandleContext(ginCtx)
 
 		//公開モードでは、作品情報の取得は認証無しで可能
-		err := ginCtx.Errors.Last()
-		assert.Nil(t, err, "%T %v", err, err)
-		assert.Equal(t, http.StatusOK, w.Code)
-		res, _ := json.Marshal(data)
-		assert.Equal(t, res, w.Body.Bytes())
-	})
-
-	t.Run("Private mode", func(t *testing.T) {
-		ctrl, ctx := gomock.WithContext(context.Background(), t)
-		defer ctrl.Finish()
-
-		w := httptest.NewRecorder()
-		ginCtx, r := gin.CreateTestContext(w)
-
-		service := mocks.NewMockWorksService(ctrl)
-		service.EXPECT().GetAll(ctx).Return(data, nil)
-		called := false
-		NewWorksController(r.Group(path), service, testutil.AssertCalled(&called), false)
-
-		req, _ := http.NewRequest(http.MethodGet, endpoint, nil)
-		req = req.WithContext(ctx)
-		ginCtx.Request = req
-		r.HandleContext(ginCtx)
-
-		assert.True(t, called)
 		err := ginCtx.Errors.Last()
 		assert.Nil(t, err, "%T %v", err, err)
 		assert.Equal(t, http.StatusOK, w.Code)
@@ -106,7 +80,7 @@ func TestGetWorks(t *testing.T) {
 		errExpect := errors.New("ERROR")
 		service := mocks.NewMockWorksService(ctrl)
 		service.EXPECT().GetAll(gomock.Any()).Return(nil, errExpect)
-		NewWorksController(r.Group(path), service, testutil.NOPHandler, true)
+		NewWorksController(r.Group(path), service)
 
 		req, _ := http.NewRequest(http.MethodGet, endpoint, nil)
 		ginCtx.Request = req
@@ -134,7 +108,7 @@ func TestGetWorkById(t *testing.T) {
 		service := mocks.NewMockWorksService(ctrl)
 		id := uint64(1)
 		service.EXPECT().FindByID(ctx, id).Return(data[1], nil)
-		NewWorksController(r.Group(path), service, testutil.NOPHandler, true)
+		NewWorksController(r.Group(path), service)
 
 		req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf(endpoint, id), nil)
 		req = req.WithContext(ctx)
@@ -143,31 +117,6 @@ func TestGetWorkById(t *testing.T) {
 
 		err := ginCtx.Errors.Last()
 		assert.Equal(t, http.StatusOK, w.Code)
-		assert.Nil(t, err, "%T %v", err, err)
-		res, _ := json.Marshal(data[1])
-		assert.Equal(t, res, w.Body.Bytes())
-	})
-
-	t.Run("Private mode", func(t *testing.T) {
-		ctrl, ctx := gomock.WithContext(context.Background(), t)
-		defer ctrl.Finish()
-
-		w := httptest.NewRecorder()
-		ginCtx, r := gin.CreateTestContext(w)
-
-		service := mocks.NewMockWorksService(ctrl)
-		id := uint64(1)
-		service.EXPECT().FindByID(ctx, id).Return(data[1], nil)
-		called := false
-		NewWorksController(r.Group(path), service, testutil.AssertCalled(&called), false)
-
-		req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf(endpoint, id), nil)
-		req = req.WithContext(ctx)
-		ginCtx.Request = req
-		r.HandleContext(ginCtx)
-
-		assert.True(t, called)
-		err := ginCtx.Errors.Last()
 		assert.Nil(t, err, "%T %v", err, err)
 		res, _ := json.Marshal(data[1])
 		assert.Equal(t, res, w.Body.Bytes())
@@ -183,7 +132,7 @@ func TestGetWorkById(t *testing.T) {
 		service := mocks.NewMockWorksService(ctrl)
 		errExpect := errors.New("ERROR")
 		service.EXPECT().FindByID(gomock.Any(), gomock.Any()).Return(nil, errExpect)
-		NewWorksController(r.Group(path), service, testutil.NOPHandler, true)
+		NewWorksController(r.Group(path), service)
 
 		id := uint64(1)
 		req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf(endpoint, id), nil)
@@ -228,14 +177,12 @@ func TestPostWorksWithURL(t *testing.T) {
 		}
 		service := mocks.NewMockWorksService(ctrl)
 		service.EXPECT().Create(ctx, &form).Return(nil)
-		called := false
-		NewWorksController(r.Group(path), service, testutil.AssertCalled(&called), false)
+		NewWorksController(r.Group(path), service)
 
 		r.HandleContext(ginCtx)
 
 		err := ginCtx.Errors.Last()
 		assert.Nil(t, err, "%T %v", err, err)
-		assert.True(t, called)
 	})
 
 	t.Run("Missing content type", func(t *testing.T) {
@@ -253,7 +200,7 @@ func TestPostWorksWithURL(t *testing.T) {
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
-		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
+		NewWorksController(r.Group(path), service)
 
 		r.HandleContext(ginCtx)
 
@@ -285,7 +232,7 @@ func TestPostWorksWithURL(t *testing.T) {
 		service := mocks.NewMockWorksService(ctrl)
 		errExpect := errors.New("ERROR")
 		service.EXPECT().Create(gomock.Any(), gomock.Any()).Return(errExpect)
-		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
+		NewWorksController(r.Group(path), service)
 
 		r.HandleContext(ginCtx)
 
@@ -312,7 +259,7 @@ func TestPostWorksWithURL(t *testing.T) {
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
-		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
+		NewWorksController(r.Group(path), service)
 
 		r.HandleContext(ginCtx)
 
@@ -343,8 +290,7 @@ func TestPostWorksWithURL(t *testing.T) {
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
 		service.EXPECT().Create(gomock.Any(), gomock.Any()).Return(nil)
-		called := false
-		NewWorksController(r.Group(path), service, testutil.AssertCalled(&called), false)
+		NewWorksController(r.Group(path), service)
 
 		r.HandleContext(ginCtx)
 
@@ -367,7 +313,7 @@ func TestPostWorksWithURL(t *testing.T) {
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
-		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
+		NewWorksController(r.Group(path), service)
 
 		r.HandleContext(ginCtx)
 
@@ -413,8 +359,7 @@ func TestPostWorksWithFile(t *testing.T) {
 		}
 		service := mocks.NewMockWorksService(ctrl)
 		service.EXPECT().Create(ctx, &form).Return(nil)
-		called := false
-		NewWorksController(r.Group(path), service, testutil.AssertCalled(&called), false)
+		NewWorksController(r.Group(path), service)
 
 		r.HandleContext(ginCtx)
 
@@ -437,7 +382,7 @@ func TestPostWorksWithFile(t *testing.T) {
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
-		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
+		NewWorksController(r.Group(path), service)
 
 		r.HandleContext(ginCtx)
 
@@ -469,7 +414,7 @@ func TestPostWorksWithFile(t *testing.T) {
 		service := mocks.NewMockWorksService(ctrl)
 		errExpect := errors.New("ERROR")
 		service.EXPECT().Create(gomock.Any(), gomock.Any()).Return(errExpect)
-		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
+		NewWorksController(r.Group(path), service)
 
 		r.HandleContext(ginCtx)
 
@@ -496,7 +441,7 @@ func TestPostWorksWithFile(t *testing.T) {
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
-		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
+		NewWorksController(r.Group(path), service)
 
 		r.HandleContext(ginCtx)
 
@@ -526,7 +471,7 @@ func TestPostWorksWithFile(t *testing.T) {
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
-		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
+		NewWorksController(r.Group(path), service)
 
 		r.HandleContext(ginCtx)
 
@@ -557,8 +502,7 @@ func TestPostWorksWithFile(t *testing.T) {
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
 		service.EXPECT().Create(gomock.Any(), gomock.Any()).Return(nil)
-		called := false
-		NewWorksController(r.Group(path), service, testutil.AssertCalled(&called), false)
+		NewWorksController(r.Group(path), service)
 
 		r.HandleContext(ginCtx)
 
@@ -581,7 +525,7 @@ func TestPostWorksWithFile(t *testing.T) {
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
-		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
+		NewWorksController(r.Group(path), service)
 
 		r.HandleContext(ginCtx)
 
@@ -627,8 +571,7 @@ func TestPutWorksWithURL(t *testing.T) {
 		}
 		service := mocks.NewMockWorksService(ctrl)
 		service.EXPECT().Update(ctx, targetID, &form).Return(nil)
-		called := false
-		NewWorksController(r.Group(path), service, testutil.AssertCalled(&called), false)
+		NewWorksController(r.Group(path), service)
 
 		r.HandleContext(ginCtx)
 
@@ -651,7 +594,7 @@ func TestPutWorksWithURL(t *testing.T) {
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
-		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
+		NewWorksController(r.Group(path), service)
 
 		r.HandleContext(ginCtx)
 
@@ -683,7 +626,7 @@ func TestPutWorksWithURL(t *testing.T) {
 		service := mocks.NewMockWorksService(ctrl)
 		errExpect := errors.New("ERROR")
 		service.EXPECT().Update(gomock.Any(), gomock.Any(), gomock.Any()).Return(errExpect)
-		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
+		NewWorksController(r.Group(path), service)
 
 		r.HandleContext(ginCtx)
 
@@ -710,7 +653,7 @@ func TestPutWorksWithURL(t *testing.T) {
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
-		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
+		NewWorksController(r.Group(path), service)
 
 		r.HandleContext(ginCtx)
 
@@ -741,7 +684,7 @@ func TestPutWorksWithURL(t *testing.T) {
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
 		service.EXPECT().Update(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
-		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
+		NewWorksController(r.Group(path), service)
 
 		r.HandleContext(ginCtx)
 
@@ -764,7 +707,7 @@ func TestPutWorksWithURL(t *testing.T) {
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
-		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
+		NewWorksController(r.Group(path), service)
 
 		r.HandleContext(ginCtx)
 
@@ -811,8 +754,7 @@ func TestPutWorksWithFile(t *testing.T) {
 		}
 		service := mocks.NewMockWorksService(ctrl)
 		service.EXPECT().Update(req.Context(), targetID, &form).Return(nil)
-		called := false
-		NewWorksController(r.Group(path), service, testutil.AssertCalled(&called), false)
+		NewWorksController(r.Group(path), service)
 
 		r.HandleContext(ginCtx)
 
@@ -835,7 +777,7 @@ func TestPutWorksWithFile(t *testing.T) {
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
-		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
+		NewWorksController(r.Group(path), service)
 
 		r.HandleContext(ginCtx)
 
@@ -867,7 +809,7 @@ func TestPutWorksWithFile(t *testing.T) {
 		service := mocks.NewMockWorksService(ctrl)
 		errExpect := errors.New("ERROR")
 		service.EXPECT().Update(gomock.Any(), gomock.Any(), gomock.Any()).Return(errExpect)
-		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
+		NewWorksController(r.Group(path), service)
 
 		r.HandleContext(ginCtx)
 
@@ -894,7 +836,7 @@ func TestPutWorksWithFile(t *testing.T) {
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
-		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
+		NewWorksController(r.Group(path), service)
 
 		r.HandleContext(ginCtx)
 
@@ -924,7 +866,7 @@ func TestPutWorksWithFile(t *testing.T) {
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
-		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
+		NewWorksController(r.Group(path), service)
 
 		r.HandleContext(ginCtx)
 
@@ -955,7 +897,7 @@ func TestPutWorksWithFile(t *testing.T) {
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
 		service.EXPECT().Update(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
-		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
+		NewWorksController(r.Group(path), service)
 
 		r.HandleContext(ginCtx)
 
@@ -978,7 +920,7 @@ func TestPutWorksWithFile(t *testing.T) {
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
-		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
+		NewWorksController(r.Group(path), service)
 
 		r.HandleContext(ginCtx)
 
@@ -1008,8 +950,7 @@ func TestDeleteWorks(t *testing.T) {
 
 		service := mocks.NewMockWorksService(ctrl)
 		service.EXPECT().DeleteByID(ctx, targetID).Return(nil)
-		called := false
-		NewWorksController(r.Group(path), service, testutil.AssertCalled(&called), false)
+		NewWorksController(r.Group(path), service)
 
 		req, _ := http.NewRequest(http.MethodDelete, fmt.Sprintf(endpoint, targetID), nil)
 		req = req.WithContext(ctx)
@@ -1033,7 +974,7 @@ func TestDeleteWorks(t *testing.T) {
 		service := mocks.NewMockWorksService(ctrl)
 		errExpect := errors.New("ERROR")
 		service.EXPECT().DeleteByID(gomock.Any(), gomock.Any()).Return(errExpect)
-		NewWorksController(r.Group(path), service, testutil.NOPHandler, false)
+		NewWorksController(r.Group(path), service)
 
 		req, _ := http.NewRequest(http.MethodDelete, fmt.Sprintf(endpoint, targetID), nil)
 		ginCtx.Request = req
