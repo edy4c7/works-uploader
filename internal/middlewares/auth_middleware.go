@@ -2,29 +2,14 @@
 package middlewares
 
 import (
-	"encoding/json"
 	"errors"
 	"net/http"
-	"os"
-	"strings"
 
 	jwtmiddleware "github.com/auth0/go-jwt-middleware"
+	"github.com/edy4c7/darkpot-school-works/internal/util"
 	"github.com/form3tech-oss/jwt-go"
 	"github.com/gin-gonic/gin"
 )
-
-type Jwks struct {
-	Keys []JSONWebKeys `json:"keys"`
-}
-
-type JSONWebKeys struct {
-	Kty string   `json:"kty"`
-	Kid string   `json:"kid"`
-	Use string   `json:"use"`
-	N   string   `json:"n"`
-	E   string   `json:"e"`
-	X5c []string `json:"x5c"`
-}
 
 func NewJWTMiddleware(aud string, iss string) *jwtmiddleware.JWTMiddleware {
 	return jwtmiddleware.New(jwtmiddleware.Options{
@@ -40,7 +25,7 @@ func NewJWTMiddleware(aud string, iss string) *jwtmiddleware.JWTMiddleware {
 				return token, errors.New("invalid issuer")
 			}
 
-			cert, err := getPemCert(token)
+			cert, err := util.GetPemCertOfJWK(token, iss+".well-known/jwks.json")
 			if err != nil {
 				panic(err.Error())
 			}
@@ -52,148 +37,48 @@ func NewJWTMiddleware(aud string, iss string) *jwtmiddleware.JWTMiddleware {
 	})
 }
 
-func getPemCert(token *jwt.Token) (string, error) {
-	cert := ""
-	resp, err := http.Get("https://" + os.Getenv("AUTH0_DOMAIN") + "/.well-known/jwks.json")
+type policyFunc func(*http.Request) bool
 
-	if err != nil {
-		return cert, err
-	}
-	defer resp.Body.Close()
-
-	var jwks = Jwks{}
-	err = json.NewDecoder(resp.Body).Decode(&jwks)
-
-	if err != nil {
-		return cert, err
-	}
-
-	for k := range jwks.Keys {
-		if token.Header["kid"] == jwks.Keys[k].Kid {
-			cert = "-----BEGIN CERTIFICATE-----\n" + jwks.Keys[k].X5c[0] + "\n-----END CERTIFICATE-----"
-		}
-	}
-
-	if cert == "" {
-		err := errors.New("Unable to find appropriate key.")
-		return cert, err
-	}
-
-	return cert, nil
+type JWTMiddleware interface {
+	CheckJWT(w http.ResponseWriter, r *http.Request) error
 }
 
-type CustomClaims struct {
-	Scope string `json:"scope"`
-	jwt.StandardClaims
+type authorizationConfig struct {
+	skipped policyFunc
 }
 
-type AuthPredicate func(*http.Request) bool
+type authorizationConfigrator func(*authorizationConfig)
 
-type Authorizer func(w http.ResponseWriter, r *http.Request) error
-
-type authenticationRule struct {
-	match AuthPredicate
-	rule  AuthPredicate
-}
-
-type authConfig struct {
-	ignored      AuthPredicate
-	authorize    Authorizer
-	authenticate []*authenticationRule
-}
-
-type AuthConfigrator func(*authConfig)
-
-func IgnoreAuth(filter AuthPredicate) AuthConfigrator {
-	return func(c *authConfig) {
-		c.ignored = filter
+func SkipAuthorization(filter policyFunc) authorizationConfigrator {
+	return func(c *authorizationConfig) {
+		c.skipped = filter
 	}
 }
 
-func SetAuthorizer(authorizer Authorizer) AuthConfigrator {
-	return func(c *authConfig) {
-		c.authorize = authorizer
-	}
-}
-
-func Authenticate(match AuthPredicate, rule AuthPredicate) AuthConfigrator {
-	return func(c *authConfig) {
-		c.authenticate = append(c.authenticate, &authenticationRule{
-			match: match,
-			rule:  rule,
-		})
-	}
-}
-
-func Path(method string, path string) AuthPredicate {
-	return func(r *http.Request) bool {
-		return r.Method == method && r.URL.Path == path
-	}
-}
-
-func PermitAll() AuthPredicate {
-	return func(r *http.Request) bool { return true }
-}
-
-func HasScope(scope string) AuthPredicate {
-	return func(r *http.Request) bool {
-		authHeaderParts := strings.Split(r.Header.Get("Authorization"), " ")
-		tokenStr := authHeaderParts[1]
-
-		token, _ := jwt.ParseWithClaims(tokenStr, &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
-			cert, err := getPemCert(token)
-			if err != nil {
-				return nil, err
-			}
-			result, _ := jwt.ParseRSAPublicKeyFromPEM([]byte(cert))
-			return result, nil
-		})
-
-		claims, ok := token.Claims.(*CustomClaims)
-
-		hasScope := false
-		if ok && token.Valid {
-			result := strings.Split(claims.Scope, " ")
-			for i := range result {
-				if result[i] == scope {
-					hasScope = true
-				}
-			}
-		}
-
-		return hasScope
-	}
-}
-
-func NewAuthenticationMiddleware(configrators ...AuthConfigrator) gin.HandlerFunc {
-	conf := &authConfig{}
+func NewAutorizationMiddleware(jwtMiddleware JWTMiddleware, configrators ...authorizationConfigrator) gin.HandlerFunc {
+	conf := &authorizationConfig{}
 	for _, c := range configrators {
 		c(conf)
 	}
 
 	return func(c *gin.Context) {
-		if conf.ignored != nil && conf.ignored(c.Request) {
+		if conf.skipped != nil && conf.skipped(c.Request) {
 			//認証スキップの条件に一致する場合,終了
 			return
 		}
 
-		if err := conf.authorize(c.Writer, c.Request); err != nil {
+		if err := jwtMiddleware.CheckJWT(c.Writer, c.Request); err != nil {
 			c.Error(err)
 			c.Abort()
 			return
 		}
+	}
+}
 
-		permit := false
-		for _, r := range conf.authenticate {
-			req := c.Request
-			if r.match(req) {
-				permit = r.rule(req)
-			}
-		}
-
-		if !permit {
+func NewAuthenticationMiddleware(policy policyFunc) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if !policy(c.Request) {
 			c.AbortWithStatus(http.StatusForbidden)
-			return
 		}
 	}
 }
