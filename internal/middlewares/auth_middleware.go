@@ -37,28 +37,26 @@ func NewJWTMiddleware(aud string, iss string) *jwtmiddleware.JWTMiddleware {
 	})
 }
 
-type requestFilter func(*http.Request) bool
-
 type policyFunc func(*http.Request) bool
 
 type JWTMiddleware interface {
 	CheckJWT(w http.ResponseWriter, r *http.Request) error
 }
 
-type authConfig struct {
-	skipped requestFilter
+type authorizationConfig struct {
+	skipped policyFunc
 }
 
-type AuthConfigrator func(*authConfig)
+type authorizationConfigrator func(*authorizationConfig)
 
-func SkipAuthorization(filter requestFilter) AuthConfigrator {
-	return func(c *authConfig) {
+func SkipAuthorization(filter policyFunc) authorizationConfigrator {
+	return func(c *authorizationConfig) {
 		c.skipped = filter
 	}
 }
 
-func NewAutorizationMiddleware(jwtMiddleware JWTMiddleware, configrators ...AuthConfigrator) gin.HandlerFunc {
-	conf := &authConfig{}
+func NewAutorizationMiddleware(jwtMiddleware JWTMiddleware, configrators ...authorizationConfigrator) gin.HandlerFunc {
+	conf := &authorizationConfig{}
 	for _, c := range configrators {
 		c(conf)
 	}
