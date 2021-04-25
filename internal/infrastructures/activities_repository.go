@@ -2,6 +2,7 @@ package infrastructures
 
 import (
 	"context"
+	"errors"
 
 	"github.com/edy4c7/darkpot-school-works/internal/entities"
 	"gorm.io/gorm"
@@ -31,7 +32,10 @@ func (r *ActivitiesRepositoryImpl) FindByUserID(ctx context.Context, userID stri
 	return acts, err
 }
 
-func (r *ActivitiesRepositoryImpl) Create(ctx context.Context, work *entities.Activity) error {
-	r.db.Create(work)
-	return r.db.Error
+func (r *ActivitiesRepositoryImpl) Create(ctx context.Context, act *entities.Activity) error {
+	if tx, ok := ctx.Value(transactionKey).(*gorm.DB); ok{
+		return tx.Create(act).Error
+	}
+
+	return errors.New(notInTransactionMessage)
 }
