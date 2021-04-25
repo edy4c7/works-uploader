@@ -10,11 +10,9 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
-	"github.com/edy4c7/darkpot-school-works/internal/controllers"
+	"github.com/edy4c7/darkpot-school-works/internal/config"
 	"github.com/edy4c7/darkpot-school-works/internal/entities"
-	"github.com/edy4c7/darkpot-school-works/internal/infrastructures"
 	"github.com/edy4c7/darkpot-school-works/internal/middlewares"
-	"github.com/edy4c7/darkpot-school-works/internal/services"
 	"github.com/gin-gonic/gin"
 )
 
@@ -41,22 +39,23 @@ func Run() {
 	jwtMiddleware := middlewares.NewJWTMiddleware(os.Getenv("AUTH0_AUDIENCE"), os.Getenv("AUTH0_DOMAIN"))
 	authorizationMiddleware := middlewares.NewAuthorizationMiddleware(
 		jwtMiddleware, middlewares.SkipAuthorization(func(r *http.Request) bool {
-			match, _ := path.Match("v*/works/*", r.URL.Path)
-			return r.Method == http.MethodGet && match
+			match, _ := path.Match("/v*/works/*", r.URL.Path)
+			if r.Method == http.MethodGet && match {
+				return true
+			}
+
+			match, _ = path.Match("/v*/activities/*", r.URL.Path)
+			if r.Method == http.MethodGet && match {
+				return true
+			}
+
+			return false
 		}),
 	)
 
 	r.Use(authorizationMiddleware)
 
-	tranRnr := infrastructures.NewTransactionRunnerImpl(db)
-
-	controllers.NewWorksController(services.NewWorksServiceImpl(
-		tranRnr,
-		infrastructures.NewWorksRepositoryImpl(db),
-		infrastructures.NewActivitiesRepositoryImpl(db),
-		infrastructures.DefaultUUIDGenerator,
-		&infrastructures.FileUploaderImpl{},
-	))
+	config.InitRoutes(r, db)
 
 	port, err := strconv.Atoi(os.Getenv("PORT"))
 	if err != nil {
