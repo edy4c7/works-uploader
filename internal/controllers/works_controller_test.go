@@ -66,7 +66,7 @@ func TestNewWorksController(t *testing.T) {
 }
 
 func TestGetWorks(t *testing.T) {
-	const endpoint string = "/"
+	const endpoint = "/"
 
 	t.Run("Public mode", func(t *testing.T) {
 		ctrl, ctx := gomock.WithContext(context.Background(), t)
@@ -120,6 +120,8 @@ func TestGetWorks(t *testing.T) {
 }
 
 func TestGetWorkById(t *testing.T) {
+	const endpoint = "/%v"
+
 	t.Run("Public mode", func(t *testing.T) {
 		ctrl, ctx := gomock.WithContext(context.Background(), t)
 		defer ctrl.Finish()
@@ -134,7 +136,7 @@ func TestGetWorkById(t *testing.T) {
 		workCtrl := NewWorksController(service)
 		r.GET("/:id", workCtrl.FindByID)
 
-		req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("/%d", id), nil)
+		req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf(endpoint, id), nil)
 		req = req.WithContext(ctx)
 		ginCtx.Request = req
 		r.HandleContext(ginCtx)
@@ -157,7 +159,7 @@ func TestGetWorkById(t *testing.T) {
 		workCtrl := NewWorksController(service)
 		r.GET("/:id", workCtrl.FindByID)
 
-		req, _ := http.NewRequest(http.MethodGet, "/abc", nil)
+		req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf(endpoint, "abc"), nil)
 		req = req.WithContext(ctx)
 		ginCtx.Request = req
 		r.HandleContext(ginCtx)
@@ -189,7 +191,7 @@ func TestGetWorkById(t *testing.T) {
 		r.GET("/:id", workCtrl.FindByID)
 
 		id := uint64(1)
-		req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("/%d", id), nil)
+		req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf(endpoint, id), nil)
 		ginCtx.Request = req
 		r.HandleContext(ginCtx)
 
@@ -203,7 +205,7 @@ func TestGetWorkById(t *testing.T) {
 }
 
 func TestPostWorksWithURL(t *testing.T) {
-	const endpoint string = "/"
+	const endpoint = "/"
 
 	contentType := constants.WorkType(constants.ContentTypeURL)
 	title := "foo"
@@ -390,7 +392,7 @@ func TestPostWorksWithURL(t *testing.T) {
 }
 
 func TestPostWorksWithFile(t *testing.T) {
-	const endpoint string = "/"
+	const endpoint = "/"
 
 	contentType := constants.WorkType(constants.ContentTypeFile)
 	title := "foo"
@@ -609,7 +611,7 @@ func TestPostWorksWithFile(t *testing.T) {
 }
 
 func TestPutWorksWithURL(t *testing.T) {
-	const endpoint string = "/%d"
+	const endpoint = "/%v"
 
 	targetID := uint64(1234)
 	contentType := constants.WorkType(constants.ContentTypeURL)
@@ -628,7 +630,7 @@ func TestPutWorksWithURL(t *testing.T) {
 		mw := multipart.NewWriter(buff)
 		createWorksFormRequestBody(mw, contentType, title, description, url, nil, nil, 1)
 		mw.Close()
-		req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf("/%d", targetID), buff)
+		req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf(endpoint, targetID), buff)
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
 		req = req.WithContext(ctx)
 		ginCtx.Request = req
@@ -835,7 +837,7 @@ func TestPutWorksWithURL(t *testing.T) {
 }
 
 func TestPutWorksWithFile(t *testing.T) {
-	const endpoint string = "/%d"
+	const endpoint = "/%v"
 
 	targetID := uint64(1234)
 	contentType := constants.WorkType(constants.ContentTypeFile)
@@ -1093,7 +1095,7 @@ func TestPutWorksWithFile(t *testing.T) {
 }
 
 func TestDeleteWorks(t *testing.T) {
-	const endpoint string = "/%d"
+	const endpoint = "/%v"
 
 	t.Run("Is valid", func(t *testing.T) {
 		ctrl, ctx := gomock.WithContext(context.Background(), t)
