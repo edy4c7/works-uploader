@@ -149,7 +149,7 @@ func (r *WorksServiceImpl) Create(ctx context.Context, bean *beans.WorksFormBean
 			User: author,
 			Work: w,
 		}
-		if err := r.activitiesRepository.Save(ctx, act); err != nil {
+		if err := r.activitiesRepository.Create(ctx, act); err != nil {
 			return err
 		}
 
@@ -228,7 +228,7 @@ func (r *WorksServiceImpl) Update(ctx context.Context, id uint64, bean *beans.Wo
 			User: author,
 			Work: w,
 		}
-		if err := r.activitiesRepository.Save(ctx, act); err != nil {
+		if err := r.activitiesRepository.Create(ctx, act); err != nil {
 			return myErr.NewApplicationError(myErr.Code(myErr.DSWE99), myErr.Cause(err))
 		}
 
