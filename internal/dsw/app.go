@@ -36,7 +36,7 @@ func Run() {
 
 	db.AutoMigrate(entities.Work{}, entities.Activity{})
 
-	jwtMiddleware := middlewares.NewJWTMiddleware(os.Getenv("AUTH0_AUDIENCE"), os.Getenv("AUTH0_DOMAIN"))
+	jwtMiddleware := middlewares.NewJWTMiddleware(os.Getenv("AUTH0_AUDIENCE"), os.Getenv("AUTH0_ISSUER"))
 	authorizationMiddleware := middlewares.NewAuthorizationMiddleware(
 		jwtMiddleware, middlewares.SkipAuthorization(func(r *http.Request) bool {
 			match, _ := path.Match("/v*/works/*", r.URL.Path)
