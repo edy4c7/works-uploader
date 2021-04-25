@@ -279,7 +279,7 @@ func TestCreate(t *testing.T) {
 		worksRepo.EXPECT().Save(gomock.Eq(ctx), work)
 
 		actRepo := mocks.NewMockActivitiesRepository(ctrl)
-		actRepo.EXPECT().Save(gomock.Eq(ctx), &entities.Activity{
+		actRepo.EXPECT().Create(gomock.Eq(ctx), &entities.Activity{
 			Type: constants.ActivityAdded,
 			User: subject,
 			Work: work,
@@ -349,7 +349,7 @@ func TestCreate(t *testing.T) {
 		worksRepo.EXPECT().Save(gomock.Eq(ctx), work)
 
 		actRepo := mocks.NewMockActivitiesRepository(ctrl)
-		actRepo.EXPECT().Save(gomock.Eq(ctx), &entities.Activity{
+		actRepo.EXPECT().Create(gomock.Eq(ctx), &entities.Activity{
 			Type: constants.ActivityAdded,
 			User: subject,
 			Work: work,
@@ -644,7 +644,7 @@ func TestCreate(t *testing.T) {
 		worksRepo.EXPECT().Save(gomock.Any(), gomock.Any())
 		actRepo := mocks.NewMockActivitiesRepository(ctrl)
 		expect := errors.New("error")
-		actRepo.EXPECT().Save(gomock.Any(), gomock.Any()).Return(expect)
+		actRepo.EXPECT().Create(gomock.Any(), gomock.Any()).Return(expect)
 
 		service := &WorksServiceImpl{
 			uuidGenerator:        uuidGenerator,
@@ -706,7 +706,7 @@ func TestUpdate(t *testing.T) {
 		worksRepo.EXPECT().Save(gomock.Eq(ctx), work)
 
 		actRepo := mocks.NewMockActivitiesRepository(ctrl)
-		actRepo.EXPECT().Save(gomock.Eq(ctx), &entities.Activity{
+		actRepo.EXPECT().Create(gomock.Eq(ctx), &entities.Activity{
 			Type: constants.ActivityUpdated,
 			User: subject,
 			Work: work,
@@ -774,7 +774,7 @@ func TestUpdate(t *testing.T) {
 		worksRepo.EXPECT().Save(gomock.Eq(ctx), work)
 
 		actRepo := mocks.NewMockActivitiesRepository(ctrl)
-		actRepo.EXPECT().Save(gomock.Eq(ctx), &entities.Activity{
+		actRepo.EXPECT().Create(gomock.Eq(ctx), &entities.Activity{
 			Type: constants.ActivityUpdated,
 			User: subject,
 			Work: work,
@@ -1222,7 +1222,7 @@ func TestUpdate(t *testing.T) {
 		worksRepo.EXPECT().Save(gomock.Any(), gomock.Any())
 		actRepo := mocks.NewMockActivitiesRepository(ctrl)
 		expect := errors.New("error")
-		actRepo.EXPECT().Save(gomock.Any(), gomock.Any()).Return(expect)
+		actRepo.EXPECT().Create(gomock.Any(), gomock.Any()).Return(expect)
 
 		service := &WorksServiceImpl{
 			uuidGenerator:        uuidGenerator,

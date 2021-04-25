@@ -18,9 +18,20 @@ func NewActivitiesRepositoryImpl(db *gorm.DB) *ActivitiesRepositoryImpl {
 }
 
 func (r *ActivitiesRepositoryImpl) GetAll(ctx context.Context) ([]*entities.Activity, error) {
-	return nil, nil
+	acts := make([]*entities.Activity, 0)
+	r.db.WithContext(ctx).Find(&acts)
+	err := r.db.Error
+	return acts, err
 }
 
-func (r *ActivitiesRepositoryImpl) Save(ctx context.Context, work *entities.Activity) error {
-	return nil
+func (r *ActivitiesRepositoryImpl) FindByUserID(ctx context.Context, userID string) ([]*entities.Activity, error) {
+	acts := make([]*entities.Activity, 0)
+	r.db.WithContext(ctx).Where("user = ?", userID).Find(&acts)
+	err := r.db.Error
+	return acts, err
+}
+
+func (r *ActivitiesRepositoryImpl) Create(ctx context.Context, work *entities.Activity) error {
+	r.db.Create(work)
+	return r.db.Error
 }

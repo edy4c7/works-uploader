@@ -8,5 +8,6 @@ import (
 
 type ActivitiesRepository interface {
 	GetAll(context.Context) ([]*entities.Activity, error)
-	Save(context.Context, *entities.Activity) error
+	FindByUserID(context.Context, string) ([]*entities.Activity, error)
+	Create(context.Context, *entities.Activity) error
 }
