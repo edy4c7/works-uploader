@@ -25,7 +25,7 @@ import (
 
 const contentTypeKey string = "Content-Type"
 
-var data = []*entities.Work{
+var worksTestData = []*entities.Work{
 	{
 		ID:           0,
 		Title:        "hoge",
@@ -44,8 +44,29 @@ var data = []*entities.Work{
 
 const path = "/"
 
+func TestNewWorksController(t *testing.T) {
+	t.Run("is valid", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		service := mocks.NewMockWorksService(ctrl)
+		workCtrl := NewWorksController(service)
+
+		assert.Same(t, service, workCtrl.service)
+	})
+
+	t.Run("service is nil", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		assert.Panics(t, func() {
+			NewWorksController(nil)
+		})
+	})
+}
+
 func TestGetWorks(t *testing.T) {
-	const endpoint string = "/works/"
+	const endpoint string = "/"
 
 	t.Run("Public mode", func(t *testing.T) {
 		ctrl, ctx := gomock.WithContext(context.Background(), t)
@@ -55,8 +76,9 @@ func TestGetWorks(t *testing.T) {
 		ginCtx, r := gin.CreateTestContext(w)
 
 		service := mocks.NewMockWorksService(ctrl)
-		service.EXPECT().GetAll(ctx).Return(data, nil)
-		NewWorksController(r.Group(path), service)
+		service.EXPECT().GetAll(ctx).Return(worksTestData, nil)
+		workCtrl := NewWorksController(service)
+		r.GET("/", workCtrl.Get)
 
 		req, _ := http.NewRequest(http.MethodGet, endpoint, nil)
 		req = req.WithContext(ctx)
@@ -67,7 +89,7 @@ func TestGetWorks(t *testing.T) {
 		err := ginCtx.Errors.Last()
 		assert.Nil(t, err, "%T %v", err, err)
 		assert.Equal(t, http.StatusOK, w.Code)
-		res, _ := json.Marshal(data)
+		res, _ := json.Marshal(worksTestData)
 		assert.Equal(t, res, w.Body.Bytes())
 	})
 
@@ -81,7 +103,8 @@ func TestGetWorks(t *testing.T) {
 		errExpect := errors.New("ERROR")
 		service := mocks.NewMockWorksService(ctrl)
 		service.EXPECT().GetAll(gomock.Any()).Return(nil, errExpect)
-		NewWorksController(r.Group(path), service)
+		workCtrl := NewWorksController(service)
+		r.GET("/", workCtrl.Get)
 
 		req, _ := http.NewRequest(http.MethodGet, endpoint, nil)
 		ginCtx.Request = req
@@ -97,8 +120,6 @@ func TestGetWorks(t *testing.T) {
 }
 
 func TestGetWorkById(t *testing.T) {
-	const endpoint string = "/works/%d"
-
 	t.Run("Public mode", func(t *testing.T) {
 		ctrl, ctx := gomock.WithContext(context.Background(), t)
 		defer ctrl.Finish()
@@ -108,10 +129,12 @@ func TestGetWorkById(t *testing.T) {
 
 		service := mocks.NewMockWorksService(ctrl)
 		id := uint64(1)
-		service.EXPECT().FindByID(ctx, id).Return(data[1], nil)
-		NewWorksController(r.Group(path), service)
+		expect := worksTestData[1]
+		service.EXPECT().FindByID(ctx, id).Return(expect, nil)
+		workCtrl := NewWorksController(service)
+		r.GET("/:id", workCtrl.FindByID)
 
-		req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf(endpoint, id), nil)
+		req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("/%d", id), nil)
 		req = req.WithContext(ctx)
 		ginCtx.Request = req
 		r.HandleContext(ginCtx)
@@ -119,7 +142,7 @@ func TestGetWorkById(t *testing.T) {
 		err := ginCtx.Errors.Last()
 		assert.Equal(t, http.StatusOK, w.Code)
 		assert.Nil(t, err, "%T %v", err, err)
-		res, _ := json.Marshal(data[1])
+		res, _ := json.Marshal(expect)
 		assert.Equal(t, res, w.Body.Bytes())
 	})
 
@@ -131,9 +154,10 @@ func TestGetWorkById(t *testing.T) {
 		ginCtx, r := gin.CreateTestContext(w)
 
 		service := mocks.NewMockWorksService(ctrl)
-		NewWorksController(r.Group(path), service)
+		workCtrl := NewWorksController(service)
+		r.GET("/:id", workCtrl.FindByID)
 
-		req, _ := http.NewRequest(http.MethodGet, "/works/abc", nil)
+		req, _ := http.NewRequest(http.MethodGet, "/abc", nil)
 		req = req.WithContext(ctx)
 		ginCtx.Request = req
 		r.HandleContext(ginCtx)
@@ -161,10 +185,11 @@ func TestGetWorkById(t *testing.T) {
 		service := mocks.NewMockWorksService(ctrl)
 		errExpect := errors.New("ERROR")
 		service.EXPECT().FindByID(gomock.Any(), gomock.Any()).Return(nil, errExpect)
-		NewWorksController(r.Group(path), service)
+		workCtrl := NewWorksController(service)
+		r.GET("/:id", workCtrl.FindByID)
 
 		id := uint64(1)
-		req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf(endpoint, id), nil)
+		req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("/%d", id), nil)
 		ginCtx.Request = req
 		r.HandleContext(ginCtx)
 
@@ -178,7 +203,7 @@ func TestGetWorkById(t *testing.T) {
 }
 
 func TestPostWorksWithURL(t *testing.T) {
-	const endpoint string = "/works/"
+	const endpoint string = "/"
 
 	contentType := constants.WorkType(constants.ContentTypeURL)
 	title := "foo"
@@ -206,7 +231,8 @@ func TestPostWorksWithURL(t *testing.T) {
 		}
 		service := mocks.NewMockWorksService(ctrl)
 		service.EXPECT().Create(ctx, &form).Return(nil)
-		NewWorksController(r.Group(path), service)
+		workCtrl := NewWorksController(service)
+		r.POST("/", workCtrl.Post)
 
 		r.HandleContext(ginCtx)
 
@@ -229,7 +255,8 @@ func TestPostWorksWithURL(t *testing.T) {
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
-		NewWorksController(r.Group(path), service)
+		workCtrl := NewWorksController(service)
+		r.POST("/", workCtrl.Post)
 
 		r.HandleContext(ginCtx)
 
@@ -261,7 +288,8 @@ func TestPostWorksWithURL(t *testing.T) {
 		service := mocks.NewMockWorksService(ctrl)
 		errExpect := errors.New("ERROR")
 		service.EXPECT().Create(gomock.Any(), gomock.Any()).Return(errExpect)
-		NewWorksController(r.Group(path), service)
+		workCtrl := NewWorksController(service)
+		r.POST("/", workCtrl.Post)
 
 		r.HandleContext(ginCtx)
 
@@ -288,7 +316,8 @@ func TestPostWorksWithURL(t *testing.T) {
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
-		NewWorksController(r.Group(path), service)
+		workCtrl := NewWorksController(service)
+		r.POST("/", workCtrl.Post)
 
 		r.HandleContext(ginCtx)
 
@@ -319,7 +348,8 @@ func TestPostWorksWithURL(t *testing.T) {
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
 		service.EXPECT().Create(gomock.Any(), gomock.Any()).Return(nil)
-		NewWorksController(r.Group(path), service)
+		workCtrl := NewWorksController(service)
+		r.POST("/", workCtrl.Post)
 
 		r.HandleContext(ginCtx)
 
@@ -342,7 +372,8 @@ func TestPostWorksWithURL(t *testing.T) {
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
-		NewWorksController(r.Group(path), service)
+		workCtrl := NewWorksController(service)
+		r.POST("/", workCtrl.Post)
 
 		r.HandleContext(ginCtx)
 
@@ -359,7 +390,7 @@ func TestPostWorksWithURL(t *testing.T) {
 }
 
 func TestPostWorksWithFile(t *testing.T) {
-	const endpoint string = "/works/"
+	const endpoint string = "/"
 
 	contentType := constants.WorkType(constants.ContentTypeFile)
 	title := "foo"
@@ -388,7 +419,8 @@ func TestPostWorksWithFile(t *testing.T) {
 		}
 		service := mocks.NewMockWorksService(ctrl)
 		service.EXPECT().Create(ctx, &form).Return(nil)
-		NewWorksController(r.Group(path), service)
+		workCtrl := NewWorksController(service)
+		r.POST("/", workCtrl.Post)
 
 		r.HandleContext(ginCtx)
 
@@ -411,7 +443,8 @@ func TestPostWorksWithFile(t *testing.T) {
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
-		NewWorksController(r.Group(path), service)
+		workCtrl := NewWorksController(service)
+		r.POST("/", workCtrl.Post)
 
 		r.HandleContext(ginCtx)
 
@@ -443,7 +476,8 @@ func TestPostWorksWithFile(t *testing.T) {
 		service := mocks.NewMockWorksService(ctrl)
 		errExpect := errors.New("ERROR")
 		service.EXPECT().Create(gomock.Any(), gomock.Any()).Return(errExpect)
-		NewWorksController(r.Group(path), service)
+		workCtrl := NewWorksController(service)
+		r.POST("/", workCtrl.Post)
 
 		r.HandleContext(ginCtx)
 
@@ -470,7 +504,8 @@ func TestPostWorksWithFile(t *testing.T) {
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
-		NewWorksController(r.Group(path), service)
+		workCtrl := NewWorksController(service)
+		r.POST("/", workCtrl.Post)
 
 		r.HandleContext(ginCtx)
 
@@ -500,7 +535,8 @@ func TestPostWorksWithFile(t *testing.T) {
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
-		NewWorksController(r.Group(path), service)
+		workCtrl := NewWorksController(service)
+		r.POST("/", workCtrl.Post)
 
 		r.HandleContext(ginCtx)
 
@@ -531,7 +567,8 @@ func TestPostWorksWithFile(t *testing.T) {
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
 		service.EXPECT().Create(gomock.Any(), gomock.Any()).Return(nil)
-		NewWorksController(r.Group(path), service)
+		workCtrl := NewWorksController(service)
+		r.POST("/", workCtrl.Post)
 
 		r.HandleContext(ginCtx)
 
@@ -554,7 +591,8 @@ func TestPostWorksWithFile(t *testing.T) {
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
-		NewWorksController(r.Group(path), service)
+		workCtrl := NewWorksController(service)
+		r.POST("/", workCtrl.Post)
 
 		r.HandleContext(ginCtx)
 
@@ -571,7 +609,7 @@ func TestPostWorksWithFile(t *testing.T) {
 }
 
 func TestPutWorksWithURL(t *testing.T) {
-	const endpoint string = "/works/%d"
+	const endpoint string = "/%d"
 
 	targetID := uint64(1234)
 	contentType := constants.WorkType(constants.ContentTypeURL)
@@ -590,7 +628,7 @@ func TestPutWorksWithURL(t *testing.T) {
 		mw := multipart.NewWriter(buff)
 		createWorksFormRequestBody(mw, contentType, title, description, url, nil, nil, 1)
 		mw.Close()
-		req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf(endpoint, targetID), buff)
+		req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf("/%d", targetID), buff)
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
 		req = req.WithContext(ctx)
 		ginCtx.Request = req
@@ -600,7 +638,8 @@ func TestPutWorksWithURL(t *testing.T) {
 		}
 		service := mocks.NewMockWorksService(ctrl)
 		service.EXPECT().Update(ctx, targetID, &form).Return(nil)
-		NewWorksController(r.Group(path), service)
+		workCtrl := NewWorksController(service)
+		r.PUT("/:id", workCtrl.Put)
 
 		r.HandleContext(ginCtx)
 
@@ -619,7 +658,7 @@ func TestPutWorksWithURL(t *testing.T) {
 		mw := multipart.NewWriter(buff)
 		createWorksFormRequestBody(mw, contentType, title, description, url, nil, nil, 1)
 		mw.Close()
-		req, _ := http.NewRequest(http.MethodPut, "/works/abc", buff)
+		req, _ := http.NewRequest(http.MethodPut, "/abc", buff)
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
 		req = req.WithContext(ctx)
 		ginCtx.Request = req
@@ -628,7 +667,8 @@ func TestPutWorksWithURL(t *testing.T) {
 			assert.FailNow(t, err.Error())
 		}
 		service := mocks.NewMockWorksService(ctrl)
-		NewWorksController(r.Group(path), service)
+		workCtrl := NewWorksController(service)
+		r.PUT("/:id", workCtrl.Put)
 
 		r.HandleContext(ginCtx)
 
@@ -660,7 +700,8 @@ func TestPutWorksWithURL(t *testing.T) {
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
-		NewWorksController(r.Group(path), service)
+		workCtrl := NewWorksController(service)
+		r.PUT("/:id", workCtrl.Put)
 
 		r.HandleContext(ginCtx)
 
@@ -692,7 +733,8 @@ func TestPutWorksWithURL(t *testing.T) {
 		service := mocks.NewMockWorksService(ctrl)
 		errExpect := errors.New("ERROR")
 		service.EXPECT().Update(gomock.Any(), gomock.Any(), gomock.Any()).Return(errExpect)
-		NewWorksController(r.Group(path), service)
+		workCtrl := NewWorksController(service)
+		r.PUT("/:id", workCtrl.Put)
 
 		r.HandleContext(ginCtx)
 
@@ -719,7 +761,8 @@ func TestPutWorksWithURL(t *testing.T) {
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
-		NewWorksController(r.Group(path), service)
+		workCtrl := NewWorksController(service)
+		r.PUT("/:id", workCtrl.Put)
 
 		r.HandleContext(ginCtx)
 
@@ -750,7 +793,8 @@ func TestPutWorksWithURL(t *testing.T) {
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
 		service.EXPECT().Update(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
-		NewWorksController(r.Group(path), service)
+		workCtrl := NewWorksController(service)
+		r.PUT("/:id", workCtrl.Put)
 
 		r.HandleContext(ginCtx)
 
@@ -773,7 +817,8 @@ func TestPutWorksWithURL(t *testing.T) {
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
-		NewWorksController(r.Group(path), service)
+		workCtrl := NewWorksController(service)
+		r.PUT("/:id", workCtrl.Put)
 
 		r.HandleContext(ginCtx)
 
@@ -790,7 +835,7 @@ func TestPutWorksWithURL(t *testing.T) {
 }
 
 func TestPutWorksWithFile(t *testing.T) {
-	const endpoint string = "/works/%d"
+	const endpoint string = "/%d"
 
 	targetID := uint64(1234)
 	contentType := constants.WorkType(constants.ContentTypeFile)
@@ -820,7 +865,8 @@ func TestPutWorksWithFile(t *testing.T) {
 		}
 		service := mocks.NewMockWorksService(ctrl)
 		service.EXPECT().Update(req.Context(), targetID, &form).Return(nil)
-		NewWorksController(r.Group(path), service)
+		workCtrl := NewWorksController(service)
+		r.PUT("/:id", workCtrl.Put)
 
 		r.HandleContext(ginCtx)
 
@@ -839,7 +885,7 @@ func TestPutWorksWithFile(t *testing.T) {
 		mw := multipart.NewWriter(buff)
 		createWorksFormRequestBody(mw, contentType, title, description, "", thumbnail, content, 0)
 		mw.Close()
-		req, _ := http.NewRequest(http.MethodPut, "/works/abc", buff)
+		req, _ := http.NewRequest(http.MethodPut, "/abc", buff)
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
 		req = req.WithContext(ctx)
 		ginCtx.Request = req
@@ -848,7 +894,8 @@ func TestPutWorksWithFile(t *testing.T) {
 			assert.FailNow(t, err.Error())
 		}
 		service := mocks.NewMockWorksService(ctrl)
-		NewWorksController(r.Group(path), service)
+		workCtrl := NewWorksController(service)
+		r.PUT("/:id", workCtrl.Put)
 
 		r.HandleContext(ginCtx)
 
@@ -880,7 +927,8 @@ func TestPutWorksWithFile(t *testing.T) {
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
-		NewWorksController(r.Group(path), service)
+		workCtrl := NewWorksController(service)
+		r.PUT("/:id", workCtrl.Put)
 
 		r.HandleContext(ginCtx)
 
@@ -912,7 +960,8 @@ func TestPutWorksWithFile(t *testing.T) {
 		service := mocks.NewMockWorksService(ctrl)
 		errExpect := errors.New("ERROR")
 		service.EXPECT().Update(gomock.Any(), gomock.Any(), gomock.Any()).Return(errExpect)
-		NewWorksController(r.Group(path), service)
+		workCtrl := NewWorksController(service)
+		r.PUT("/:id", workCtrl.Put)
 
 		r.HandleContext(ginCtx)
 
@@ -939,7 +988,8 @@ func TestPutWorksWithFile(t *testing.T) {
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
-		NewWorksController(r.Group(path), service)
+		workCtrl := NewWorksController(service)
+		r.PUT("/:id", workCtrl.Put)
 
 		r.HandleContext(ginCtx)
 
@@ -969,7 +1019,8 @@ func TestPutWorksWithFile(t *testing.T) {
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
-		NewWorksController(r.Group(path), service)
+		workCtrl := NewWorksController(service)
+		r.PUT("/:id", workCtrl.Put)
 
 		r.HandleContext(ginCtx)
 
@@ -1000,7 +1051,8 @@ func TestPutWorksWithFile(t *testing.T) {
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
 		service.EXPECT().Update(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
-		NewWorksController(r.Group(path), service)
+		workCtrl := NewWorksController(service)
+		r.PUT("/:id", workCtrl.Put)
 
 		r.HandleContext(ginCtx)
 
@@ -1023,7 +1075,8 @@ func TestPutWorksWithFile(t *testing.T) {
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
-		NewWorksController(r.Group(path), service)
+		workCtrl := NewWorksController(service)
+		r.PUT("/:id", workCtrl.Put)
 
 		r.HandleContext(ginCtx)
 
@@ -1040,7 +1093,7 @@ func TestPutWorksWithFile(t *testing.T) {
 }
 
 func TestDeleteWorks(t *testing.T) {
-	const endpoint string = "/works/%d"
+	const endpoint string = "/%d"
 
 	t.Run("Is valid", func(t *testing.T) {
 		ctrl, ctx := gomock.WithContext(context.Background(), t)
@@ -1053,7 +1106,8 @@ func TestDeleteWorks(t *testing.T) {
 
 		service := mocks.NewMockWorksService(ctrl)
 		service.EXPECT().DeleteByID(ctx, targetID).Return(nil)
-		NewWorksController(r.Group(path), service)
+		workCtrl := NewWorksController(service)
+		r.DELETE("/:id", workCtrl.Delete)
 
 		req, _ := http.NewRequest(http.MethodDelete, fmt.Sprintf(endpoint, targetID), nil)
 		req = req.WithContext(ctx)
@@ -1073,9 +1127,10 @@ func TestDeleteWorks(t *testing.T) {
 		ginCtx, r := gin.CreateTestContext(w)
 
 		service := mocks.NewMockWorksService(ctrl)
-		NewWorksController(r.Group(path), service)
+		workCtrl := NewWorksController(service)
+		r.DELETE("/:id", workCtrl.Delete)
 
-		req, _ := http.NewRequest(http.MethodDelete, "/works/abc", nil)
+		req, _ := http.NewRequest(http.MethodDelete, "/abc", nil)
 		req = req.WithContext(ctx)
 		ginCtx.Request = req
 
@@ -1106,7 +1161,8 @@ func TestDeleteWorks(t *testing.T) {
 		service := mocks.NewMockWorksService(ctrl)
 		errExpect := errors.New("ERROR")
 		service.EXPECT().DeleteByID(gomock.Any(), gomock.Any()).Return(errExpect)
-		NewWorksController(r.Group(path), service)
+		workCtrl := NewWorksController(service)
+		r.DELETE("/:id", workCtrl.Delete)
 
 		req, _ := http.NewRequest(http.MethodDelete, fmt.Sprintf(endpoint, targetID), nil)
 		ginCtx.Request = req

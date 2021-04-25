@@ -50,15 +50,13 @@ func Run() {
 
 	tranRnr := infrastructures.NewTransactionRunnerImpl(db)
 
-	v1 := r.Group("/v1")
-	controllers.NewWorksController(v1.Group("/works"),
-		services.NewWorksServiceImpl(
-			tranRnr,
-			infrastructures.NewWorksRepositoryImpl(db),
-			infrastructures.NewActivitiesRepositoryImpl(db),
-			infrastructures.DefaultUUIDGenerator,
-			&infrastructures.FileUploaderImpl{},
-		))
+	controllers.NewWorksController(services.NewWorksServiceImpl(
+		tranRnr,
+		infrastructures.NewWorksRepositoryImpl(db),
+		infrastructures.NewActivitiesRepositoryImpl(db),
+		infrastructures.DefaultUUIDGenerator,
+		&infrastructures.FileUploaderImpl{},
+	))
 
 	port, err := strconv.Atoi(os.Getenv("PORT"))
 	if err != nil {
