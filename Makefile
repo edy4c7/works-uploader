@@ -27,6 +27,9 @@ test_go:
 .PHONY: test
 test: test_go test_web
 
+public: nuxt.config.js web
+	yarn run generate
+
 mocks:
 	mockgen -source internal/services/works_service.go -destination internal/mocks/works_service.go --package mocks
 	mockgen -source internal/services/activities_service.go -destination internal/mocks/activities_service.go --package mocks
@@ -37,5 +40,5 @@ mocks:
 	mockgen -source internal/tools/uuid_generator.go -destination internal/mocks/uuid_generator.go --package mocks
 
 .PHONY: run
-run: 
+run: public
 	go run cmd/dsw/main.go
