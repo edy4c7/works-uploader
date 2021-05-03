@@ -41,4 +41,4 @@ mocks:
 
 .PHONY: run
 run: public
-	go run cmd/wu/main.go
+	air
