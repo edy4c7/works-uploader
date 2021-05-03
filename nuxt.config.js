@@ -71,11 +71,11 @@ export default {
   // Build Configuration (https://go.nuxtjs.dev/config-build)
   build: {},
 
+  srcDir: 'web/',
+
   generate: {
-    dir:
-      process.env.NODE_ENV === 'production'
-        ? '../public'
-        : '../functions/static',
+    dir: 'public',
+    subFolders: false,
     routes: ['/works/01', '/works/02', '/works/03', '/works/04', '/works/05'],
   },
   router: {

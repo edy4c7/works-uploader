@@ -1,12 +1,18 @@
 package config
 
 import (
+	"net/http"
+	"os"
+	"strings"
+
 	"github.com/edy4c7/darkpot-school-works/internal/controllers"
 	"github.com/edy4c7/darkpot-school-works/internal/infrastructures"
 	"github.com/edy4c7/darkpot-school-works/internal/services"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
+
+const apiPath = "/api"
 
 func InitRoutes(r *gin.Engine, db *gorm.DB) {
 	tranRnr := infrastructures.NewTransactionRunnerImpl(db)
@@ -21,7 +27,8 @@ func InitRoutes(r *gin.Engine, db *gorm.DB) {
 	actsService := services.NewActivitiesServiceImpl(actRepo)
 	actsCtrl := controllers.NewActivitiesController(actsService)
 
-	v1 := r.Group("/v1")
+	api := r.Group(apiPath)
+	v1 := api.Group("/v1")
 
 	worksRoutes := v1.Group("/works")
 	worksRoutes.GET("/", worksCtrl.Get)
@@ -32,4 +39,16 @@ func InitRoutes(r *gin.Engine, db *gorm.DB) {
 
 	actsRoutes := v1.Group("/activities")
 	actsRoutes.GET("/", actsCtrl.Get)
+
+	wd, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+	publicDir := wd + "/public"
+	indexCtrl := controllers.NewIndexController(http.Dir(publicDir))
+	r.NoRoute(func(c *gin.Context) {
+		if strings.HasPrefix(c.Request.URL.Path, apiPath) {
+			c.AbortWithStatus(http.StatusNotFound)
+		}
+	}, indexCtrl.Index)
 }

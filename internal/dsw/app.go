@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"path"
 	"strconv"
 
 	"gorm.io/driver/postgres"
@@ -39,17 +38,7 @@ func Run() {
 	jwtMiddleware := middlewares.NewJWTMiddleware(os.Getenv("AUTH0_AUDIENCE"), os.Getenv("AUTH0_ISSUER"))
 	authorizationMiddleware := middlewares.NewAuthorizationMiddleware(
 		jwtMiddleware, middlewares.SkipAuthorization(func(r *http.Request) bool {
-			match, _ := path.Match("/v*/works/*", r.URL.Path)
-			if r.Method == http.MethodGet && match {
-				return true
-			}
-
-			match, _ = path.Match("/v*/activities/*", r.URL.Path)
-			if r.Method == http.MethodGet && match {
-				return true
-			}
-
-			return false
+			return r.Method == http.MethodGet
 		}),
 	)
 
