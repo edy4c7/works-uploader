@@ -3,7 +3,7 @@ tmp_dir = "tmp"
 
 [build]
   bin = "./tmp/main"
-  cmd = "go build -o ./tmp/main cmd/dsw/main.go"
+  cmd = "go build -o ./tmp/main cmd/wu/main.go"
   delay = 1000
   exclude_dir = ["web", "node_modules", "public", "tmp"]
   exclude_file = []
