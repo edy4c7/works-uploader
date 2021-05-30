@@ -3,7 +3,7 @@ package controllers
 import (
 	"net/http"
 
-	"github.com/edy4c7/darkpot-school-works/internal/services"
+	"github.com/edy4c7/works-uploader/internal/services"
 	"github.com/gin-gonic/gin"
 )
 

@@ -8,9 +8,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/edy4c7/darkpot-school-works/internal/common/constants"
-	"github.com/edy4c7/darkpot-school-works/internal/entities"
-	"github.com/edy4c7/darkpot-school-works/internal/mocks"
+	"github.com/edy4c7/works-uploader/internal/entities"
+	"github.com/edy4c7/works-uploader/internal/mocks"
+	"github.com/edy4c7/works-uploader/internal/common/constants"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"

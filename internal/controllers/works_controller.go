@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/edy4c7/darkpot-school-works/internal/beans"
-	"github.com/edy4c7/darkpot-school-works/internal/errors"
-	"github.com/edy4c7/darkpot-school-works/internal/services"
+	"github.com/edy4c7/works-uploader/internal/beans"
+	"github.com/edy4c7/works-uploader/internal/errors"
+	"github.com/edy4c7/works-uploader/internal/services"
 	"github.com/gin-gonic/gin"
 )
 
@@ -40,7 +40,7 @@ func (ctrl *WorksController) Get(c *gin.Context) {
 func (ctrl *WorksController) FindByID(c *gin.Context) {
 	id, err := extractWorksID(c)
 	if err != nil {
-		c.Error(errors.NewApplicationError(errors.Code(errors.DSWE01), errors.Cause(err)))
+		c.Error(errors.NewApplicationError(errors.Code(errors.WUE01), errors.Cause(err)))
 		return
 	}
 
@@ -71,7 +71,7 @@ func (ctrl *WorksController) Post(c *gin.Context) {
 func (ctrl *WorksController) Put(c *gin.Context) {
 	id, err := extractWorksID(c)
 	if err != nil {
-		c.Error(errors.NewApplicationError(errors.Code(errors.DSWE01), errors.Cause(err)))
+		c.Error(errors.NewApplicationError(errors.Code(errors.WUE01), errors.Cause(err)))
 		return
 	}
 
@@ -92,7 +92,7 @@ func (ctrl *WorksController) Put(c *gin.Context) {
 func (ctrl *WorksController) Delete(c *gin.Context) {
 	id, err := extractWorksID(c)
 	if err != nil {
-		c.Error(errors.NewApplicationError(errors.Code(errors.DSWE01), errors.Cause(err)))
+		c.Error(errors.NewApplicationError(errors.Code(errors.WUE01), errors.Cause(err)))
 		return
 	}
 

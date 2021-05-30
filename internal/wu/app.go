@@ -1,4 +1,4 @@
-package dsw
+package wu
 
 import (
 	"fmt"
@@ -9,9 +9,9 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
-	"github.com/edy4c7/darkpot-school-works/internal/config"
-	"github.com/edy4c7/darkpot-school-works/internal/entities"
-	"github.com/edy4c7/darkpot-school-works/internal/middlewares"
+	"github.com/edy4c7/works-uploader/internal/config"
+	"github.com/edy4c7/works-uploader/internal/entities"
+	"github.com/edy4c7/works-uploader/internal/middlewares"
 	"github.com/gin-gonic/gin"
 )
 

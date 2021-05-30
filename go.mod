@@ -1,4 +1,4 @@
-module github.com/edy4c7/darkpot-school-works
+module github.com/edy4c7/works-uploader
 
 go 1.15
 

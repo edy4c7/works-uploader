@@ -5,7 +5,7 @@
 package mocks
 
 import (
-	entities "github.com/edy4c7/darkpot-school-works/internal/entities"
+	entities "github.com/edy4c7/works-uploader/internal/entities"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )

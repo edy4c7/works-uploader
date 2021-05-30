@@ -1,4 +1,4 @@
-# darkpot-school-works
+# works-uploader
 
 ## Build Setup
 

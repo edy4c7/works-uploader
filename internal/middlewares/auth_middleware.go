@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	jwtmiddleware "github.com/auth0/go-jwt-middleware"
-	"github.com/edy4c7/darkpot-school-works/internal/util"
+	"github.com/edy4c7/works-uploader/internal/util"
 	"github.com/form3tech-oss/jwt-go"
 	"github.com/gin-gonic/gin"
 )

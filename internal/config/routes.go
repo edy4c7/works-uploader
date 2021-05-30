@@ -5,9 +5,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/edy4c7/darkpot-school-works/internal/controllers"
-	"github.com/edy4c7/darkpot-school-works/internal/infrastructures"
-	"github.com/edy4c7/darkpot-school-works/internal/services"
+	"github.com/edy4c7/works-uploader/internal/controllers"
+	"github.com/edy4c7/works-uploader/internal/infrastructures"
+	"github.com/edy4c7/works-uploader/internal/services"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
