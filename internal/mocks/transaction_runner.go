@@ -6,7 +6,7 @@ package mocks
 
 import (
 	context "context"
-	repositories "github.com/edy4c7/darkpot-school-works/internal/repositories"
+	repositories "github.com/edy4c7/works-uploader/internal/repositories"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )

@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"cloud.google.com/go/firestore"
-	"github.com/edy4c7/darkpot-school-works/internal/entities"
+	"github.com/edy4c7/works-uploader/internal/entities"
 )
 
 const numberingCollectionName string = "numbering"

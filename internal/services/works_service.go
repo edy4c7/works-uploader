@@ -5,12 +5,12 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/edy4c7/darkpot-school-works/internal/beans"
-	"github.com/edy4c7/darkpot-school-works/internal/common/constants"
-	"github.com/edy4c7/darkpot-school-works/internal/entities"
-	myErr "github.com/edy4c7/darkpot-school-works/internal/errors"
-	"github.com/edy4c7/darkpot-school-works/internal/repositories"
-	"github.com/edy4c7/darkpot-school-works/internal/tools"
+	"github.com/edy4c7/works-uploader/internal/beans"
+	"github.com/edy4c7/works-uploader/internal/common/constants"
+	"github.com/edy4c7/works-uploader/internal/entities"
+	myErr "github.com/edy4c7/works-uploader/internal/errors"
+	"github.com/edy4c7/works-uploader/internal/repositories"
+	"github.com/edy4c7/works-uploader/internal/tools"
 	"github.com/form3tech-oss/jwt-go"
 )
 
@@ -80,7 +80,7 @@ func NewWorksServiceImpl(
 func (r *WorksServiceImpl) GetAll(ctx context.Context) ([]*entities.Work, error) {
 	result, err := r.worksRepository.GetAll(ctx)
 	if err != nil {
-		return nil, myErr.NewApplicationError(myErr.Code(myErr.DSWE99), myErr.Cause(err))
+		return nil, myErr.NewApplicationError(myErr.Code(myErr.WUE99), myErr.Cause(err))
 	}
 	return result, err
 }
@@ -92,10 +92,10 @@ func (r *WorksServiceImpl) FindByID(ctx context.Context, id uint64) (*entities.W
 	if err != nil {
 		var dbErr *myErr.RecordNotFoundError
 		if errors.As(err, &dbErr) {
-			return nil, myErr.NewApplicationError(myErr.Code(myErr.DSWE01), myErr.Cause(err))
+			return nil, myErr.NewApplicationError(myErr.Code(myErr.WUE01), myErr.Cause(err))
 		}
 
-		return nil, myErr.NewApplicationError(myErr.Code(myErr.DSWE99), myErr.Cause(err))
+		return nil, myErr.NewApplicationError(myErr.Code(myErr.WUE99), myErr.Cause(err))
 	}
 
 	return result, nil
@@ -104,15 +104,15 @@ func (r *WorksServiceImpl) FindByID(ctx context.Context, id uint64) (*entities.W
 func (r *WorksServiceImpl) Create(ctx context.Context, bean *beans.WorksFormBean) error {
 	token, ok := ctx.Value(userKey).(*jwt.Token)
 	if !ok {
-		return myErr.NewApplicationError(myErr.Code(myErr.DSWE99))
+		return myErr.NewApplicationError(myErr.Code(myErr.WUE99))
 	}
 	clm, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return myErr.NewApplicationError(myErr.Code(myErr.DSWE99))
+		return myErr.NewApplicationError(myErr.Code(myErr.WUE99))
 	}
 	author, ok := clm[subjectKey].(string)
 	if !ok {
-		return myErr.NewApplicationError(myErr.Code(myErr.DSWE99))
+		return myErr.NewApplicationError(myErr.Code(myErr.WUE99))
 	}
 
 	w := &entities.Work{
@@ -126,13 +126,13 @@ func (r *WorksServiceImpl) Create(ctx context.Context, bean *beans.WorksFormBean
 	if bean.Type == constants.ContentTypeFile {
 		thumbURL, err := r.fileUploader.Upload(r.uuidGenerator.Generate(), bean.Thumbnail)
 		if err != nil {
-			return myErr.NewApplicationError(myErr.Code(myErr.DSWE99), myErr.Cause(err))
+			return myErr.NewApplicationError(myErr.Code(myErr.WUE99), myErr.Cause(err))
 		}
 		w.ThumbnailURL = thumbURL
 
 		contentURL, err := r.fileUploader.Upload(r.uuidGenerator.Generate(), bean.Content)
 		if err != nil {
-			return myErr.NewApplicationError(myErr.Code(myErr.DSWE99), myErr.Cause(err))
+			return myErr.NewApplicationError(myErr.Code(myErr.WUE99), myErr.Cause(err))
 		}
 		w.ContentURL = contentURL
 	} else {
@@ -157,7 +157,7 @@ func (r *WorksServiceImpl) Create(ctx context.Context, bean *beans.WorksFormBean
 	})
 
 	if err != nil {
-		return myErr.NewApplicationError(myErr.Code(myErr.DSWE99), myErr.Cause(err))
+		return myErr.NewApplicationError(myErr.Code(myErr.WUE99), myErr.Cause(err))
 	}
 
 	return nil
@@ -167,15 +167,15 @@ func (r *WorksServiceImpl) Create(ctx context.Context, bean *beans.WorksFormBean
 func (r *WorksServiceImpl) Update(ctx context.Context, id uint64, bean *beans.WorksFormBean) error {
 	token, ok := ctx.Value(userKey).(*jwt.Token)
 	if !ok {
-		return myErr.NewApplicationError(myErr.Code(myErr.DSWE99))
+		return myErr.NewApplicationError(myErr.Code(myErr.WUE99))
 	}
 	clm, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return myErr.NewApplicationError(myErr.Code(myErr.DSWE99))
+		return myErr.NewApplicationError(myErr.Code(myErr.WUE99))
 	}
 	author, ok := clm[subjectKey].(string)
 	if !ok {
-		return myErr.NewApplicationError(myErr.Code(myErr.DSWE99))
+		return myErr.NewApplicationError(myErr.Code(myErr.WUE99))
 	}
 
 	var thumbURL string
@@ -184,12 +184,12 @@ func (r *WorksServiceImpl) Update(ctx context.Context, id uint64, bean *beans.Wo
 		var err error
 		thumbURL, err = r.fileUploader.Upload(r.uuidGenerator.Generate(), bean.Thumbnail)
 		if err != nil {
-			return myErr.NewApplicationError(myErr.Code(myErr.DSWE99), myErr.Cause(err))
+			return myErr.NewApplicationError(myErr.Code(myErr.WUE99), myErr.Cause(err))
 		}
 
 		contentURL, err = r.fileUploader.Upload(r.uuidGenerator.Generate(), bean.Content)
 		if err != nil {
-			return myErr.NewApplicationError(myErr.Code(myErr.DSWE99), myErr.Cause(err))
+			return myErr.NewApplicationError(myErr.Code(myErr.WUE99), myErr.Cause(err))
 		}
 	} else {
 		contentURL = bean.ContentURL
@@ -201,14 +201,14 @@ func (r *WorksServiceImpl) Update(ctx context.Context, id uint64, bean *beans.Wo
 		if err != nil {
 			var rnfErr *myErr.RecordNotFoundError
 			if errors.As(err, &rnfErr) {
-				return myErr.NewApplicationError(myErr.Code(myErr.DSWE01), myErr.Cause(err))
+				return myErr.NewApplicationError(myErr.Code(myErr.WUE01), myErr.Cause(err))
 			}
 
-			return myErr.NewApplicationError(myErr.Code(myErr.DSWE99), myErr.Cause(err))
+			return myErr.NewApplicationError(myErr.Code(myErr.WUE99), myErr.Cause(err))
 		}
 
 		if w.Version != bean.Version {
-			return myErr.NewApplicationError(myErr.Code(myErr.DSWE02))
+			return myErr.NewApplicationError(myErr.Code(myErr.WUE02))
 		}
 
 		w.Type = bean.Type
@@ -220,7 +220,7 @@ func (r *WorksServiceImpl) Update(ctx context.Context, id uint64, bean *beans.Wo
 		w.Version = w.Version + 1
 
 		if err := r.worksRepository.Save(ctx, w); err != nil {
-			return myErr.NewApplicationError(myErr.Code(myErr.DSWE99), myErr.Cause(err))
+			return myErr.NewApplicationError(myErr.Code(myErr.WUE99), myErr.Cause(err))
 		}
 
 		act := &entities.Activity{
@@ -229,7 +229,7 @@ func (r *WorksServiceImpl) Update(ctx context.Context, id uint64, bean *beans.Wo
 			Work: w,
 		}
 		if err := r.activitiesRepository.Create(ctx, act); err != nil {
-			return myErr.NewApplicationError(myErr.Code(myErr.DSWE99), myErr.Cause(err))
+			return myErr.NewApplicationError(myErr.Code(myErr.WUE99), myErr.Cause(err))
 		}
 
 		return nil
@@ -240,7 +240,7 @@ func (r *WorksServiceImpl) Update(ctx context.Context, id uint64, bean *beans.Wo
 		if errors.As(err, &appErr) {
 			return err
 		}
-		return myErr.NewApplicationError(myErr.Code(myErr.DSWE99), myErr.Cause(err))
+		return myErr.NewApplicationError(myErr.Code(myErr.WUE99), myErr.Cause(err))
 	}
 
 	return nil
@@ -252,18 +252,18 @@ func (r *WorksServiceImpl) DeleteByID(ctx context.Context, id uint64) error {
 	if err != nil {
 		var dbErr *myErr.RecordNotFoundError
 		if errors.As(err, &dbErr) {
-			return myErr.NewApplicationError(myErr.Code(myErr.DSWE01), myErr.Cause(err))
+			return myErr.NewApplicationError(myErr.Code(myErr.WUE01), myErr.Cause(err))
 		}
 
-		return myErr.NewApplicationError(myErr.Code(myErr.DSWE99), myErr.Cause(err))
+		return myErr.NewApplicationError(myErr.Code(myErr.WUE99), myErr.Cause(err))
 	}
 
 	if err := r.fileUploader.Delete(w.ThumbnailURL); err != nil {
-		return myErr.NewApplicationError(myErr.Code(myErr.DSWE99), myErr.Cause(err))
+		return myErr.NewApplicationError(myErr.Code(myErr.WUE99), myErr.Cause(err))
 	}
 
 	if err := r.fileUploader.Delete(w.ContentURL); err != nil {
-		return myErr.NewApplicationError(myErr.Code(myErr.DSWE99), myErr.Cause(err))
+		return myErr.NewApplicationError(myErr.Code(myErr.WUE99), myErr.Cause(err))
 	}
 
 	err = r.transactionRunner.Run(ctx, func(c context.Context) error {
@@ -271,7 +271,7 @@ func (r *WorksServiceImpl) DeleteByID(ctx context.Context, id uint64) error {
 	})
 
 	if err != nil {
-		return myErr.NewApplicationError(myErr.Code(myErr.DSWE99), myErr.Cause(err))
+		return myErr.NewApplicationError(myErr.Code(myErr.WUE99), myErr.Cause(err))
 	}
 
 	return nil

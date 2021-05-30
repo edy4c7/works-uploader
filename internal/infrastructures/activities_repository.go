@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/edy4c7/darkpot-school-works/internal/entities"
+	"github.com/edy4c7/works-uploader/internal/entities"
 	"gorm.io/gorm"
 )
 

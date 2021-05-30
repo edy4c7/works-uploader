@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	myErr "github.com/edy4c7/darkpot-school-works/internal/errors"
-	"github.com/edy4c7/darkpot-school-works/internal/tools"
+	myErr "github.com/edy4c7/works-uploader/internal/errors"
+	"github.com/edy4c7/works-uploader/internal/tools"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 )
@@ -25,9 +25,9 @@ func NewErrorMiddleware(messageLoader tools.MessageLoader) gin.HandlerFunc {
 				)
 
 				switch appErr.Code() {
-				case myErr.DSWE01:
+				case myErr.WUE01:
 					c.AbortWithError(http.StatusNotFound, wrapedErr)
-				case myErr.DSWE99:
+				case myErr.WUE99:
 					c.AbortWithError(http.StatusInternalServerError, wrapedErr)
 				}
 			}

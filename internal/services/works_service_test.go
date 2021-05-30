@@ -7,12 +7,12 @@ import (
 	"mime/multipart"
 	"testing"
 
-	"github.com/edy4c7/darkpot-school-works/internal/beans"
-	"github.com/edy4c7/darkpot-school-works/internal/common/constants"
-	"github.com/edy4c7/darkpot-school-works/internal/entities"
-	myErr "github.com/edy4c7/darkpot-school-works/internal/errors"
-	"github.com/edy4c7/darkpot-school-works/internal/mocks"
-	"github.com/edy4c7/darkpot-school-works/internal/repositories"
+	"github.com/edy4c7/works-uploader/internal/beans"
+	"github.com/edy4c7/works-uploader/internal/common/constants"
+	"github.com/edy4c7/works-uploader/internal/entities"
+	myErr "github.com/edy4c7/works-uploader/internal/errors"
+	"github.com/edy4c7/works-uploader/internal/mocks"
+	"github.com/edy4c7/works-uploader/internal/repositories"
 	"github.com/form3tech-oss/jwt-go"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -157,7 +157,7 @@ func TestGetAll(t *testing.T) {
 		assert.True(t, errors.Is(err, errExpect))
 		var appErr *myErr.ApplicationError
 		if errors.As(err, &appErr) {
-			assert.Equal(t, myErr.DSWE99, appErr.Code())
+			assert.Equal(t, myErr.WUE99, appErr.Code())
 		} else {
 			assert.Failf(t, "Invalid error type", "%w", err)
 		}
@@ -211,7 +211,7 @@ func TestFindByID(t *testing.T) {
 		assert.True(t, errors.Is(err, errExpect))
 		var appErr *myErr.ApplicationError
 		if errors.As(err, &appErr) {
-			assert.Equal(t, appErr.Code(), myErr.DSWE01)
+			assert.Equal(t, appErr.Code(), myErr.WUE01)
 		} else {
 			assert.Failf(t, "Invalid error type", "%w", err)
 		}
@@ -236,7 +236,7 @@ func TestFindByID(t *testing.T) {
 		assert.True(t, errors.Is(err, errExpect))
 		var appErr *myErr.ApplicationError
 		if errors.As(err, &appErr) {
-			assert.Equal(t, appErr.Code(), myErr.DSWE99)
+			assert.Equal(t, appErr.Code(), myErr.WUE99)
 		} else {
 			assert.Failf(t, "Invalid error type", "%w", err)
 		}
@@ -377,7 +377,7 @@ func TestCreate(t *testing.T) {
 		assert.Error(t, err)
 		var appErr *myErr.ApplicationError
 		if errors.As(err, &appErr) {
-			assert.Equal(t, myErr.DSWE99, appErr.Code())
+			assert.Equal(t, myErr.WUE99, appErr.Code())
 		} else {
 			assert.Failf(t, "Invalid error type", "%w", err)
 		}
@@ -396,7 +396,7 @@ func TestCreate(t *testing.T) {
 		assert.Error(t, err)
 		var appErr *myErr.ApplicationError
 		if errors.As(err, &appErr) {
-			assert.Equal(t, myErr.DSWE99, appErr.Code())
+			assert.Equal(t, myErr.WUE99, appErr.Code())
 		} else {
 			assert.Failf(t, "Invalid error type", "%w", err)
 		}
@@ -417,7 +417,7 @@ func TestCreate(t *testing.T) {
 		assert.Error(t, err)
 		var appErr *myErr.ApplicationError
 		if errors.As(err, &appErr) {
-			assert.Equal(t, myErr.DSWE99, appErr.Code())
+			assert.Equal(t, myErr.WUE99, appErr.Code())
 		} else {
 			assert.Failf(t, "Invalid error type", "%w", err)
 		}
@@ -459,7 +459,7 @@ func TestCreate(t *testing.T) {
 		assert.True(t, errors.Is(actual, expect))
 		var appErr *myErr.ApplicationError
 		if errors.As(actual, &appErr) {
-			assert.Equal(t, myErr.DSWE99, appErr.Code())
+			assert.Equal(t, myErr.WUE99, appErr.Code())
 		} else {
 			assert.Failf(t, "Invalid error type", "%w", actual)
 		}
@@ -504,7 +504,7 @@ func TestCreate(t *testing.T) {
 		assert.True(t, errors.Is(actual, expect))
 		var appErr *myErr.ApplicationError
 		if errors.As(actual, &appErr) {
-			assert.Equal(t, myErr.DSWE99, appErr.Code())
+			assert.Equal(t, myErr.WUE99, appErr.Code())
 		} else {
 			assert.Failf(t, "Invalid error type", "%w", actual)
 		}
@@ -554,7 +554,7 @@ func TestCreate(t *testing.T) {
 		assert.True(t, errors.Is(actual, expect))
 		var appErr *myErr.ApplicationError
 		if errors.As(actual, &appErr) {
-			assert.Equal(t, myErr.DSWE99, appErr.Code())
+			assert.Equal(t, myErr.WUE99, appErr.Code())
 		} else {
 			assert.Failf(t, "Invalid error type", "%w", actual)
 		}
@@ -605,7 +605,7 @@ func TestCreate(t *testing.T) {
 		assert.True(t, errors.Is(actual, expect))
 		var appErr *myErr.ApplicationError
 		if errors.As(actual, &appErr) {
-			assert.Equal(t, myErr.DSWE99, appErr.Code())
+			assert.Equal(t, myErr.WUE99, appErr.Code())
 		} else {
 			assert.Failf(t, "Invalid error type", "%w", actual)
 		}
@@ -659,7 +659,7 @@ func TestCreate(t *testing.T) {
 		assert.True(t, errors.Is(actual, expect))
 		var appErr *myErr.ApplicationError
 		if errors.As(actual, &appErr) {
-			assert.Equal(t, myErr.DSWE99, appErr.Code())
+			assert.Equal(t, myErr.WUE99, appErr.Code())
 		} else {
 			assert.Failf(t, "Invalid error type", "%w", actual)
 		}
@@ -835,7 +835,7 @@ func TestUpdate(t *testing.T) {
 		assert.Error(t, err)
 		var appErr *myErr.ApplicationError
 		if errors.As(err, &appErr) {
-			assert.Equal(t, myErr.DSWE02, appErr.Code())
+			assert.Equal(t, myErr.WUE02, appErr.Code())
 		} else {
 			assert.Failf(t, "Invalid error type", "%w", err)
 		}
@@ -852,7 +852,7 @@ func TestUpdate(t *testing.T) {
 		assert.Error(t, err)
 		var appErr *myErr.ApplicationError
 		if errors.As(err, &appErr) {
-			assert.Equal(t, myErr.DSWE99, appErr.Code())
+			assert.Equal(t, myErr.WUE99, appErr.Code())
 		} else {
 			assert.Failf(t, "Invalid error type", "%w", err)
 		}
@@ -871,7 +871,7 @@ func TestUpdate(t *testing.T) {
 		assert.Error(t, err)
 		var appErr *myErr.ApplicationError
 		if errors.As(err, &appErr) {
-			assert.Equal(t, myErr.DSWE99, appErr.Code())
+			assert.Equal(t, myErr.WUE99, appErr.Code())
 		} else {
 			assert.Failf(t, "Invalid error type", "%w", err)
 		}
@@ -892,7 +892,7 @@ func TestUpdate(t *testing.T) {
 		assert.Error(t, err)
 		var appErr *myErr.ApplicationError
 		if errors.As(err, &appErr) {
-			assert.Equal(t, myErr.DSWE99, appErr.Code())
+			assert.Equal(t, myErr.WUE99, appErr.Code())
 		} else {
 			assert.Failf(t, "Invalid error type", "%w", err)
 		}
@@ -934,7 +934,7 @@ func TestUpdate(t *testing.T) {
 		assert.True(t, errors.Is(actual, expect))
 		var appErr *myErr.ApplicationError
 		if errors.As(actual, &appErr) {
-			assert.Equal(t, myErr.DSWE99, appErr.Code())
+			assert.Equal(t, myErr.WUE99, appErr.Code())
 		} else {
 			assert.Failf(t, "Invalid error type", "%w", actual)
 		}
@@ -979,7 +979,7 @@ func TestUpdate(t *testing.T) {
 		assert.True(t, errors.Is(actual, expect))
 		var appErr *myErr.ApplicationError
 		if errors.As(actual, &appErr) {
-			assert.Equal(t, myErr.DSWE99, appErr.Code())
+			assert.Equal(t, myErr.WUE99, appErr.Code())
 		} else {
 			assert.Failf(t, "Invalid error type", "%w", actual)
 		}
@@ -1029,7 +1029,7 @@ func TestUpdate(t *testing.T) {
 		assert.True(t, errors.Is(actual, expect))
 		var appErr *myErr.ApplicationError
 		if errors.As(actual, &appErr) {
-			assert.Equal(t, myErr.DSWE99, appErr.Code())
+			assert.Equal(t, myErr.WUE99, appErr.Code())
 		} else {
 			assert.Failf(t, "Invalid error type", "%w", actual)
 		}
@@ -1080,7 +1080,7 @@ func TestUpdate(t *testing.T) {
 		assert.True(t, errors.Is(actual, expect))
 		var appErr *myErr.ApplicationError
 		if errors.As(actual, &appErr) {
-			assert.Equal(t, myErr.DSWE01, appErr.Code())
+			assert.Equal(t, myErr.WUE01, appErr.Code())
 		} else {
 			assert.Failf(t, "Invalid error type", "%w", actual)
 		}
@@ -1131,7 +1131,7 @@ func TestUpdate(t *testing.T) {
 		assert.True(t, errors.Is(actual, expect))
 		var appErr *myErr.ApplicationError
 		if errors.As(actual, &appErr) {
-			assert.Equal(t, myErr.DSWE99, appErr.Code())
+			assert.Equal(t, myErr.WUE99, appErr.Code())
 		} else {
 			assert.Failf(t, "Invalid error type", "%w", actual)
 		}
@@ -1182,7 +1182,7 @@ func TestUpdate(t *testing.T) {
 		assert.True(t, errors.Is(actual, expect))
 		var appErr *myErr.ApplicationError
 		if errors.As(actual, &appErr) {
-			assert.Equal(t, myErr.DSWE99, appErr.Code())
+			assert.Equal(t, myErr.WUE99, appErr.Code())
 		} else {
 			assert.Failf(t, "Invalid error type", "%w", actual)
 		}
@@ -1237,7 +1237,7 @@ func TestUpdate(t *testing.T) {
 		assert.True(t, errors.Is(actual, expect))
 		var appErr *myErr.ApplicationError
 		if errors.As(actual, &appErr) {
-			assert.Equal(t, myErr.DSWE99, appErr.Code())
+			assert.Equal(t, myErr.WUE99, appErr.Code())
 		} else {
 			assert.Failf(t, "Invalid error type", "%w", actual)
 		}
@@ -1303,7 +1303,7 @@ func TestDeleteByID(t *testing.T) {
 		assert.True(t, errors.Is(actual, expect), "%w", actual)
 		var appErr *myErr.ApplicationError
 		if errors.As(actual, &appErr) {
-			assert.Equal(t, myErr.DSWE01, appErr.Code())
+			assert.Equal(t, myErr.WUE01, appErr.Code())
 		} else {
 			assert.Failf(t, "Invalid error type", "%w", actual)
 		}
@@ -1328,7 +1328,7 @@ func TestDeleteByID(t *testing.T) {
 		assert.True(t, errors.Is(actual, expect))
 		var appErr *myErr.ApplicationError
 		if errors.As(actual, &appErr) {
-			assert.Equal(t, myErr.DSWE99, appErr.Code())
+			assert.Equal(t, myErr.WUE99, appErr.Code())
 		} else {
 			assert.Failf(t, "Invalid error type", "%w", actual)
 		}
@@ -1356,7 +1356,7 @@ func TestDeleteByID(t *testing.T) {
 		assert.True(t, errors.Is(actual, expect))
 		var appErr *myErr.ApplicationError
 		if errors.As(actual, &appErr) {
-			assert.Equal(t, myErr.DSWE99, appErr.Code())
+			assert.Equal(t, myErr.WUE99, appErr.Code())
 		} else {
 			assert.Failf(t, "Invalid error type", "%w", actual)
 		}
@@ -1385,7 +1385,7 @@ func TestDeleteByID(t *testing.T) {
 		assert.True(t, errors.Is(actual, expect))
 		var appErr *myErr.ApplicationError
 		if errors.As(actual, &appErr) {
-			assert.Equal(t, myErr.DSWE99, appErr.Code())
+			assert.Equal(t, myErr.WUE99, appErr.Code())
 		} else {
 			assert.Failf(t, "Invalid error type", "%w", actual)
 		}
@@ -1416,7 +1416,7 @@ func TestDeleteByID(t *testing.T) {
 		assert.True(t, errors.Is(actual, expect), "%w", actual)
 		var appErr *myErr.ApplicationError
 		if errors.As(actual, &appErr) {
-			assert.Equal(t, myErr.DSWE99, appErr.Code())
+			assert.Equal(t, myErr.WUE99, appErr.Code())
 		} else {
 			assert.Failf(t, "Invalid error type", "%w", actual)
 		}
@@ -1454,7 +1454,7 @@ func TestDeleteByID(t *testing.T) {
 		assert.True(t, errors.Is(actual, expect), "%w", actual)
 		var appErr *myErr.ApplicationError
 		if errors.As(actual, &appErr) {
-			assert.Equal(t, myErr.DSWE99, appErr.Code())
+			assert.Equal(t, myErr.WUE99, appErr.Code())
 		} else {
 			assert.Failf(t, "Invalid error type", "%w", actual)
 		}

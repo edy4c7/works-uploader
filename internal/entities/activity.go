@@ -3,7 +3,7 @@ package entities
 import (
 	"time"
 
-	"github.com/edy4c7/darkpot-school-works/internal/common/constants"
+	"github.com/edy4c7/works-uploader/internal/common/constants"
 )
 
 type Activity struct {

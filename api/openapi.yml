@@ -1,6 +1,6 @@
 openapi: "3.0.2"
 info:
-  title: 闇鍋学園Works
+  title: Works uploader
   version: "1.0"
 components:
   schemas:

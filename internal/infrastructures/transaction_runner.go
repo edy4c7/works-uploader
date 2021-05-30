@@ -3,7 +3,7 @@ package infrastructures
 import (
 	"context"
 
-	"github.com/edy4c7/darkpot-school-works/internal/repositories"
+	"github.com/edy4c7/works-uploader/internal/repositories"
 	"gorm.io/gorm"
 )
 

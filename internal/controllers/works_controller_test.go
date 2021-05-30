@@ -12,11 +12,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/edy4c7/darkpot-school-works/internal/beans"
-	"github.com/edy4c7/darkpot-school-works/internal/common/constants"
-	"github.com/edy4c7/darkpot-school-works/internal/entities"
-	myErr "github.com/edy4c7/darkpot-school-works/internal/errors"
-	"github.com/edy4c7/darkpot-school-works/internal/mocks"
+	"github.com/edy4c7/works-uploader/internal/beans"
+	"github.com/edy4c7/works-uploader/internal/common/constants"
+	"github.com/edy4c7/works-uploader/internal/entities"
+	myErr "github.com/edy4c7/works-uploader/internal/errors"
+	"github.com/edy4c7/works-uploader/internal/mocks"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/golang/mock/gomock"
@@ -170,7 +170,7 @@ func TestGetWorkById(t *testing.T) {
 			if !errors.As(err.Err, &appErr) {
 				assert.Fail(t, err.Err.Error())
 			} else {
-				assert.Equal(t, myErr.DSWE01, appErr.Code())
+				assert.Equal(t, myErr.WUE01, appErr.Code())
 			}
 		} else {
 			assert.Fail(t, "%v", err)
@@ -680,7 +680,7 @@ func TestPutWorksWithURL(t *testing.T) {
 			if !errors.As(err.Err, &appErr) {
 				assert.Fail(t, err.Err.Error())
 			} else {
-				assert.Equal(t, myErr.DSWE01, appErr.Code())
+				assert.Equal(t, myErr.WUE01, appErr.Code())
 			}
 		} else {
 			assert.Fail(t, "%v", err)
@@ -907,7 +907,7 @@ func TestPutWorksWithFile(t *testing.T) {
 			if !errors.As(err.Err, &appErr) {
 				assert.Fail(t, err.Err.Error())
 			} else {
-				assert.Equal(t, myErr.DSWE01, appErr.Code())
+				assert.Equal(t, myErr.WUE01, appErr.Code())
 			}
 		} else {
 			assert.Fail(t, "%v", err)
@@ -1144,7 +1144,7 @@ func TestDeleteWorks(t *testing.T) {
 			if !errors.As(err.Err, &appErr) {
 				assert.Fail(t, err.Err.Error())
 			} else {
-				assert.Equal(t, myErr.DSWE01, appErr.Code())
+				assert.Equal(t, myErr.WUE01, appErr.Code())
 			}
 		} else {
 			assert.Fail(t, "%v", err)
