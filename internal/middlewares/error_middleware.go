@@ -6,12 +6,12 @@ import (
 	"strings"
 
 	myErr "github.com/edy4c7/works-uploader/internal/errors"
-	"github.com/edy4c7/works-uploader/internal/tools"
+	"github.com/edy4c7/works-uploader/internal/i18n"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 )
 
-func NewErrorMiddleware(messageLoader tools.MessageLoader) gin.HandlerFunc {
+func NewErrorMiddleware(messageLoader i18n.MessageLoader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Next()
 

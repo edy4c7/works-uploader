@@ -9,8 +9,8 @@ import (
 	"github.com/edy4c7/works-uploader/internal/common/constants"
 	"github.com/edy4c7/works-uploader/internal/entities"
 	myErr "github.com/edy4c7/works-uploader/internal/errors"
+	"github.com/edy4c7/works-uploader/internal/lib"
 	"github.com/edy4c7/works-uploader/internal/repositories"
-	"github.com/edy4c7/works-uploader/internal/tools"
 	"github.com/form3tech-oss/jwt-go"
 )
 
@@ -38,8 +38,8 @@ type WorksServiceImpl struct {
 	transactionRunner    repositories.TransactionRunner
 	worksRepository      repositories.WorksRepository
 	activitiesRepository repositories.ActivitiesRepository
-	uuidGenerator        tools.UUIDGenerator
-	fileUploader         tools.FileUploader
+	uuidGenerator        lib.UUIDGenerator
+	fileUploader         lib.FileUploader
 }
 
 //NewWorksServiceImpl は、TransuctionRunner、リポジトリオブジェクトを指定し、WorksServiceImplの新しいインスタンスを生成する
@@ -47,8 +47,8 @@ func NewWorksServiceImpl(
 	tranRnr repositories.TransactionRunner,
 	worksRepo repositories.WorksRepository,
 	activitiesRepo repositories.ActivitiesRepository,
-	uuidGenerator tools.UUIDGenerator,
-	fileUploader tools.FileUploader,
+	uuidGenerator lib.UUIDGenerator,
+	fileUploader lib.FileUploader,
 ) *WorksServiceImpl {
 
 	if tranRnr == nil {
