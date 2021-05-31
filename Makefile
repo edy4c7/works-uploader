@@ -7,8 +7,8 @@ mocks:
 	mockgen -source internal/repositories/transaction_runner.go -destination internal/mocks/transaction_runner.go --package mocks
 	mockgen -source internal/repositories/works_repository.go -destination internal/mocks/works_repository.go --package mocks
 	mockgen -source internal/repositories/activities_repository.go -destination internal/mocks/activities_repository.go --package mocks
-	mockgen -source internal/tools/file_uploader.go -destination internal/mocks/file_uploader.go --package mocks
-	mockgen -source internal/tools/uuid_generator.go -destination internal/mocks/uuid_generator.go --package mocks
+	mockgen -source internal/lib/file_uploader.go -destination internal/mocks/file_uploader.go --package mocks
+	mockgen -source internal/lib/uuid_generator.go -destination internal/mocks/uuid_generator.go --package mocks
 
 .PHONY: dev
 dev:
