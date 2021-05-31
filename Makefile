@@ -1,34 +1,5 @@
 .PHONY: all
-all:	
-	cd web \
-	&& yarn \
-	&& yarn generate
-	cd functions \
-	&& yarn \
-	&& yarn build
-
-emulator: all
-	firebase emulators:start
-	&& yarn run build
-
-.PHONY: dev
-dev:
-	cd web && yarn dev
-
-.PHONY: test_web
-test_web:
-	cd web && yarn test
-
-.PHONY: test_go
-test_go:
-	go test -coverprofile=cover.out -v ./...
-	go tool cover -html=cover.out -o cover.html
-
-.PHONY: test
-test: test_go test_web
-
-public: nuxt.config.js web
-	yarn run generate
+all:	public wu
 
 mocks:
 	mockgen -source internal/services/works_service.go -destination internal/mocks/works_service.go --package mocks
@@ -39,6 +10,22 @@ mocks:
 	mockgen -source internal/tools/file_uploader.go -destination internal/mocks/file_uploader.go --package mocks
 	mockgen -source internal/tools/uuid_generator.go -destination internal/mocks/uuid_generator.go --package mocks
 
+.PHONY: dev
+dev:
+	yarn dev
+
 .PHONY: run
 run: public
 	air
+
+.PHONY: test
+test:
+	go test -coverprofile=cover.out -v ./...
+	go tool cover -html=cover.out -o cover.html
+	yarn test
+
+public: nuxt.config.js web
+	yarn run generate
+
+wu:
+	go build cmd/wu/main.go
