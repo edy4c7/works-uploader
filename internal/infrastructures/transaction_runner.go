@@ -23,6 +23,6 @@ func NewTransactionRunnerImpl(db *gorm.DB) *TransactionRunnerImpl {
 
 func (r *TransactionRunnerImpl) Run(ctx context.Context, tranFunc repositories.TransactionFunction) error {
 	return r.db.Transaction(func(tx *gorm.DB) error {
-		return tranFunc(context.WithValue(ctx, transactionKey, tx.WithContext(ctx)))
+		return tranFunc(context.WithValue(ctx, transactionKey, tx))
 	})
 }
