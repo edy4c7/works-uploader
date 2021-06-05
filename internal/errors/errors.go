@@ -21,9 +21,6 @@ func newErrorBase() *errorBase {
 }
 
 func (r errorBase) Error() string {
-	if r.cause != nil {
-		return r.cause.Error()
-	}
 	return r.message
 }
 
@@ -96,6 +93,8 @@ func MessageParams(messageParams ...interface{}) ApplicationErrorOption {
 
 func NewApplicationError(options ...ApplicationErrorOption) *ApplicationError {
 	err := &ApplicationError{errorBase: newErrorBase()}
+
+	err.message = "an ApplicationError has occurred"
 
 	for _, opt := range options {
 		opt(err)

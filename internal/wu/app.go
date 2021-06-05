@@ -11,6 +11,7 @@ import (
 
 	"github.com/edy4c7/works-uploader/internal/config"
 	"github.com/edy4c7/works-uploader/internal/entities"
+	"github.com/edy4c7/works-uploader/internal/i18n"
 	"github.com/edy4c7/works-uploader/internal/middlewares"
 	"github.com/gin-gonic/gin"
 )
@@ -43,6 +44,8 @@ func Run() {
 	)
 
 	r.Use(authorizationMiddleware)
+
+	r.Use(middlewares.NewErrorMiddleware(i18n.NewPrinter()))
 
 	config.InitRoutes(r, db)
 
