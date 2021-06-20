@@ -11,6 +11,7 @@ import (
 
 	"github.com/edy4c7/works-uploader/internal/config"
 	"github.com/edy4c7/works-uploader/internal/entities"
+	"github.com/edy4c7/works-uploader/internal/i18n"
 	"github.com/edy4c7/works-uploader/internal/middlewares"
 	"github.com/gin-gonic/gin"
 )
@@ -18,8 +19,6 @@ import (
 //Run run app
 func Run() {
 	r := gin.Default()
-
-	r.Use(middlewares.NewValidationErrorHandler())
 
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
 		os.Getenv("DB_HOST"),
@@ -43,6 +42,8 @@ func Run() {
 	)
 
 	r.Use(authorizationMiddleware)
+
+	r.Use(middlewares.NewErrorMiddleware(i18n.NewPrinter()))
 
 	config.InitRoutes(r, db)
 
