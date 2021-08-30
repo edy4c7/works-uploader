@@ -18,6 +18,7 @@ func InitRoutes(r *gin.Engine, db *gorm.DB) {
 	tranRnr := infrastructures.NewTransactionRunnerImpl(db)
 	worksRepo := infrastructures.NewWorksRepositoryImpl(db)
 	actRepo := infrastructures.NewActivitiesRepositoryImpl(db)
+	userRepo := infrastructures.NewUserRepositoryImpl(db)
 	uuidGen := &infrastructures.UUIDGeneratorImpl{}
 	fileUploader := &infrastructures.FileUploaderImpl{}
 
@@ -26,6 +27,9 @@ func InitRoutes(r *gin.Engine, db *gorm.DB) {
 
 	actsService := services.NewActivitiesServiceImpl(actRepo)
 	actsCtrl := controllers.NewActivitiesController(actsService)
+
+	usersService := services.NewUsersServiceImpl(userRepo)
+	usersCtrl := controllers.NewUsersController(usersService)
 
 	api := r.Group(apiPath)
 	v1 := api.Group("/v1")
@@ -39,6 +43,9 @@ func InitRoutes(r *gin.Engine, db *gorm.DB) {
 
 	actsRoutes := v1.Group("/activities")
 	actsRoutes.GET("/", actsCtrl.Get)
+
+	userRoutes := v1.Group("/users")
+	userRoutes.PUT("", usersCtrl.Save)
 
 	wd, err := os.Getwd()
 	if err != nil {
