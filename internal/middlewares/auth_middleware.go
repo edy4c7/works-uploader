@@ -11,7 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewJWTMiddleware(aud string, iss string) *jwtmiddleware.JWTMiddleware {
+func NewJWTMiddleware(aud string, iss string, jwk string) *jwtmiddleware.JWTMiddleware {
 	return jwtmiddleware.New(jwtmiddleware.Options{
 		ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
 			// Verify 'aud' claim
@@ -25,7 +25,7 @@ func NewJWTMiddleware(aud string, iss string) *jwtmiddleware.JWTMiddleware {
 				return token, errors.New("invalid issuer")
 			}
 
-			cert, err := lib.GetPemCertOfJWK(token, iss+".well-known/jwks.json")
+			cert, err := lib.GetPemCertOfJWK(token, jwk)
 			if err != nil {
 				panic(err.Error())
 			}
