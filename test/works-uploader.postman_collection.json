@@ -1,0 +1,1966 @@
+{
+	"info": {
+		"_postman_id": "09e17a9c-67dd-442c-b6a7-02e388a9f37d",
+		"name": "Works uploader",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "works",
+			"item": [
+				{
+					"name": "{id}",
+					"item": [
+						{
+							"name": "作品データ個別取得",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"const baseUrl = pm.environment.get(\"baseUrl\");\r",
+											"\r",
+											"pm.sendRequest({\r",
+											"    url: `${baseUrl}/works`,\r",
+											"    method: 'GET',\r",
+											"    header: 'Content-Type:application/json',\r",
+											"}, (err, response) => {\r",
+											"    if (err) {\r",
+											"        console.log(err)\r",
+											"    }\r",
+											"\r",
+											"    const items = response.json().items;\r",
+											"    const target = items[Math.floor(Math.random() * items.length)];\r",
+											"\r",
+											"    pm.environment.set(\"get_target\", target.ID);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const expectedCode = 200\r",
+											"\r",
+											"pm.test(`Status code is ${expectedCode}`, () =>  {\r",
+											"    pm.response.to.have.status(expectedCode);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/works/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"works",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{get_target}}",
+											"description": "(Required) 作品ID"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "作品データ",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/works/:id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"works",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"id\": 1,\n \"type\": 1,\n \"title\": \"作品01\",\n \"author\": \"abcd1234\",\n \"description\": \"小説だよ\",\n \"thumbnailUrl\": \"https://example.com\",\n \"contentUrl\": \"https://example.com\",\n \"version\": 1,\n \"createdAt\": \"2019-08-24T14:15:22.000Z\",\n \"updatedAt\": \"2019-08-24T14:15:22.000Z\"\n}"
+								},
+								{
+									"name": "リソースが見つからない",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/works/:id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"works",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id"
+												}
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"code\": \"dolore quis amet\",\n \"message\": \"incididunt quis sunt in ut\"\n}"
+								}
+							]
+						},
+						{
+							"name": "作品データ修正",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"const now = new Date();\r",
+											"\r",
+											"pm.environment.set(\"update_title\", `hoge${now}`);\r",
+											"pm.environment.set(\"update_description\", `hogehooge${now}`);\r",
+											"pm.environment.set(\"update_content_url\", `https://example.com/${now.getTime()}`);\r",
+											"\r",
+											"const baseUrl = pm.environment.get(\"baseUrl\");\r",
+											"\r",
+											"pm.sendRequest({\r",
+											"    url: `${baseUrl}/works`,\r",
+											"    method: 'GET',\r",
+											"    header: 'Content-Type:application/json',\r",
+											"}, (err, response) => {\r",
+											"    if (err) {\r",
+											"        console.log(err)\r",
+											"    }\r",
+											"\r",
+											"    const items = response.json().items;\r",
+											"    const target = items[Math.floor(Math.random() * items.length)];\r",
+											"\r",
+											"    pm.environment.set(\"update_target\", target.ID);\r",
+											"    pm.environment.set(\"update_target_version\", target.Version);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const expectedCode = 200\r",
+											"\r",
+											"pm.test(`Status code is ${expectedCode}`, () =>  {\r",
+											"    pm.response.to.have.status(expectedCode);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "multipart/form-data"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "type",
+											"value": "1",
+											"description": "(Required) 作品種別",
+											"type": "text"
+										},
+										{
+											"key": "title",
+											"value": "{{update_title}}",
+											"description": "(Required) タイトル",
+											"type": "text"
+										},
+										{
+											"key": "description",
+											"value": "{{update_description}}",
+											"description": "説明文",
+											"type": "text"
+										},
+										{
+											"key": "url",
+											"value": "{{update_content_url}}",
+											"description": "作品本体のURL",
+											"type": "text"
+										},
+										{
+											"key": "version",
+											"value": "{{update_target_version}}",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{baseUrl}}/works/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"works",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{update_target}}",
+											"description": "(Required) 作品ID"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "OK",
+									"originalRequest": {
+										"method": "PUT",
+										"header": [
+											{
+												"description": "Added as a part of security scheme: bearer",
+												"key": "Authorization",
+												"value": "Bearer <token>"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/works/:id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"works",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "text/plain"
+										}
+									],
+									"cookie": [],
+									"body": ""
+								},
+								{
+									"name": "リクエストパラメータ不正",
+									"originalRequest": {
+										"method": "PUT",
+										"header": [
+											{
+												"description": "Added as a part of security scheme: bearer",
+												"key": "Authorization",
+												"value": "Bearer <token>"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/works/:id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"works",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id"
+												}
+											]
+										}
+									},
+									"status": "Bad Request",
+									"code": 400,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"code\": \"dolore quis amet\",\n \"message\": \"incididunt quis sunt in ut\"\n}"
+								},
+								{
+									"name": "リソースが見つからない",
+									"originalRequest": {
+										"method": "PUT",
+										"header": [
+											{
+												"description": "Added as a part of security scheme: bearer",
+												"key": "Authorization",
+												"value": "Bearer <token>"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/works/:id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"works",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id"
+												}
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"code\": \"dolore quis amet\",\n \"message\": \"incididunt quis sunt in ut\"\n}"
+								}
+							]
+						},
+						{
+							"name": "作品データ削除",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"const baseUrl = pm.environment.get(\"baseUrl\");\r",
+											"\r",
+											"pm.sendRequest({\r",
+											"    url: `${baseUrl}/works`,\r",
+											"    method: 'POST',\r",
+											"    header: `Content-Type:application/json\\nAuthorization: Bearer ${pm.environment.get(\"access_token\")}`,\r",
+											"    body: {\r",
+											"        mode: 'formdata',\r",
+											"        formdata: [\r",
+											"            {key: \"type\", value: 1},\r",
+											"            {key: \"title\", value: \"aaaaaaaaaa\"},\r",
+											"            {key: \"description\", value: \"bbbbbbbbb\"},\r",
+											"            {key: \"url\", value: \"https://example.com\"},\r",
+											"        ]\r",
+											"    }\r",
+											"}, (err, response) => {\r",
+											"    if (err) {\r",
+											"        console.log(err)\r",
+											"    }\r",
+											"    const res = response.json();\r",
+											"    pm.environment.set(\"delete_target\", res.ID);\r",
+											"});\r",
+											"\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const expectedCode = 204\r",
+											"\r",
+											"pm.test(`Status code is ${expectedCode}`, () =>  {\r",
+											"    pm.response.to.have.status(expectedCode);\r",
+											"});\r",
+											"\r",
+											"pm.test(`Specified work was deleted`, () => {\r",
+											"    const baseUrl = pm.environment.get(\"baseUrl\");\r",
+											"    const target = pm.environment.get(\"delete_target\");\r",
+											"    \r",
+											"    pm.sendRequest({\r",
+											"        url: `${baseUrl}/works`,\r",
+											"        method: 'GET'\r",
+											"    }, (err, response) => {\r",
+											"        if (err) {\r",
+											"            pm.assert.fail()\r",
+											"        }\r",
+											"        \r",
+											"        pm.expect(response.json().items.some((e) => e.ID === target)).to.be.false;\r",
+											"    });\r",
+											"\r",
+											"    pm.sendRequest({\r",
+											"        url: `${baseUrl}/works/${target}`,\r",
+											"        method: 'GET'\r",
+											"    }, (err, response) => {\r",
+											"        if (err) {\r",
+											"            pm.assert.fail()\r",
+											"        }\r",
+											"        \r",
+											"        pm.expect(response.code).to.be.eq(404);\r",
+											"    });\r",
+											"})\r",
+											"\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/works/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"works",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{delete_target}}",
+											"description": "(Required) 作品ID"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "OK",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [
+											{
+												"description": "Added as a part of security scheme: bearer",
+												"key": "Authorization",
+												"value": "Bearer <token>"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/works/:id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"works",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "text/plain"
+										}
+									],
+									"cookie": [],
+									"body": ""
+								},
+								{
+									"name": "リソースが見つからない",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [
+											{
+												"description": "Added as a part of security scheme: bearer",
+												"key": "Authorization",
+												"value": "Bearer <token>"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/works/:id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"works",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id"
+												}
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"code\": \"dolore quis amet\",\n \"message\": \"incididunt quis sunt in ut\"\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "作品データ取得",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const expectedCode = 200\r",
+									"\r",
+									"pm.test(`Status code is ${expectedCode}`, () =>  {\r",
+									"    pm.response.to.have.status(expectedCode);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Offset is same as param\", () => {\r",
+									"    const offset = parseInt(pm.request.url.query.get(\"offset\"))\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.offset).to.be.eq(offset)\r",
+									"})\r",
+									"\r",
+									"pm.test(\"Items are fewer than limit\", () => {\r",
+									"    const limit = parseInt(pm.request.url.query.get(\"limit\"))\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.items.length).to.be.lte(limit)\r",
+									"})\r",
+									"\r",
+									"pm.test(\"Has total items\", () =>  {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(typeof jsonData.totalItems).to.be.eq(\"number\")\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/works?offset={{works_offset}}&limit={{works_limit}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"works"
+							],
+							"query": [
+								{
+									"key": "offset",
+									"value": "{{works_offset}}",
+									"description": "開始行数"
+								},
+								{
+									"key": "limit",
+									"value": "{{works_limit}}",
+									"description": "取得件数"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "作品データ",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/works?offset=0&limit=200",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"works"
+									],
+									"query": [
+										{
+											"key": "offset",
+											"value": "0"
+										},
+										{
+											"key": "limit",
+											"value": "200"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"totalItems\": 2,\n \"items\": [\n  {\n   \"id\": 1,\n   \"type\": 1,\n   \"title\": \"作品01\",\n   \"author\": \"abcd1234\",\n   \"description\": \"小説だよ\",\n   \"thumbnailUrl\": \"https://example.com\",\n   \"contentUrl\": \"https://example.com\",\n   \"version\": 1,\n   \"createdAt\": \"2019-08-24T14:15:22.000Z\",\n   \"updatedAt\": \"2019-08-24T14:15:22.000Z\"\n  },\n  {\n   \"id\": 2,\n   \"type\": 2,\n   \"title\": \"作品02\",\n   \"author\": \"efgh5678\",\n   \"description\": \"絵画でございますわ\",\n   \"thumbnailUrl\": \"https://example.com\",\n   \"contentUrl\": \"https://example.com\",\n   \"version\": 1,\n   \"createdAt\": \"2019-08-24T14:15:22.000Z\",\n   \"updatedAt\": \"2019-08-24T14:15:22.000Z\"\n  }\n ]\n}"
+						},
+						{
+							"name": "リクエストパラメータ不正",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/works?offset=0&limit=200",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"works"
+									],
+									"query": [
+										{
+											"key": "offset",
+											"value": "0"
+										},
+										{
+											"key": "limit",
+											"value": "200"
+										}
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"code\": \"dolore quis amet\",\n \"message\": \"incididunt quis sunt in ut\"\n}"
+						}
+					]
+				},
+				{
+					"name": "作品データ取得_offsetのみ",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const expectedCode = 200\r",
+									"\r",
+									"pm.test(`Status code is ${expectedCode}`, () =>  {\r",
+									"    pm.response.to.have.status(expectedCode);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Offset is same as param\", () => {\r",
+									"    const offset = parseInt(pm.request.url.query.get(\"offset\"))\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.offset).to.be.eq(offset)\r",
+									"})\r",
+									"\r",
+									"const defaultLimit = 100\r",
+									"pm.test(`Items are fewer than ${defaultLimit}`, () => {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.items.length).to.be.lte(defaultLimit)\r",
+									"})\r",
+									"\r",
+									"pm.test(\"Has total items\", () =>  {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(typeof jsonData.totalItems).to.be.eq(\"number\")\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/works?offset={{works_offset}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"works"
+							],
+							"query": [
+								{
+									"key": "offset",
+									"value": "{{works_offset}}",
+									"description": "開始行数"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "作品データ",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/works?offset=0&limit=200",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"works"
+									],
+									"query": [
+										{
+											"key": "offset",
+											"value": "0"
+										},
+										{
+											"key": "limit",
+											"value": "200"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"totalItems\": 2,\n \"items\": [\n  {\n   \"id\": 1,\n   \"type\": 1,\n   \"title\": \"作品01\",\n   \"author\": \"abcd1234\",\n   \"description\": \"小説だよ\",\n   \"thumbnailUrl\": \"https://example.com\",\n   \"contentUrl\": \"https://example.com\",\n   \"version\": 1,\n   \"createdAt\": \"2019-08-24T14:15:22.000Z\",\n   \"updatedAt\": \"2019-08-24T14:15:22.000Z\"\n  },\n  {\n   \"id\": 2,\n   \"type\": 2,\n   \"title\": \"作品02\",\n   \"author\": \"efgh5678\",\n   \"description\": \"絵画でございますわ\",\n   \"thumbnailUrl\": \"https://example.com\",\n   \"contentUrl\": \"https://example.com\",\n   \"version\": 1,\n   \"createdAt\": \"2019-08-24T14:15:22.000Z\",\n   \"updatedAt\": \"2019-08-24T14:15:22.000Z\"\n  }\n ]\n}"
+						},
+						{
+							"name": "リクエストパラメータ不正",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/works?offset=0&limit=200",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"works"
+									],
+									"query": [
+										{
+											"key": "offset",
+											"value": "0"
+										},
+										{
+											"key": "limit",
+											"value": "200"
+										}
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"code\": \"dolore quis amet\",\n \"message\": \"incididunt quis sunt in ut\"\n}"
+						}
+					]
+				},
+				{
+					"name": "作品データ取得_limitのみ",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const expectedCode = 200\r",
+									"\r",
+									"pm.test(`Status code is ${expectedCode}`, () =>  {\r",
+									"    pm.response.to.have.status(expectedCode);\r",
+									"});\r",
+									"\r",
+									"const defaultOffset = 0\r",
+									"pm.test(`Offset is equal to ${defaultOffset}`, () => {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.offset).to.be.eq(defaultOffset)\r",
+									"})\r",
+									"\r",
+									"const defaultLimit = 100\r",
+									"pm.test(`Items are fewer than ${defaultLimit}`, () => {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.items.length).to.be.lte(defaultLimit)\r",
+									"})\r",
+									"\r",
+									"pm.test(\"Has total items\", () =>  {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(typeof jsonData.totalItems).to.be.eq(\"number\")\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/works?limit={{works_limit}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"works"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "{{works_limit}}",
+									"description": "取得件数"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "作品データ",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/works?offset=0&limit=200",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"works"
+									],
+									"query": [
+										{
+											"key": "offset",
+											"value": "0"
+										},
+										{
+											"key": "limit",
+											"value": "200"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"totalItems\": 2,\n \"items\": [\n  {\n   \"id\": 1,\n   \"type\": 1,\n   \"title\": \"作品01\",\n   \"author\": \"abcd1234\",\n   \"description\": \"小説だよ\",\n   \"thumbnailUrl\": \"https://example.com\",\n   \"contentUrl\": \"https://example.com\",\n   \"version\": 1,\n   \"createdAt\": \"2019-08-24T14:15:22.000Z\",\n   \"updatedAt\": \"2019-08-24T14:15:22.000Z\"\n  },\n  {\n   \"id\": 2,\n   \"type\": 2,\n   \"title\": \"作品02\",\n   \"author\": \"efgh5678\",\n   \"description\": \"絵画でございますわ\",\n   \"thumbnailUrl\": \"https://example.com\",\n   \"contentUrl\": \"https://example.com\",\n   \"version\": 1,\n   \"createdAt\": \"2019-08-24T14:15:22.000Z\",\n   \"updatedAt\": \"2019-08-24T14:15:22.000Z\"\n  }\n ]\n}"
+						},
+						{
+							"name": "リクエストパラメータ不正",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/works?offset=0&limit=200",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"works"
+									],
+									"query": [
+										{
+											"key": "offset",
+											"value": "0"
+										},
+										{
+											"key": "limit",
+											"value": "200"
+										}
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"code\": \"dolore quis amet\",\n \"message\": \"incididunt quis sunt in ut\"\n}"
+						}
+					]
+				},
+				{
+					"name": "作品データ取得_両方指定なし",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const expectedCode = 200\r",
+									"\r",
+									"pm.test(`Status code is ${expectedCode}`, () =>  {\r",
+									"    pm.response.to.have.status(expectedCode);\r",
+									"});\r",
+									"\r",
+									"const defaultOffset = 0\r",
+									"pm.test(`Offset is equal to ${defaultOffset}`, () => {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.offset).to.be.eq(defaultOffset)\r",
+									"})\r",
+									"\r",
+									"const defaultLimit = 100\r",
+									"pm.test(`Items are fewer than ${defaultLimit}`, () => {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.items.length).to.be.lte(defaultLimit)\r",
+									"})\r",
+									"\r",
+									"pm.test(\"Has total items\", () =>  {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(typeof jsonData.totalItems).to.be.eq(\"number\")\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/works",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"works"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "作品データ",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/works?offset=0&limit=200",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"works"
+									],
+									"query": [
+										{
+											"key": "offset",
+											"value": "0"
+										},
+										{
+											"key": "limit",
+											"value": "200"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"totalItems\": 2,\n \"items\": [\n  {\n   \"id\": 1,\n   \"type\": 1,\n   \"title\": \"作品01\",\n   \"author\": \"abcd1234\",\n   \"description\": \"小説だよ\",\n   \"thumbnailUrl\": \"https://example.com\",\n   \"contentUrl\": \"https://example.com\",\n   \"version\": 1,\n   \"createdAt\": \"2019-08-24T14:15:22.000Z\",\n   \"updatedAt\": \"2019-08-24T14:15:22.000Z\"\n  },\n  {\n   \"id\": 2,\n   \"type\": 2,\n   \"title\": \"作品02\",\n   \"author\": \"efgh5678\",\n   \"description\": \"絵画でございますわ\",\n   \"thumbnailUrl\": \"https://example.com\",\n   \"contentUrl\": \"https://example.com\",\n   \"version\": 1,\n   \"createdAt\": \"2019-08-24T14:15:22.000Z\",\n   \"updatedAt\": \"2019-08-24T14:15:22.000Z\"\n  }\n ]\n}"
+						},
+						{
+							"name": "リクエストパラメータ不正",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/works?offset=0&limit=200",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"works"
+									],
+									"query": [
+										{
+											"key": "offset",
+											"value": "0"
+										},
+										{
+											"key": "limit",
+											"value": "200"
+										}
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"code\": \"dolore quis amet\",\n \"message\": \"incididunt quis sunt in ut\"\n}"
+						}
+					]
+				},
+				{
+					"name": "作品データ投稿(URL)_valid",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([201, 202]);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "multipart/form-data"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "type",
+									"value": "1",
+									"description": "(Required) 作品種別",
+									"type": "text"
+								},
+								{
+									"key": "title",
+									"value": "Hoge",
+									"description": "(Required) タイトル",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Upload with URL",
+									"description": "説明文",
+									"type": "text"
+								},
+								{
+									"key": "url",
+									"value": "https://example.com",
+									"description": "作品のURL",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/works",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"works"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "OK",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"description": "Added as a part of security scheme: bearer",
+										"key": "Authorization",
+										"value": "Bearer <token>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/works?type=1&title=Hoge&description=Upload with URL&url=https://example.com",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"works"
+									],
+									"query": [
+										{
+											"key": "type",
+											"value": "1"
+										},
+										{
+											"key": "title",
+											"value": "Hoge"
+										},
+										{
+											"key": "description",
+											"value": "Upload with URL"
+										},
+										{
+											"key": "url",
+											"value": "https://example.com"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"id\": 1,\n \"type\": 1,\n \"title\": \"作品01\",\n \"author\": \"abcd1234\",\n \"description\": \"小説だよ\",\n \"thumbnailUrl\": \"https://example.com\",\n \"contentUrl\": \"https://example.com\",\n \"version\": 1,\n \"createdAt\": \"2019-08-24T14:15:22.000Z\",\n \"updatedAt\": \"2019-08-24T14:15:22.000Z\"\n}"
+						}
+					]
+				},
+				{
+					"name": "作品データ投稿(URL)_invalid",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const expectedCode = 400\r",
+									"\r",
+									"pm.test(`Status code is ${expectedCode}`, function () {\r",
+									"    pm.response.to.have.status(expectedCode);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "multipart/form-data"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "type",
+									"value": "1",
+									"description": "(Required) 作品種別",
+									"type": "text"
+								},
+								{
+									"key": "title",
+									"value": "Hoge",
+									"description": "(Required) タイトル",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Upload with URL",
+									"description": "説明文",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/works",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"works"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "リクエストパラメータ不正",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"description": "Added as a part of security scheme: bearer",
+										"key": "Authorization",
+										"value": "Bearer <token>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/works",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"works"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"code\": \"dolore quis amet\",\n \"message\": \"incididunt quis sunt in ut\"\n}"
+						}
+					]
+				},
+				{
+					"name": "作品データ投稿(File)_valid",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([201, 202]);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "multipart/form-data"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "type",
+									"value": "2",
+									"description": "(Required) 作品種別",
+									"type": "text"
+								},
+								{
+									"key": "title",
+									"value": "Hoge",
+									"description": "(Required) タイトル",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Upload with file",
+									"description": "説明文",
+									"type": "text"
+								},
+								{
+									"key": "thumbnail",
+									"type": "file",
+									"src": "cat.jpg"
+								},
+								{
+									"key": "content",
+									"description": "作品本体",
+									"type": "file",
+									"src": "kingfisher.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/works",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"works"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "OK",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"description": "Added as a part of security scheme: bearer",
+										"key": "Authorization",
+										"value": "Bearer <token>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/works?type=2&title=Hoge&description=Upload with URL&thumbnail=thumbnail&content=content",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"works"
+									],
+									"query": [
+										{
+											"key": "type",
+											"value": "2"
+										},
+										{
+											"key": "title",
+											"value": "Hoge"
+										},
+										{
+											"key": "description",
+											"value": "Upload with URL"
+										},
+										{
+											"key": "thumbnail",
+											"value": "thumbnail"
+										},
+										{
+											"key": "content",
+											"value": "content"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"id\": 1,\n \"type\": 1,\n \"title\": \"作品01\",\n \"author\": \"abcd1234\",\n \"description\": \"小説だよ\",\n \"thumbnailUrl\": \"https://example.com\",\n \"contentUrl\": \"https://example.com\",\n \"version\": 1,\n \"createdAt\": \"2019-08-24T14:15:22.000Z\",\n \"updatedAt\": \"2019-08-24T14:15:22.000Z\"\n}"
+						}
+					]
+				},
+				{
+					"name": "作品データ投稿(File)_intvalid",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const expectedCode = 400\r",
+									"\r",
+									"pm.test(`Status code is ${expectedCode}`, function () {\r",
+									"    pm.response.to.have.status(expectedCode);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "multipart/form-data"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "type",
+									"value": "2",
+									"description": "(Required) 作品種別",
+									"type": "text"
+								},
+								{
+									"key": "title",
+									"value": "Hoge",
+									"description": "(Required) タイトル",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Upload with URL",
+									"description": "説明文",
+									"type": "text"
+								},
+								{
+									"key": "content",
+									"description": "作品本体",
+									"type": "file",
+									"src": "kingfisher.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/works",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"works"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "リクエストパラメータ不正",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"description": "Added as a part of security scheme: bearer",
+										"key": "Authorization",
+										"value": "Bearer <token>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/works",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"works"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"code\": \"dolore quis amet\",\n \"message\": \"incididunt quis sunt in ut\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "アクティビティデータ取得",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const expectedCode = 200\r",
+							"\r",
+							"pm.test(`Status code is ${expectedCode}`, function () {\r",
+							"    pm.response.to.have.status(expectedCode);\r",
+							"});\r",
+							"\r",
+							"const limit = 20\r",
+							"pm.test(`Items are fewer than ${limit}`, () => {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.length).to.be.lte(limit)\r",
+							"})\r",
+							"\r",
+							"pm.test(`Items are sorted by CreatedAt`, () => {\r",
+							"    var jsonData = pm.response.json();\r",
+							"\r",
+							"    before = new Date(jsonData[0].CreatedAt)\r",
+							"    for(v of jsonData) {\r",
+							"        current = new Date(v.CreatedAt)\r",
+							"        pm.expect(current).to.be.lte(before)\r",
+							"        before = current\r",
+							"    }\r",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/activities",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"activities"
+					],
+					"query": [
+						{
+							"key": "user",
+							"value": "amet in commo",
+							"description": "アクティビティを取得したいユーザーのID",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "アクティビティデータ",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/activities?offset=0&limit=200&user=amet in commo",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"activities"
+							],
+							"query": [
+								{
+									"key": "offset",
+									"value": "0"
+								},
+								{
+									"key": "limit",
+									"value": "200"
+								},
+								{
+									"key": "user",
+									"value": "amet in commo"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "[\n  {\n   \"id\": 1,\n   \"userId\": \"abcd1234\",\n   \"type\": 0,\n   \"target\": {\n    \"id\": 1,\n    \"author\": {\n     \"localId\": \"abcd1234\",\n     \"displayName\": \"太郎\",\n     \"photoUrl\": \"https://example.com\"\n    },\n    \"title\": \"作品01\",\n    \"description\": \"小説だよ\",\n    \"thumbnailUrl\": \"https://example.com\",\n    \"contentUrl\": \"https://example.com\",\n    \"createdAt\": \"2019-08-24T14:15:22.000Z\",\n    \"updatedAt\": \"2019-08-24T14:15:22.000Z\"\n   },\n   \"timestamp\": \"2019-08-24T14:15:22.000Z\"\n  }\n ]"
+				}
+			]
+		},
+		{
+			"name": "アクティビティデータ取得_ユーザー指定",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const expectedCode = 200\r",
+							"\r",
+							"pm.test(`Status code is ${expectedCode}`, function () {\r",
+							"    pm.response.to.have.status(expectedCode);\r",
+							"});\r",
+							"\r",
+							"const limit = 10\r",
+							"pm.test(`Items are fewer than ${limit}`, () => {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.length).to.be.lte(limit)\r",
+							"})\r",
+							"\r",
+							"pm.test(`Items are sorted by CreatedAt`, () => {\r",
+							"    var jsonData = pm.response.json();\r",
+							"\r",
+							"    before = new Date(jsonData[0].CreatedAt)\r",
+							"    for(v of jsonData) {\r",
+							"        current = new Date(v.CreatedAt)\r",
+							"        pm.expect(current).to.be.lte(before)\r",
+							"        before = current\r",
+							"    }\r",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/activities?user=t99KheiHum0wUBnRLJ8gPgvDTmiC8sCr@clients",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"activities"
+					],
+					"query": [
+						{
+							"key": "user",
+							"value": "t99KheiHum0wUBnRLJ8gPgvDTmiC8sCr@clients",
+							"description": "アクティビティを取得したいユーザーのID"
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "アクティビティデータ",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/activities?offset=0&limit=200&user=amet in commo",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"activities"
+							],
+							"query": [
+								{
+									"key": "offset",
+									"value": "0"
+								},
+								{
+									"key": "limit",
+									"value": "200"
+								},
+								{
+									"key": "user",
+									"value": "amet in commo"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "[\n  {\n   \"id\": 1,\n   \"userId\": \"abcd1234\",\n   \"type\": 0,\n   \"target\": {\n    \"id\": 1,\n    \"author\": {\n     \"localId\": \"abcd1234\",\n     \"displayName\": \"太郎\",\n     \"photoUrl\": \"https://example.com\"\n    },\n    \"title\": \"作品01\",\n    \"description\": \"小説だよ\",\n    \"thumbnailUrl\": \"https://example.com\",\n    \"contentUrl\": \"https://example.com\",\n    \"createdAt\": \"2019-08-24T14:15:22.000Z\",\n    \"updatedAt\": \"2019-08-24T14:15:22.000Z\"\n   },\n   \"timestamp\": \"2019-08-24T14:15:22.000Z\"\n  }\n ]"
+				}
+			]
+		},
+		{
+			"name": "ユーザー情報更新",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const envKeys = {\r",
+							"    accessToken: 'callback_token',\r",
+							"    expires: 'callback_token_expires_in',\r",
+							"    auth0Audience: 'auth0_audience',\r",
+							"    auth0Domain: 'auth0_domain',\r",
+							"    auth0ClientId: 'callback_client_id',\r",
+							"    auth0ClientSecret: 'callback_client_secret',\r",
+							"}\r",
+							"\r",
+							"const now = new Date();\r",
+							"if(!pm.environment.get(envKeys.accessToken) || \r",
+							"    pm.environment.get(envKeys.expires) <= now) {\r",
+							"    pm.sendRequest({\r",
+							"        url: `https://${pm.environment.get(envKeys.auth0Domain)}/oauth/token`,\r",
+							"        method: 'POST',\r",
+							"        header: 'Content-Type:application/json',\r",
+							"        body: {\r",
+							"            mode: 'application/json',\r",
+							"            raw: JSON.stringify({\r",
+							"                audience: pm.environment.get(envKeys.auth0Audience),\r",
+							"                grant_type: \"client_credentials\",\r",
+							"                client_id: pm.environment.get(envKeys.auth0ClientId),\r",
+							"                client_secret: pm.environment.get(envKeys.auth0ClientSecret)\r",
+							"            })\r",
+							"        }\r",
+							"    }, (err, response) => {\r",
+							"        if (err) {\r",
+							"            console.log(err)\r",
+							"        }\r",
+							"        const res = response.json();\r",
+							"        pm.environment.set(envKeys.accessToken, res.access_token);\r",
+							"        const expiresIn = now;\r",
+							"        expiresIn.setSeconds(expiresIn.getSeconds() + res.expires_in);\r",
+							"        pm.environment.set(envKeys.expires, expiresIn.getTime());\r",
+							"    });\r",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const expectedCode = 200\r",
+							"\r",
+							"pm.test(`Status code is ${expectedCode}`, function () {\r",
+							"    pm.response.to.have.status(expectedCode);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{callback_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"ID\": \"o9gqM5wIN0cJ4HfY0kZ3UaLgJDtskkeH@clients\",\r\n    \"Name\": \"test user\",\r\n    \"Nickname\": \"test\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/users",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"users"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"const envKeys = {",
+					"    accessToken: 'access_token',",
+					"    expires: 'access_token_expires_in',",
+					"    auth0Audience: 'auth0_audience',",
+					"    auth0Domain: 'auth0_domain',",
+					"    auth0ClientId: 'auth0_client_id',",
+					"    auth0ClientSecret: 'auth0_client_secret',",
+					"    worksOffset: 'works_offset'",
+					"}",
+					"",
+					"const now = new Date();",
+					"if(!pm.environment.get(envKeys.accessToken) || ",
+					"    pm.environment.get(envKeys.expires) <= now) {",
+					"    pm.sendRequest({",
+					"        url: `https://${pm.environment.get(envKeys.auth0Domain)}/oauth/token`,",
+					"        method: 'POST',",
+					"        header: 'Content-Type:application/json',",
+					"        body: {",
+					"            mode: 'application/json',",
+					"            raw: JSON.stringify({",
+					"                audience: pm.environment.get(envKeys.auth0Audience),",
+					"                grant_type: \"client_credentials\",",
+					"                client_id: pm.environment.get(envKeys.auth0ClientId),",
+					"                client_secret: pm.environment.get(envKeys.auth0ClientSecret)",
+					"            })",
+					"        }",
+					"    }, (err, response) => {",
+					"        if (err) {",
+					"            console.log(err)",
+					"        }",
+					"        const res = response.json();",
+					"        pm.environment.set(envKeys.accessToken, res.access_token);",
+					"        const expiresIn = now;",
+					"        expiresIn.setSeconds(expiresIn.getSeconds() + res.expires_in);",
+					"        pm.environment.set(envKeys.expires, expiresIn.getTime());",
+					"    });",
+					"}",
+					"",
+					"const baseUrl = pm.environment.get(\"baseUrl\");",
+					"",
+					"pm.sendRequest({",
+					"    url: `${baseUrl}/works`,",
+					"    method: 'GET'",
+					"}, (err, response) => {",
+					"    if (err) {",
+					"        pm.assert.fail(err)",
+					"    }",
+					"    ",
+					"    const res = response.json();",
+					"    const lenItems = res.items.length;",
+					"    const offset = pm.environment.get(envKeys.worksOffset);",
+					"",
+					"    if(lenItems >= offset) {",
+					"        return;",
+					"    }",
+					"",
+					"    for(let i = 0; i < offset - lenItems; i++) {",
+					"        pm.sendRequest({",
+					"            url: `${baseUrl}/works`,",
+					"            method: 'POST',",
+					"            header: `Content-Type:application/json\\nAuthorization: Bearer ${pm.environment.get(\"access_token\")}`,",
+					"            body: {",
+					"                mode: 'formdata',",
+					"                formdata: [",
+					"                    {key: \"type\", value: 1},",
+					"                    {key: \"title\", value: \"aaaaaaaaaa\"},",
+					"                    {key: \"description\", value: \"bbbbbbbbb\"},",
+					"                    {key: \"url\", value: \"https://example.com\"},",
+					"                ]",
+					"            }",
+					"        })",
+					"    }",
+					"});",
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "/"
+		}
+	]
+}
