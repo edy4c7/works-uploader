@@ -7,6 +7,10 @@ components:
     WorkId:
       description: 作品ID
       type: string
+    WorkType:
+      description: 作品ID
+      type: integer 
+      format: int32
     Timestamp:
       type: string
       format: date-time
@@ -25,19 +29,29 @@ components:
           type: string
           format: url
           description: アバター用画像ファイルのURL
+    UserId:
+      type: string
+    Page:
+      type: object
+      properties:
+        totalItems:
+          description: 作品の全体件数
+          type: integer
     Work:
       type: object
       description: 作品データ
       properties:
         id:
           $ref: "#/components/schemas/WorkId"
-        author:
-          description: 作者
-          allOf: 
-            - $ref: "#/components/schemas/User"
+        type:
+          $ref: "#/components/schemas/WorkType"
         title:
           description: タイトル
           type: string
+        author:
+          description: 作者のユーザーID
+          allOf:
+            - $ref: "#/components/schemas/UserId"
         description:
           description: 説明文
           type: string
@@ -49,6 +63,10 @@ components:
           description: 作品本体のURL
           type: string
           format: url
+        version:
+          description: バージョン
+          type: integer
+          format: long
         createdAt:
           description: 作成日
           allOf:
@@ -69,7 +87,7 @@ components:
         user:
           description: アクティビティを発生させたユーザー
           allOf:
-            - $ref: "#/components/schemas/User"
+            - $ref: "#/components/schemas/UserId"
         type:
           description: アクティビティの種別
           type: integer
@@ -107,6 +125,7 @@ components:
       schema:
         type: integer
         format: int32
+        default: 0
     limit:
       description: 取得件数
       name: limit
@@ -114,34 +133,21 @@ components:
       schema:
         type: integer
         format: int32
+        default: 200
   requestBodies:
     Work:
       description: アップロードする作品データ
       content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              title:
-                description: タイトル
-                type: string
-              description:
-                description: 説明文
-                type: string
-              contentUrl:
-                description: 作品本体のUrl(PixivとかYoutubeとか)
-                type: string
-                format: url
-          examples:
-           default:
-              value:
-                title: 作品名
-                description: 説明文
-                contentUrl: https://example.com
         multipart/form-data:
           schema:
             type: object
+            required:
+              - type
+              - title
             properties:
+              type:
+                description: 作品種別
+                type: number
               title:
                 description: タイトル
                 type: string
@@ -156,6 +162,43 @@ components:
                 description: 作品本体のファイル
                 type: string
                 format: binary
+              url:
+                description: 作品本体のURL
+                type: string
+              version:
+                description: バージョン
+                type: number
+          examples:
+            url_valid:
+              summary: Upload with URL
+              value:
+                type: 1
+                title: "Hoge"  
+                description: "Upload with URL"
+                url: "https://example.com"
+            file_valid:
+              summary: Upload with URL
+              value:
+                type: 1
+                title: "Hoge"  
+                description: "Upload with URL"
+                thumbnail: "thumbnail"
+                content: "content"
+            url_invalid:
+              summary: Upload with URL (invalid)
+              value:
+                type: 1
+                title: "Hoge"  
+                description: "Upload with URL"
+                url: "https://example.com"
+            file_invalid:
+              summary: Upload with URL (invalid)
+              value:
+                type: 1
+                title: "Hoge"  
+                description: "Upload with URL"
+                thumbnail: "thumbnail"
+                content: "content"
   responses:
     OK:
       description: "OK"
@@ -165,30 +208,30 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/Error"
-          examples:
-            missingRequired:
-              summary: 必須項目が入力されていない
-              value:
-                code: DPWE01
-                message: XXXは必ず入力してください。
     NotFound:
       description: "リソースが見つからない"
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/Error"
-          examples:
-            notFound:
-              value:
-                code: DPWE02
-                message: 指定されたリソースが存在しません。
   securitySchemes:
     Bearer:
       type: http
       scheme: bearer
       description: Bearer token
-security:
-  - Bearer: []
+  examples:
+    Work:
+      value:
+        id: 1
+        type: 1
+        title: 作品01
+        author: abcd1234
+        description: 小説だよ
+        thumbnailUrl: https://example.com
+        contentUrl: https://example.com
+        version: 1
+        createdAt: 2019-08-24T14:15:22Z
+        updatedAt: 2019-08-24T14:15:22Z
 paths:
   /works:
     get:
@@ -202,43 +245,59 @@ paths:
           content:
             application/json:
               schema:
-                type: array
+                allOf:
+                  - $ref: "#/components/schemas/Page"
                 items: 
-                  $ref: "#/components/schemas/Work"
+                  description: 作品データ
+                  type: array
+                  items: 
+                    $ref: "#/components/schemas/Work"
               examples:
                 default:
                   value:
-                    - id: 1
-                      author:
-                        localId: abcd1234
-                        displayName: 太郎
-                        photoUrl: https://example.com
-                      title: 作品01
-                      description: 小説だよ
-                      thumbnailUrl: https://example.com
-                      contentUrl: https://example.com
-                      createdAt: 2019-08-24T14:15:22Z
-                      updatedAt: 2019-08-24T14:15:22Z
-                    - id: 2
-                      author:
-                        localId: efgh5678
-                        displayName: 花子
-                        photoUrl: https://example.com
-                      title: 作品02
-                      description: 絵画でございますわ
-                      thumbnailUrl: https://example.com
-                      contentUrl: https://example.com
-                      createdAt: 2019-08-24T14:15:22Z
-                      updatedAt: 2019-08-24T14:15:22Z
+                    totalItems: 2
+                    offset: 0
+                    items:
+                      - id: 1
+                        type: 1
+                        title: 作品01
+                        author: abcd1234
+                        description: 小説だよ
+                        thumbnailUrl: https://example.com
+                        contentUrl: https://example.com
+                        version: 1
+                        createdAt: 2019-08-24T14:15:22Z
+                        updatedAt: 2019-08-24T14:15:22Z
+                      - id: 2
+                        type: 2
+                        title: 作品02
+                        author: efgh5678
+                        description: 絵画でございますわ
+                        thumbnailUrl: https://example.com
+                        contentUrl: https://example.com
+                        version: 1
+                        createdAt: 2019-08-24T14:15:22Z
+                        updatedAt: 2019-08-24T14:15:22Z
         400: 
           $ref: "#/components/responses/BadRequest"
     post:
       summary: 作品データ投稿
+      security:
+        - Bearer: []
       requestBody:
         $ref: "#/components/requestBodies/Work"
       responses:
         200: 
-          $ref: "#/components/responses/OK"
+          description: OK
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/Work"
+              examples:
+                url_valid:
+                  $ref: "#/components/examples/Work"
+                file_valid:
+                  $ref: "#/components/examples/Work"
         400: 
           $ref: "#/components/responses/BadRequest"
   /works/{id}:
@@ -255,22 +314,13 @@ paths:
                 $ref: "#/components/schemas/Work"
               examples:
                 default:
-                  value:
-                    id: 1
-                    author:
-                      localId: abcd1234
-                      displayName: 太郎
-                      photoUrl: https://example.com
-                    title: 作品01
-                    description: 小説だよ
-                    thumbnailUrl: https://example.com
-                    contentUrl: https://example.com
-                    createdAt: 2019-08-24T14:15:22Z
-                    updatedAt: 2019-08-24T14:15:22Z
+                  $ref: "#/components/examples/Work"
         404: 
           $ref: "#/components/responses/NotFound"
     put:
       summary: 作品データ修正
+      security:
+        - Bearer: []
       parameters:
         - $ref: "#/components/parameters/workId"
       requestBody:
@@ -278,12 +328,21 @@ paths:
       responses:
         200: 
           $ref: "#/components/responses/OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Work"
+              examples:
+                default:
+                  $ref: "#/components/examples/Work"
         400: 
           $ref: "#/components/responses/BadRequest"
         404: 
           $ref: "#/components/responses/NotFound"
     delete:
       summary: 作品データ削除
+      security:
+        - Bearer: []
       parameters:
         - $ref: "#/components/parameters/workId"
       responses:
@@ -308,30 +367,33 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Activity"
+                $ref: "#/components/schemas/Activity"
               examples:
                 default:
                   value:
-                    id: 1
-                    user:
-                      localId: abcd1234
-                      displayName: 太郎
-                      photoUrl: https://example.com
-                    type: 0
-                    target:
-                      id: 1
-                      author:
-                        localId: abcd1234
-                        displayName: 太郎
-                        photoUrl: https://example.com
-                      title: 作品01
-                      description: 小説だよ
-                      thumbnailUrl: https://example.com
-                      contentUrl: https://example.com
-                      createdAt: 2019-08-24T14:15:22Z
-                      updatedAt: 2019-08-24T14:15:22Z
-                    timestamp: 2019-08-24T14:15:22Z
-        404: 
-          $ref: "#/components/responses/NotFound"
+                    - id: 1
+                      userId: abcd1234
+                      type: 0
+                      target:
+                        id: 1
+                        author: abcd1234
+                        title: 作品01
+                        description: 小説だよ
+                        thumbnailUrl: https://example.com
+                        contentUrl: https://example.com
+                        createdAt: 2019-08-24T14:15:22Z
+                        updatedAt: 2019-08-24T14:15:22Z
+                      timestamp: 2019-08-24T14:15:22Z
+                    - id: 2
+                      userId: abcd1234
+                      type: 0
+                      target:
+                        id: 1
+                        author: abcd1234
+                        title: 作品01
+                        description: 小説だよ
+                        thumbnailUrl: https://example.com
+                        contentUrl: https://example.com
+                        createdAt: 2019-08-24T14:15:22Z
+                        updatedAt: 2019-08-24T14:15:22Z
+                      timestamp: 2019-08-24T14:15:22Z
