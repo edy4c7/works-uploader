@@ -35,33 +35,33 @@ func (m *MockActivitiesRepository) EXPECT() *MockActivitiesRepositoryMockRecorde
 }
 
 // GetAll mocks base method
-func (m *MockActivitiesRepository) GetAll(arg0 context.Context) ([]*entities.Activity, error) {
+func (m *MockActivitiesRepository) GetAll(arg0 context.Context, arg1 int) ([]*entities.Activity, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAll", arg0)
+	ret := m.ctrl.Call(m, "GetAll", arg0, arg1)
 	ret0, _ := ret[0].([]*entities.Activity)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetAll indicates an expected call of GetAll
-func (mr *MockActivitiesRepositoryMockRecorder) GetAll(arg0 interface{}) *gomock.Call {
+func (mr *MockActivitiesRepositoryMockRecorder) GetAll(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockActivitiesRepository)(nil).GetAll), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockActivitiesRepository)(nil).GetAll), arg0, arg1)
 }
 
 // FindByUserID mocks base method
-func (m *MockActivitiesRepository) FindByUserID(arg0 context.Context, arg1 string) ([]*entities.Activity, error) {
+func (m *MockActivitiesRepository) FindByUserID(arg0 context.Context, arg1 string, arg2 int) ([]*entities.Activity, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindByUserID", arg0, arg1)
+	ret := m.ctrl.Call(m, "FindByUserID", arg0, arg1, arg2)
 	ret0, _ := ret[0].([]*entities.Activity)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // FindByUserID indicates an expected call of FindByUserID
-func (mr *MockActivitiesRepositoryMockRecorder) FindByUserID(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockActivitiesRepositoryMockRecorder) FindByUserID(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByUserID", reflect.TypeOf((*MockActivitiesRepository)(nil).FindByUserID), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByUserID", reflect.TypeOf((*MockActivitiesRepository)(nil).FindByUserID), arg0, arg1, arg2)
 }
 
 // Create mocks base method

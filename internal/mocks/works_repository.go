@@ -35,18 +35,33 @@ func (m *MockWorksRepository) EXPECT() *MockWorksRepositoryMockRecorder {
 }
 
 // GetAll mocks base method
-func (m *MockWorksRepository) GetAll(arg0 context.Context) ([]*entities.Work, error) {
+func (m *MockWorksRepository) GetAll(ctx context.Context, offset, limit int) ([]*entities.Work, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAll", arg0)
+	ret := m.ctrl.Call(m, "GetAll", ctx, offset, limit)
 	ret0, _ := ret[0].([]*entities.Work)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetAll indicates an expected call of GetAll
-func (mr *MockWorksRepositoryMockRecorder) GetAll(arg0 interface{}) *gomock.Call {
+func (mr *MockWorksRepositoryMockRecorder) GetAll(ctx, offset, limit interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockWorksRepository)(nil).GetAll), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockWorksRepository)(nil).GetAll), ctx, offset, limit)
+}
+
+// CountAll mocks base method
+func (m *MockWorksRepository) CountAll(arg0 context.Context) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CountAll", arg0)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CountAll indicates an expected call of CountAll
+func (mr *MockWorksRepositoryMockRecorder) CountAll(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountAll", reflect.TypeOf((*MockWorksRepository)(nil).CountAll), arg0)
 }
 
 // FindByID mocks base method

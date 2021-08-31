@@ -10,6 +10,6 @@ const (
 type ActivityType int
 
 const (
-	ActivityAdded ActivityType = iota
+	ActivityAdded ActivityType = iota + 1
 	ActivityUpdated
 )

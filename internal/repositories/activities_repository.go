@@ -7,7 +7,7 @@ import (
 )
 
 type ActivitiesRepository interface {
-	GetAll(context.Context) ([]*entities.Activity, error)
-	FindByUserID(context.Context, string) ([]*entities.Activity, error)
+	GetAll(context.Context, int) ([]*entities.Activity, error)
+	FindByUserID(context.Context, string, int) ([]*entities.Activity, error)
 	Create(context.Context, *entities.Activity) error
 }

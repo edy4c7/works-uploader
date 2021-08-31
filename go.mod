@@ -6,7 +6,7 @@ require (
 	github.com/auth0/go-jwt-middleware v1.0.0
 	github.com/form3tech-oss/jwt-go v3.2.2+incompatible
 	github.com/gin-gonic/gin v1.6.3
-	github.com/go-playground/validator/v10 v10.4.1
+	github.com/go-playground/validator/v10 v10.4.1 // indirect
 	github.com/golang/mock v1.4.4
 	github.com/golang/protobuf v1.4.3 // indirect
 	github.com/google/go-cmp v0.5.4 // indirect

@@ -68,7 +68,8 @@ func TestGetAllActivities(t *testing.T) {
 
 		repo := mocks.NewMockActivitiesRepository(ctrl)
 		expect := activitiesTestData
-		repo.EXPECT().GetAll(ctx).Return(expect, nil)
+		limit := 20
+		repo.EXPECT().GetAll(ctx, limit).Return(expect, nil)
 
 		service := &ActivitiesServiceImpl{
 			repository: repo,
@@ -86,7 +87,7 @@ func TestGetAllActivities(t *testing.T) {
 
 		repo := mocks.NewMockActivitiesRepository(ctrl)
 		errExpect := errors.New("error")
-		repo.EXPECT().GetAll(ctx).Return(nil, errExpect)
+		repo.EXPECT().GetAll(ctx, gomock.Any()).Return(nil, errExpect)
 
 		service := &ActivitiesServiceImpl{
 			repository: repo,
@@ -115,7 +116,8 @@ func TestFindActivitiesByUserID(t *testing.T) {
 			activitiesTestData[0],
 		}
 		userID := "user"
-		repo.EXPECT().FindByUserID(ctx, userID).Return(expect, nil)
+		limit := 10
+		repo.EXPECT().FindByUserID(ctx, userID, limit).Return(expect, nil)
 
 		service := &ActivitiesServiceImpl{
 			repository: repo,
@@ -134,7 +136,7 @@ func TestFindActivitiesByUserID(t *testing.T) {
 		repo := mocks.NewMockActivitiesRepository(ctrl)
 		errExpect := myErr.NewRecordNotFoundError("", nil)
 		userID := "user"
-		repo.EXPECT().FindByUserID(ctx, userID).Return(nil, errExpect)
+		repo.EXPECT().FindByUserID(ctx, userID, gomock.Any()).Return(nil, errExpect)
 
 		service := &ActivitiesServiceImpl{
 			repository: repo,
@@ -159,7 +161,7 @@ func TestFindActivitiesByUserID(t *testing.T) {
 		repo := mocks.NewMockActivitiesRepository(ctrl)
 		errExpect := errors.New("error")
 		userID := "user"
-		repo.EXPECT().FindByUserID(ctx, userID).Return(nil, errExpect)
+		repo.EXPECT().FindByUserID(ctx, userID, gomock.Any()).Return(nil, errExpect)
 
 		service := &ActivitiesServiceImpl{
 			repository: repo,

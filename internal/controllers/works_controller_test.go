@@ -10,6 +10,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/edy4c7/works-uploader/internal/beans"
@@ -18,7 +19,6 @@ import (
 	myErr "github.com/edy4c7/works-uploader/internal/errors"
 	"github.com/edy4c7/works-uploader/internal/mocks"
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
@@ -66,17 +66,135 @@ func TestNewWorksController(t *testing.T) {
 }
 
 func TestGetWorks(t *testing.T) {
-	const endpoint = "/"
+	t.Run("Is valid and specify both offset and limit", func(t *testing.T) {
+		const endpoint = "/?offset=%d&limit=%d"
 
-	t.Run("Public mode", func(t *testing.T) {
 		ctrl, ctx := gomock.WithContext(context.Background(), t)
 		defer ctrl.Finish()
 
 		w := httptest.NewRecorder()
 		ginCtx, r := gin.CreateTestContext(w)
 
+		offset, limit := 1, 50
+
+		pagination := &beans.PaginationBean{
+			TotalItems: 200,
+			Offset:     offset,
+		}
+		for _, v := range worksTestData {
+			pagination.Items = append(pagination.Items, v)
+		}
+
 		service := mocks.NewMockWorksService(ctrl)
-		service.EXPECT().GetAll(ctx).Return(worksTestData, nil)
+		service.EXPECT().GetAll(ctx, offset, limit).Return(pagination, nil)
+		workCtrl := NewWorksController(service)
+		r.GET("/", workCtrl.Get)
+
+		req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf(endpoint, offset, limit), nil)
+		req = req.WithContext(ctx)
+		ginCtx.Request = req
+		r.HandleContext(ginCtx)
+
+		err := ginCtx.Errors.Last()
+		assert.Nil(t, err, "%T %v", err, err)
+		assert.Equal(t, http.StatusOK, w.Code)
+		res, _ := json.Marshal(pagination)
+		assert.Equal(t, res, w.Body.Bytes())
+	})
+
+	t.Run("Is valid and specify only offset", func(t *testing.T) {
+		const endpoint = "/?offset=%d"
+
+		ctrl, ctx := gomock.WithContext(context.Background(), t)
+		defer ctrl.Finish()
+
+		w := httptest.NewRecorder()
+		ginCtx, r := gin.CreateTestContext(w)
+
+		offset, limit := 1, 100
+
+		pagination := &beans.PaginationBean{
+			TotalItems: 200,
+			Offset:     offset,
+		}
+		for _, v := range worksTestData {
+			pagination.Items = append(pagination.Items, v)
+		}
+
+		service := mocks.NewMockWorksService(ctrl)
+		service.EXPECT().GetAll(ctx, offset, limit).Return(pagination, nil)
+		workCtrl := NewWorksController(service)
+		r.GET("/", workCtrl.Get)
+
+		req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf(endpoint, offset), nil)
+		req = req.WithContext(ctx)
+		ginCtx.Request = req
+		r.HandleContext(ginCtx)
+
+		err := ginCtx.Errors.Last()
+		assert.Nil(t, err, "%T %v", err, err)
+		assert.Equal(t, http.StatusOK, w.Code)
+		res, _ := json.Marshal(pagination)
+		assert.Equal(t, res, w.Body.Bytes())
+	})
+
+	t.Run("Is valid and specify only limit", func(t *testing.T) {
+		const endpoint = "/?limit=%d"
+
+		ctrl, ctx := gomock.WithContext(context.Background(), t)
+		defer ctrl.Finish()
+
+		w := httptest.NewRecorder()
+		ginCtx, r := gin.CreateTestContext(w)
+
+		offset, limit := 0, 50
+
+		pagination := &beans.PaginationBean{
+			TotalItems: 200,
+			Offset:     offset,
+		}
+		for _, v := range worksTestData {
+			pagination.Items = append(pagination.Items, v)
+		}
+
+		service := mocks.NewMockWorksService(ctrl)
+		service.EXPECT().GetAll(ctx, offset, limit).Return(pagination, nil)
+		workCtrl := NewWorksController(service)
+		r.GET("/", workCtrl.Get)
+
+		req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf(endpoint, limit), nil)
+		req = req.WithContext(ctx)
+		ginCtx.Request = req
+		r.HandleContext(ginCtx)
+
+		err := ginCtx.Errors.Last()
+		assert.Nil(t, err, "%T %v", err, err)
+		assert.Equal(t, http.StatusOK, w.Code)
+		res, _ := json.Marshal(pagination)
+		assert.Equal(t, res, w.Body.Bytes())
+	})
+
+	t.Run("Is valid and not specify both offset and limit", func(t *testing.T) {
+		const endpoint = "/"
+
+		ctrl, ctx := gomock.WithContext(context.Background(), t)
+		defer ctrl.Finish()
+
+		w := httptest.NewRecorder()
+		ginCtx, r := gin.CreateTestContext(w)
+
+		offset, limit := 0, 100
+
+		pagination := &beans.PaginationBean{
+			TotalItems: 200,
+			Offset:     offset,
+		}
+		for _, v := range worksTestData {
+			pagination.Items = append(pagination.Items, v)
+		}
+
+		service := mocks.NewMockWorksService(ctrl)
+		service.EXPECT().GetAll(ctx, offset, limit).Return(pagination, nil)
 		workCtrl := NewWorksController(service)
 		r.GET("/", workCtrl.Get)
 
@@ -85,15 +203,16 @@ func TestGetWorks(t *testing.T) {
 		ginCtx.Request = req
 		r.HandleContext(ginCtx)
 
-		//公開モードでは、作品情報の取得は認証無しで可能
 		err := ginCtx.Errors.Last()
 		assert.Nil(t, err, "%T %v", err, err)
 		assert.Equal(t, http.StatusOK, w.Code)
-		res, _ := json.Marshal(worksTestData)
+		res, _ := json.Marshal(pagination)
 		assert.Equal(t, res, w.Body.Bytes())
 	})
 
 	t.Run("error", func(t *testing.T) {
+		const endpoint = "/"
+
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
@@ -102,7 +221,7 @@ func TestGetWorks(t *testing.T) {
 
 		errExpect := errors.New("ERROR")
 		service := mocks.NewMockWorksService(ctrl)
-		service.EXPECT().GetAll(gomock.Any()).Return(nil, errExpect)
+		service.EXPECT().GetAll(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, errExpect)
 		workCtrl := NewWorksController(service)
 		r.GET("/", workCtrl.Get)
 
@@ -232,7 +351,13 @@ func TestPostWorksWithURL(t *testing.T) {
 			assert.FailNow(t, err.Error())
 		}
 		service := mocks.NewMockWorksService(ctrl)
-		service.EXPECT().Create(ctx, &form).Return(nil)
+		expect := &entities.Work{
+			ID:          12345,
+			Title:       form.Title,
+			Description: form.Description,
+			ContentURL:  form.ContentURL,
+		}
+		service.EXPECT().Create(ctx, &form).Return(expect, nil)
 		workCtrl := NewWorksController(service)
 		r.POST("/", workCtrl.Post)
 
@@ -240,6 +365,11 @@ func TestPostWorksWithURL(t *testing.T) {
 
 		err := ginCtx.Errors.Last()
 		assert.Nil(t, err, "%T %v", err, err)
+		assert.Equal(t, http.StatusCreated, w.Code)
+		var res entities.Work
+		_ = json.Unmarshal(w.Body.Bytes(), &res)
+		assert.True(t, strings.HasSuffix(w.Header().Get("Location"), fmt.Sprintf("/%d", res.ID)))
+		assert.Equal(t, *expect, res)
 	})
 
 	t.Run("Missing content type", func(t *testing.T) {
@@ -264,10 +394,8 @@ func TestPostWorksWithURL(t *testing.T) {
 
 		errActual := ginCtx.Errors.Last()
 		if errActual != nil {
-			var ve validator.ValidationErrors
-			if !errors.As(errActual.Err, &ve) || len(ve) <= 0 {
-				assert.Fail(t, errActual.Err.Error())
-			}
+			var bre *myErr.BadRequestError
+			assert.True(t, errors.As(errActual.Err, &bre))
 		} else {
 			assert.Fail(t, "%v", errActual)
 		}
@@ -289,7 +417,7 @@ func TestPostWorksWithURL(t *testing.T) {
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
 		errExpect := errors.New("ERROR")
-		service.EXPECT().Create(gomock.Any(), gomock.Any()).Return(errExpect)
+		service.EXPECT().Create(gomock.Any(), gomock.Any()).Return(nil, errExpect)
 		workCtrl := NewWorksController(service)
 		r.POST("/", workCtrl.Post)
 
@@ -325,10 +453,8 @@ func TestPostWorksWithURL(t *testing.T) {
 
 		errActual := ginCtx.Errors.Last()
 		if errActual != nil {
-			var ve validator.ValidationErrors
-			if !errors.As(errActual.Err, &ve) || len(ve) <= 0 {
-				assert.Fail(t, errActual.Err.Error())
-			}
+			var bre *myErr.BadRequestError
+			assert.True(t, errors.As(errActual.Err, &bre))
 		} else {
 			assert.Fail(t, "%v", errActual)
 		}
@@ -349,7 +475,12 @@ func TestPostWorksWithURL(t *testing.T) {
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
-		service.EXPECT().Create(gomock.Any(), gomock.Any()).Return(nil)
+		expect := &entities.Work{
+			Title:       title,
+			Description: description,
+			ContentURL:  url,
+		}
+		service.EXPECT().Create(gomock.Any(), gomock.Any()).Return(expect, nil)
 		workCtrl := NewWorksController(service)
 		r.POST("/", workCtrl.Post)
 
@@ -381,10 +512,8 @@ func TestPostWorksWithURL(t *testing.T) {
 
 		errActual := ginCtx.Errors.Last()
 		if errActual != nil {
-			var ve validator.ValidationErrors
-			if !errors.As(errActual.Err, &ve) || len(ve) <= 0 {
-				assert.Fail(t, errActual.Err.Error())
-			}
+			var bre *myErr.BadRequestError
+			assert.True(t, errors.As(errActual.Err, &bre))
 		} else {
 			assert.Fail(t, "%v", errActual)
 		}
@@ -420,7 +549,14 @@ func TestPostWorksWithFile(t *testing.T) {
 			assert.FailNow(t, err.Error())
 		}
 		service := mocks.NewMockWorksService(ctrl)
-		service.EXPECT().Create(ctx, &form).Return(nil)
+		expect := &entities.Work{
+			ID:           12345,
+			Title:        form.Title,
+			Description:  form.Description,
+			ThumbnailURL: "https://example.com/thumbnail",
+			ContentURL:   "https://example.com/contenturl",
+		}
+		service.EXPECT().Create(ctx, &form).Return(expect, nil)
 		workCtrl := NewWorksController(service)
 		r.POST("/", workCtrl.Post)
 
@@ -428,6 +564,11 @@ func TestPostWorksWithFile(t *testing.T) {
 
 		err := ginCtx.Errors.Last()
 		assert.Nil(t, err, "%T %v", err, err)
+		assert.Equal(t, http.StatusCreated, w.Code)
+		var res entities.Work
+		_ = json.Unmarshal(w.Body.Bytes(), &res)
+		assert.True(t, strings.HasSuffix(w.Header().Get("Location"), fmt.Sprintf("/%d", res.ID)))
+		assert.Equal(t, *expect, res)
 	})
 
 	t.Run("Missing content type", func(t *testing.T) {
@@ -452,10 +593,8 @@ func TestPostWorksWithFile(t *testing.T) {
 
 		errActual := ginCtx.Errors.Last()
 		if errActual != nil {
-			var ve validator.ValidationErrors
-			if !errors.As(errActual.Err, &ve) || len(ve) <= 0 {
-				assert.Fail(t, errActual.Err.Error())
-			}
+			var bre *myErr.BadRequestError
+			assert.True(t, errors.As(errActual.Err, &bre))
 		} else {
 			assert.Fail(t, "%v", errActual)
 		}
@@ -477,7 +616,7 @@ func TestPostWorksWithFile(t *testing.T) {
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
 		errExpect := errors.New("ERROR")
-		service.EXPECT().Create(gomock.Any(), gomock.Any()).Return(errExpect)
+		service.EXPECT().Create(gomock.Any(), gomock.Any()).Return(nil, errExpect)
 		workCtrl := NewWorksController(service)
 		r.POST("/", workCtrl.Post)
 
@@ -513,10 +652,8 @@ func TestPostWorksWithFile(t *testing.T) {
 
 		errActual := ginCtx.Errors.Last()
 		if errActual != nil {
-			var ve validator.ValidationErrors
-			if !errors.As(errActual.Err, &ve) || len(ve) <= 0 {
-				assert.Fail(t, errActual.Err.Error())
-			}
+			var bre *myErr.BadRequestError
+			assert.True(t, errors.As(errActual.Err, &bre))
 		} else {
 			assert.Fail(t, "%v", errActual)
 		}
@@ -544,10 +681,8 @@ func TestPostWorksWithFile(t *testing.T) {
 
 		errActual := ginCtx.Errors.Last()
 		if errActual != nil {
-			var ve validator.ValidationErrors
-			if !errors.As(errActual.Err, &ve) || len(ve) <= 0 {
-				assert.Fail(t, errActual.Err.Error())
-			}
+			var bre *myErr.BadRequestError
+			assert.True(t, errors.As(errActual.Err, &bre))
 		} else {
 			assert.Fail(t, "%v", errActual)
 		}
@@ -568,7 +703,7 @@ func TestPostWorksWithFile(t *testing.T) {
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
-		service.EXPECT().Create(gomock.Any(), gomock.Any()).Return(nil)
+		service.EXPECT().Create(gomock.Any(), gomock.Any()).Return(&entities.Work{}, nil)
 		workCtrl := NewWorksController(service)
 		r.POST("/", workCtrl.Post)
 
@@ -600,10 +735,8 @@ func TestPostWorksWithFile(t *testing.T) {
 
 		errActual := ginCtx.Errors.Last()
 		if errActual != nil {
-			var ve validator.ValidationErrors
-			if !errors.As(errActual.Err, &ve) || len(ve) <= 0 {
-				assert.Fail(t, errActual.Err.Error())
-			}
+			var bre *myErr.BadRequestError
+			assert.True(t, errors.As(errActual.Err, &bre))
 		} else {
 			assert.Fail(t, "%v", errActual)
 		}
@@ -639,7 +772,13 @@ func TestPutWorksWithURL(t *testing.T) {
 			assert.FailNow(t, err.Error())
 		}
 		service := mocks.NewMockWorksService(ctrl)
-		service.EXPECT().Update(ctx, targetID, &form).Return(nil)
+		expect := &entities.Work{
+			ID:          12345,
+			Title:       form.Title,
+			Description: form.Description,
+			ContentURL:  form.ContentURL,
+		}
+		service.EXPECT().Update(ctx, targetID, &form).Return(expect, nil)
 		workCtrl := NewWorksController(service)
 		r.PUT("/:id", workCtrl.Put)
 
@@ -647,6 +786,11 @@ func TestPutWorksWithURL(t *testing.T) {
 
 		err := ginCtx.Errors.Last()
 		assert.Nil(t, err, "%T %v", err, err)
+		assert.Equal(t, http.StatusOK, w.Code)
+		var res entities.Work
+		_ = json.Unmarshal(w.Body.Bytes(), &res)
+		assert.True(t, strings.HasSuffix(w.Header().Get("Location"), fmt.Sprintf("/%d", res.ID)))
+		assert.Equal(t, *expect, res)
 	})
 
 	t.Run("invalid id", func(t *testing.T) {
@@ -709,10 +853,8 @@ func TestPutWorksWithURL(t *testing.T) {
 
 		errActual := ginCtx.Errors.Last()
 		if errActual != nil {
-			var ve validator.ValidationErrors
-			if !errors.As(errActual.Err, &ve) || len(ve) <= 0 {
-				assert.Fail(t, errActual.Err.Error())
-			}
+			var bre *myErr.BadRequestError
+			assert.True(t, errors.As(errActual.Err, &bre))
 		} else {
 			assert.Fail(t, "%v", errActual)
 		}
@@ -734,7 +876,7 @@ func TestPutWorksWithURL(t *testing.T) {
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
 		errExpect := errors.New("ERROR")
-		service.EXPECT().Update(gomock.Any(), gomock.Any(), gomock.Any()).Return(errExpect)
+		service.EXPECT().Update(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, errExpect)
 		workCtrl := NewWorksController(service)
 		r.PUT("/:id", workCtrl.Put)
 
@@ -770,10 +912,8 @@ func TestPutWorksWithURL(t *testing.T) {
 
 		errActual := ginCtx.Errors.Last()
 		if errActual != nil {
-			var ve validator.ValidationErrors
-			if !errors.As(errActual.Err, &ve) || len(ve) <= 0 {
-				assert.Fail(t, errActual.Err.Error())
-			}
+			var bre *myErr.BadRequestError
+			assert.True(t, errors.As(errActual.Err, &bre))
 		} else {
 			assert.Fail(t, "%v", errActual)
 		}
@@ -794,7 +934,7 @@ func TestPutWorksWithURL(t *testing.T) {
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
-		service.EXPECT().Update(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+		service.EXPECT().Update(gomock.Any(), gomock.Any(), gomock.Any()).Return(&entities.Work{}, nil)
 		workCtrl := NewWorksController(service)
 		r.PUT("/:id", workCtrl.Put)
 
@@ -826,10 +966,8 @@ func TestPutWorksWithURL(t *testing.T) {
 
 		errActual := ginCtx.Errors.Last()
 		if errActual != nil {
-			var ve validator.ValidationErrors
-			if !errors.As(errActual.Err, &ve) || len(ve) <= 0 {
-				assert.Fail(t, errActual.Err.Error())
-			}
+			var bre *myErr.BadRequestError
+			assert.True(t, errors.As(errActual.Err, &bre))
 		} else {
 			assert.Fail(t, "%v", errActual)
 		}
@@ -866,7 +1004,14 @@ func TestPutWorksWithFile(t *testing.T) {
 			assert.FailNow(t, err.Error())
 		}
 		service := mocks.NewMockWorksService(ctrl)
-		service.EXPECT().Update(req.Context(), targetID, &form).Return(nil)
+		expect := &entities.Work{
+			ID:           12345,
+			Title:        form.Title,
+			Description:  form.Description,
+			ThumbnailURL: "https://example.com/thumbnail",
+			ContentURL:   "https://example.com/contenturl",
+		}
+		service.EXPECT().Update(req.Context(), targetID, &form).Return(expect, nil)
 		workCtrl := NewWorksController(service)
 		r.PUT("/:id", workCtrl.Put)
 
@@ -874,6 +1019,11 @@ func TestPutWorksWithFile(t *testing.T) {
 
 		err := ginCtx.Errors.Last()
 		assert.Nil(t, err, "%T %v", err, err)
+		assert.Equal(t, http.StatusOK, w.Code)
+		var res entities.Work
+		_ = json.Unmarshal(w.Body.Bytes(), &res)
+		assert.True(t, strings.HasSuffix(w.Header().Get("Location"), fmt.Sprintf("/%d", res.ID)))
+		assert.Equal(t, *expect, res)
 	})
 
 	t.Run("invalid id", func(t *testing.T) {
@@ -936,10 +1086,8 @@ func TestPutWorksWithFile(t *testing.T) {
 
 		errActual := ginCtx.Errors.Last()
 		if errActual != nil {
-			var ve validator.ValidationErrors
-			if !errors.As(errActual.Err, &ve) || len(ve) <= 0 {
-				assert.Fail(t, errActual.Err.Error())
-			}
+			var bre *myErr.BadRequestError
+			assert.True(t, errors.As(errActual.Err, &bre))
 		} else {
 			assert.Fail(t, "%v", errActual)
 		}
@@ -961,7 +1109,7 @@ func TestPutWorksWithFile(t *testing.T) {
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
 		errExpect := errors.New("ERROR")
-		service.EXPECT().Update(gomock.Any(), gomock.Any(), gomock.Any()).Return(errExpect)
+		service.EXPECT().Update(gomock.Any(), gomock.Any(), gomock.Any()).Return(&entities.Work{}, errExpect)
 		workCtrl := NewWorksController(service)
 		r.PUT("/:id", workCtrl.Put)
 
@@ -997,10 +1145,8 @@ func TestPutWorksWithFile(t *testing.T) {
 
 		errActual := ginCtx.Errors.Last()
 		if errActual != nil {
-			var ve validator.ValidationErrors
-			if !errors.As(errActual.Err, &ve) || len(ve) <= 0 {
-				assert.Fail(t, errActual.Err.Error())
-			}
+			var bre *myErr.BadRequestError
+			assert.True(t, errors.As(errActual.Err, &bre))
 		} else {
 			assert.Fail(t, "%v", errActual)
 		}
@@ -1028,10 +1174,8 @@ func TestPutWorksWithFile(t *testing.T) {
 
 		errActual := ginCtx.Errors.Last()
 		if errActual != nil {
-			var ve validator.ValidationErrors
-			if !errors.As(errActual.Err, &ve) || len(ve) <= 0 {
-				assert.Fail(t, errActual.Err.Error())
-			}
+			var bre *myErr.BadRequestError
+			assert.True(t, errors.As(errActual.Err, &bre))
 		} else {
 			assert.Fail(t, "%v", errActual)
 		}
@@ -1052,7 +1196,7 @@ func TestPutWorksWithFile(t *testing.T) {
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
 		ginCtx.Request = req
 		service := mocks.NewMockWorksService(ctrl)
-		service.EXPECT().Update(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+		service.EXPECT().Update(gomock.Any(), gomock.Any(), gomock.Any()).Return(&entities.Work{}, nil)
 		workCtrl := NewWorksController(service)
 		r.PUT("/:id", workCtrl.Put)
 
@@ -1084,10 +1228,8 @@ func TestPutWorksWithFile(t *testing.T) {
 
 		errActual := ginCtx.Errors.Last()
 		if errActual != nil {
-			var ve validator.ValidationErrors
-			if !errors.As(errActual.Err, &ve) || len(ve) <= 0 {
-				assert.Fail(t, errActual.Err.Error())
-			}
+			var bre *myErr.BadRequestError
+			assert.True(t, errors.As(errActual.Err, &bre))
 		} else {
 			assert.Fail(t, "%v", errActual)
 		}
