@@ -51,12 +51,17 @@ func NewRecordNotFoundError(message string, cause error) *RecordNotFoundError {
 	return err
 }
 
-type TimeoutError struct {
-	errorBase
+type BadRequestError struct {
+	*errorBase
 }
 
-func NewTimeoutError(msg string) TimeoutError {
-	return TimeoutError{errorBase{message: msg}}
+func NewBadRequestError(message string, cause error) *BadRequestError {
+	err := &BadRequestError{errorBase: newErrorBase()}
+
+	err.message = message
+	err.cause = cause
+
+	return err
 }
 
 type ApplicationError struct {

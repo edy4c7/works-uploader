@@ -35,14 +35,14 @@ func InitRoutes(r *gin.Engine, db *gorm.DB) {
 	v1 := api.Group("/v1")
 
 	worksRoutes := v1.Group("/works")
-	worksRoutes.GET("/", worksCtrl.Get)
+	worksRoutes.GET("", worksCtrl.Get)
 	worksRoutes.GET("/:id", worksCtrl.FindByID)
-	worksRoutes.POST("/", worksCtrl.Post)
+	worksRoutes.POST("", worksCtrl.Post)
 	worksRoutes.PUT("/:id", worksCtrl.Put)
 	worksRoutes.DELETE("/:id", worksCtrl.Delete)
 
 	actsRoutes := v1.Group("/activities")
-	actsRoutes.GET("/", actsCtrl.Get)
+	actsRoutes.GET("", actsCtrl.Get)
 
 	userRoutes := v1.Group("/users")
 	userRoutes.PUT("", usersCtrl.Save)

@@ -21,10 +21,17 @@ func NewWorksRepositoryImpl(db *gorm.DB) *WorksRepositoryImpl {
 	}
 }
 
-func (r *WorksRepositoryImpl) GetAll(ctx context.Context) ([]*entities.Work, error) {
+func (r *WorksRepositoryImpl) GetAll(ctx context.Context, offset int, limit int) ([]*entities.Work, error) {
 	works := make([]*entities.Work, 0)
-	err := r.db.WithContext(ctx).Find(&works).Error
+	err := r.db.WithContext(ctx).Offset(offset).Limit(limit).Find(&works).Error
 	return works, err
+}
+
+func (r *WorksRepositoryImpl) CountAll(ctx context.Context) (int64, error) {
+	works := make([]*entities.Work, 0)
+	var count int64
+	err := r.db.WithContext(ctx).Find(&works).Count(&count).Error
+	return count, err
 }
 
 func (r *WorksRepositoryImpl) FindByID(ctx context.Context, id uint64) (*entities.Work, error) {

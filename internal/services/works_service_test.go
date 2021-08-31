@@ -126,16 +126,28 @@ func TestGetAll(t *testing.T) {
 			},
 		}
 
+		offset, limit := 1, 100
+		total := int64(200)
+
 		worksRepo := mocks.NewMockWorksRepository(ctrl)
-		worksRepo.EXPECT().GetAll(gomock.Eq(ctx)).Return(data, nil)
+		worksRepo.EXPECT().CountAll(gomock.Eq(ctx)).Return(total, nil)
+		worksRepo.EXPECT().GetAll(gomock.Eq(ctx), offset, limit).Return(data, nil)
 
 		service := &WorksServiceImpl{
 			worksRepository: worksRepo,
 		}
 
-		result, err := service.GetAll(ctx)
+		result, err := service.GetAll(ctx, offset, limit)
 
-		assert.Equal(t, data, result)
+		pagination := &beans.PaginationBean{
+			TotalItems: total,
+			Offset:     offset,
+		}
+		for _, v := range data {
+			pagination.Items = append(pagination.Items, v)
+		}
+
+		assert.Equal(t, pagination, result)
 		assert.Nil(t, err)
 	})
 
@@ -146,13 +158,14 @@ func TestGetAll(t *testing.T) {
 		errExpect := errors.New("error")
 
 		worksRepo := mocks.NewMockWorksRepository(ctrl)
-		worksRepo.EXPECT().GetAll(gomock.Eq(ctx)).Return(nil, errExpect)
+		worksRepo.EXPECT().CountAll(gomock.Eq(ctx)).Return(int64(100), nil)
+		worksRepo.EXPECT().GetAll(gomock.Eq(ctx), gomock.Any(), gomock.Any()).Return(nil, errExpect)
 
 		service := &WorksServiceImpl{
 			worksRepository: worksRepo,
 		}
 
-		result, err := service.GetAll(ctx)
+		result, err := service.GetAll(ctx, 0, 100)
 		assert.Nil(t, result)
 		assert.True(t, errors.Is(err, errExpect))
 		var appErr *myErr.ApplicationError
@@ -293,7 +306,9 @@ func TestCreate(t *testing.T) {
 			activitiesRepository: actRepo,
 		}
 
-		assert.Nil(t, service.Create(ctx, form))
+		res, err := service.Create(ctx, form)
+		assert.Nil(t, err)
+		assert.Equal(t, work, res)
 	})
 
 	t.Run("New with file", func(t *testing.T) {
@@ -363,7 +378,9 @@ func TestCreate(t *testing.T) {
 			activitiesRepository: actRepo,
 		}
 
-		assert.Nil(t, service.Create(ctx, form))
+		res, err := service.Create(ctx, form)
+		assert.Nil(t, err)
+		assert.Equal(t, work, res)
 	})
 
 	t.Run("Fail to extract token", func(t *testing.T) {
@@ -372,7 +389,7 @@ func TestCreate(t *testing.T) {
 
 		service := &WorksServiceImpl{}
 
-		err := service.Create(ctx, nil)
+		_, err := service.Create(ctx, nil)
 
 		assert.Error(t, err)
 		var appErr *myErr.ApplicationError
@@ -391,7 +408,7 @@ func TestCreate(t *testing.T) {
 
 		service := &WorksServiceImpl{}
 
-		err := service.Create(ctx, nil)
+		_, err := service.Create(ctx, nil)
 
 		assert.Error(t, err)
 		var appErr *myErr.ApplicationError
@@ -412,7 +429,7 @@ func TestCreate(t *testing.T) {
 
 		service := &WorksServiceImpl{}
 
-		err := service.Create(ctx, nil)
+		_, err := service.Create(ctx, nil)
 
 		assert.Error(t, err)
 		var appErr *myErr.ApplicationError
@@ -454,7 +471,7 @@ func TestCreate(t *testing.T) {
 			fileUploader:  fileUploader,
 		}
 
-		actual := service.Create(ctx, form)
+		_, actual := service.Create(ctx, form)
 
 		assert.True(t, errors.Is(actual, expect))
 		var appErr *myErr.ApplicationError
@@ -499,7 +516,7 @@ func TestCreate(t *testing.T) {
 			fileUploader:  fileUploader,
 		}
 
-		actual := service.Create(ctx, form)
+		_, actual := service.Create(ctx, form)
 
 		assert.True(t, errors.Is(actual, expect))
 		var appErr *myErr.ApplicationError
@@ -549,7 +566,7 @@ func TestCreate(t *testing.T) {
 			transactionRunner: tranRunner,
 		}
 
-		actual := service.Create(ctx, form)
+		_, actual := service.Create(ctx, form)
 
 		assert.True(t, errors.Is(actual, expect))
 		var appErr *myErr.ApplicationError
@@ -600,7 +617,7 @@ func TestCreate(t *testing.T) {
 			worksRepository:   worksRepo,
 		}
 
-		actual := service.Create(ctx, form)
+		_, actual := service.Create(ctx, form)
 
 		assert.True(t, errors.Is(actual, expect))
 		var appErr *myErr.ApplicationError
@@ -654,7 +671,7 @@ func TestCreate(t *testing.T) {
 			activitiesRepository: actRepo,
 		}
 
-		actual := service.Create(ctx, form)
+		_, actual := service.Create(ctx, form)
 
 		assert.True(t, errors.Is(actual, expect))
 		var appErr *myErr.ApplicationError
@@ -720,7 +737,9 @@ func TestUpdate(t *testing.T) {
 			activitiesRepository: actRepo,
 		}
 
-		assert.Nil(t, service.Update(ctx, id, form))
+		res, err := service.Update(ctx, id, form)
+		assert.Nil(t, err)
+		assert.Equal(t, work, res)
 	})
 
 	t.Run("Update with file", func(t *testing.T) {
@@ -788,7 +807,9 @@ func TestUpdate(t *testing.T) {
 			activitiesRepository: actRepo,
 		}
 
-		assert.Nil(t, service.Update(ctx, id, form))
+		res, err := service.Update(ctx, id, form)
+		assert.Nil(t, err)
+		assert.Equal(t, work, res)
 	})
 
 	t.Run("conflicted", func(t *testing.T) {
@@ -830,7 +851,7 @@ func TestUpdate(t *testing.T) {
 			activitiesRepository: actRepo,
 		}
 
-		err := service.Update(ctx, id, form)
+		_, err := service.Update(ctx, id, form)
 
 		assert.Error(t, err)
 		var appErr *myErr.ApplicationError
@@ -847,7 +868,7 @@ func TestUpdate(t *testing.T) {
 
 		service := &WorksServiceImpl{}
 
-		err := service.Update(ctx, 0, nil)
+		_, err := service.Update(ctx, 0, nil)
 
 		assert.Error(t, err)
 		var appErr *myErr.ApplicationError
@@ -866,7 +887,7 @@ func TestUpdate(t *testing.T) {
 
 		service := &WorksServiceImpl{}
 
-		err := service.Update(ctx, 0, nil)
+		_, err := service.Update(ctx, 0, nil)
 
 		assert.Error(t, err)
 		var appErr *myErr.ApplicationError
@@ -887,7 +908,7 @@ func TestUpdate(t *testing.T) {
 
 		service := &WorksServiceImpl{}
 
-		err := service.Update(ctx, 0, nil)
+		_, err := service.Update(ctx, 0, nil)
 
 		assert.Error(t, err)
 		var appErr *myErr.ApplicationError
@@ -929,7 +950,7 @@ func TestUpdate(t *testing.T) {
 			fileUploader:  fileUploader,
 		}
 
-		actual := service.Update(ctx, 0, form)
+		_, actual := service.Update(ctx, 0, form)
 
 		assert.True(t, errors.Is(actual, expect))
 		var appErr *myErr.ApplicationError
@@ -974,7 +995,7 @@ func TestUpdate(t *testing.T) {
 			fileUploader:  fileUploader,
 		}
 
-		actual := service.Update(ctx, 0, form)
+		_, actual := service.Update(ctx, 0, form)
 
 		assert.True(t, errors.Is(actual, expect))
 		var appErr *myErr.ApplicationError
@@ -1024,7 +1045,7 @@ func TestUpdate(t *testing.T) {
 			transactionRunner: tranRunner,
 		}
 
-		actual := service.Update(ctx, 0, form)
+		_, actual := service.Update(ctx, 0, form)
 
 		assert.True(t, errors.Is(actual, expect))
 		var appErr *myErr.ApplicationError
@@ -1075,7 +1096,7 @@ func TestUpdate(t *testing.T) {
 			worksRepository:   worksRepo,
 		}
 
-		actual := service.Update(ctx, 0, form)
+		_, actual := service.Update(ctx, 0, form)
 
 		assert.True(t, errors.Is(actual, expect))
 		var appErr *myErr.ApplicationError
@@ -1126,7 +1147,7 @@ func TestUpdate(t *testing.T) {
 			worksRepository:   worksRepo,
 		}
 
-		actual := service.Update(ctx, 0, form)
+		_, actual := service.Update(ctx, 0, form)
 
 		assert.True(t, errors.Is(actual, expect))
 		var appErr *myErr.ApplicationError
@@ -1177,7 +1198,8 @@ func TestUpdate(t *testing.T) {
 			transactionRunner: tranRunner,
 			worksRepository:   worksRepo,
 		}
-		actual := service.Update(ctx, 0, form)
+
+		_, actual := service.Update(ctx, 0, form)
 
 		assert.True(t, errors.Is(actual, expect))
 		var appErr *myErr.ApplicationError
@@ -1232,7 +1254,7 @@ func TestUpdate(t *testing.T) {
 			activitiesRepository: actRepo,
 		}
 
-		actual := service.Update(ctx, 0, form)
+		_, actual := service.Update(ctx, 0, form)
 
 		assert.True(t, errors.Is(actual, expect))
 		var appErr *myErr.ApplicationError

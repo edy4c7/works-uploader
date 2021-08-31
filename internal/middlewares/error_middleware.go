@@ -8,7 +8,6 @@ import (
 	wuErr "github.com/edy4c7/works-uploader/internal/errors"
 	"github.com/edy4c7/works-uploader/internal/i18n"
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
 )
 
 var mapStatusCode = map[string]int{
@@ -26,10 +25,10 @@ func NewErrorMiddleware(messagePrinter i18n.Printer) gin.HandlerFunc {
 			return
 		}
 
-		var ve validator.ValidationErrors
-		if errors.As(err.Err, &ve) {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
+		var bre *wuErr.BadRequestError
+		if errors.As(err.Err, &bre) {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"message": err.Error(),
 			})
 
 			return

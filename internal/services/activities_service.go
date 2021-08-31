@@ -28,7 +28,7 @@ func NewActivitiesServiceImpl(repo repositories.ActivitiesRepository) *Activitie
 }
 
 func (r *ActivitiesServiceImpl) GetAll(ctx context.Context) ([]*entities.Activity, error) {
-	result, err := r.repository.GetAll(ctx)
+	result, err := r.repository.GetAll(ctx, 20)
 	if err != nil {
 		return nil, myErr.NewApplicationError(myErr.Code(myErr.WUE99), myErr.Cause(err))
 	}
@@ -36,7 +36,7 @@ func (r *ActivitiesServiceImpl) GetAll(ctx context.Context) ([]*entities.Activit
 }
 
 func (r *ActivitiesServiceImpl) FindByUserID(ctx context.Context, userID string) ([]*entities.Activity, error) {
-	result, err := r.repository.FindByUserID(ctx, userID)
+	result, err := r.repository.FindByUserID(ctx, userID, 10)
 	if err != nil {
 		var rnfErr *myErr.RecordNotFoundError
 		if errors.As(err, &rnfErr) {

@@ -36,18 +36,18 @@ func (m *MockWorksService) EXPECT() *MockWorksServiceMockRecorder {
 }
 
 // GetAll mocks base method
-func (m *MockWorksService) GetAll(arg0 context.Context) ([]*entities.Work, error) {
+func (m *MockWorksService) GetAll(ctx context.Context, offset, limit int) (*beans.PaginationBean, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAll", arg0)
-	ret0, _ := ret[0].([]*entities.Work)
+	ret := m.ctrl.Call(m, "GetAll", ctx, offset, limit)
+	ret0, _ := ret[0].(*beans.PaginationBean)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetAll indicates an expected call of GetAll
-func (mr *MockWorksServiceMockRecorder) GetAll(arg0 interface{}) *gomock.Call {
+func (mr *MockWorksServiceMockRecorder) GetAll(ctx, offset, limit interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockWorksService)(nil).GetAll), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockWorksService)(nil).GetAll), ctx, offset, limit)
 }
 
 // FindByID mocks base method
@@ -66,11 +66,12 @@ func (mr *MockWorksServiceMockRecorder) FindByID(arg0, arg1 interface{}) *gomock
 }
 
 // Create mocks base method
-func (m *MockWorksService) Create(arg0 context.Context, arg1 *beans.WorksFormBean) error {
+func (m *MockWorksService) Create(arg0 context.Context, arg1 *beans.WorksFormBean) (*entities.Work, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", arg0, arg1)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(*entities.Work)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // Create indicates an expected call of Create
@@ -80,11 +81,12 @@ func (mr *MockWorksServiceMockRecorder) Create(arg0, arg1 interface{}) *gomock.C
 }
 
 // Update mocks base method
-func (m *MockWorksService) Update(arg0 context.Context, arg1 uint64, arg2 *beans.WorksFormBean) error {
+func (m *MockWorksService) Update(arg0 context.Context, arg1 uint64, arg2 *beans.WorksFormBean) (*entities.Work, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Update", arg0, arg1, arg2)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(*entities.Work)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // Update indicates an expected call of Update
