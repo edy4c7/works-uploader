@@ -278,19 +278,19 @@ func (r *WorksServiceImpl) DeleteByID(ctx context.Context, id uint64) error {
 		return myErr.NewApplicationError(myErr.Code(myErr.WUE99), myErr.Cause(err))
 	}
 
-	if err := r.fileUploader.Delete(w.ThumbnailURL); err != nil {
-		return myErr.NewApplicationError(myErr.Code(myErr.WUE99), myErr.Cause(err))
-	}
-
-	if err := r.fileUploader.Delete(w.ContentURL); err != nil {
-		return myErr.NewApplicationError(myErr.Code(myErr.WUE99), myErr.Cause(err))
-	}
-
 	err = r.transactionRunner.Run(ctx, func(ctx context.Context) error {
 		return r.worksRepository.DeleteByID(ctx, id)
 	})
 
 	if err != nil {
+		return myErr.NewApplicationError(myErr.Code(myErr.WUE99), myErr.Cause(err))
+	}
+
+	if err := r.fileUploader.Delete(w.ThumbnailURL); err != nil {
+		return myErr.NewApplicationError(myErr.Code(myErr.WUE99), myErr.Cause(err))
+	}
+
+	if err := r.fileUploader.Delete(w.ContentURL); err != nil {
 		return myErr.NewApplicationError(myErr.Code(myErr.WUE99), myErr.Cause(err))
 	}
 
