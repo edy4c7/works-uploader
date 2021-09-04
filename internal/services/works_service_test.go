@@ -1361,16 +1361,26 @@ func TestDeleteByID(t *testing.T) {
 		defer ctrl.Finish()
 		ctx = setupContext(ctx)
 
+		tranRunner := mocks.NewMockTransactionRunner(ctrl)
+		tranRunner.
+			EXPECT().
+			Run(gomock.Any(), gomock.Any()).
+			DoAndReturn(func(ctx context.Context, tranFunc repositories.TransactionFunction) error {
+				return tranFunc(ctx)
+			})
+
 		worksRepo := mocks.NewMockWorksRepository(ctrl)
 		worksRepo.EXPECT().FindByID(gomock.Any(), gomock.Any()).Return(&entities.Work{}, nil)
+		worksRepo.EXPECT().DeleteByID(gomock.Any(), gomock.Any())
 
 		fileUploader := mocks.NewMockFileUploader(ctrl)
 		expect := errors.New("Failed to delete")
 		fileUploader.EXPECT().Delete(gomock.Any()).Return(expect)
 
 		service := &WorksServiceImpl{
-			fileUploader:    fileUploader,
-			worksRepository: worksRepo,
+			transactionRunner: tranRunner,
+			fileUploader:      fileUploader,
+			worksRepository:   worksRepo,
 		}
 
 		actual := service.DeleteByID(ctx, 1)
@@ -1389,6 +1399,14 @@ func TestDeleteByID(t *testing.T) {
 		defer ctrl.Finish()
 		ctx = setupContext(ctx)
 
+		tranRunner := mocks.NewMockTransactionRunner(ctrl)
+		tranRunner.
+			EXPECT().
+			Run(gomock.Any(), gomock.Any()).
+			DoAndReturn(func(ctx context.Context, tranFunc repositories.TransactionFunction) error {
+				return tranFunc(ctx)
+			})
+
 		fileUploader := mocks.NewMockFileUploader(ctrl)
 		expect := errors.New("Failed to delete")
 		fileUploader.EXPECT().Delete(gomock.Any()).Return(nil)
@@ -1396,10 +1414,12 @@ func TestDeleteByID(t *testing.T) {
 
 		worksRepo := mocks.NewMockWorksRepository(ctrl)
 		worksRepo.EXPECT().FindByID(gomock.Any(), gomock.Any()).Return(&entities.Work{}, nil)
+		worksRepo.EXPECT().DeleteByID(gomock.Any(), gomock.Any())
 
 		service := &WorksServiceImpl{
-			fileUploader:    fileUploader,
-			worksRepository: worksRepo,
+			transactionRunner: tranRunner,
+			fileUploader:      fileUploader,
+			worksRepository:   worksRepo,
 		}
 
 		actual := service.DeleteByID(ctx, 1)

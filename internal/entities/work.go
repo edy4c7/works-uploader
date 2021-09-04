@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/edy4c7/works-uploader/internal/common/constants"
+	"gorm.io/gorm"
 )
 
 type Work struct {
@@ -17,4 +18,5 @@ type Work struct {
 	Version      uint
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
+	DeletedAt    gorm.DeletedAt
 }
