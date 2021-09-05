@@ -22,7 +22,13 @@ import (
 func Run() {
 	r := gin.Default()
 
-	dsn := os.Getenv("DB_URL")
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_PASSWORD"),
+		os.Getenv("DB_SCHEMA"),
+		os.Getenv("DB_PORT"),
+	)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		DisableForeignKeyConstraintWhenMigrating: true,
 	})
@@ -62,7 +68,7 @@ func Run() {
 
 	port, err := strconv.Atoi(os.Getenv("PORT"))
 	if err != nil {
-		port = 8080
+		port = 8000
 	}
 	r.Run(fmt.Sprintf(":%d", port))
 }

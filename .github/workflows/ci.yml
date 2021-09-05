@@ -12,6 +12,24 @@ jobs:
         node: [14.17.6]
         go: [1.15]
 
+    env:
+      DB_USER: works_uploader
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_SCHEMA: works_uploader
+
+    services:
+      postgres:
+        image: postgres
+        ports: ["5432:5432"]
+        env:
+          POSTGRES_USER: ${{ env.DB_USER }}
+          POSTGRES_PASSWORD: ${{ env.DB_PASSWORD }}
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 60s
+          --health-retries 10
+
     steps:
       - name: Checkout 🛎
         uses: actions/checkout@master
@@ -42,5 +60,17 @@ jobs:
       - name: Install dependencies 👨🏻‍💻
         run: cd web && yarn
 
-      - name: Run tests 🧪
-        run: make test
+      - name: Run unit tests 🧪
+        run: make test_unit
+        
+      - name: Run API tests
+        run: 
+          make run &
+          make test_api
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5432
+          AUTH0_AUDIENCE: works-uploader
+          AUTH0_ISSUER: https://works-uploader-dev.us.auth0.com/
+          AUTH0_JWK: https://works-uploader-dev.us.auth0.com/.well-known/jwks.json
+          BASE_URL: http://localhost:8000/api/v1

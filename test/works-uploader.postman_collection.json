@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "09e17a9c-67dd-442c-b6a7-02e388a9f37d",
+		"_postman_id": "1e52b93b-4bcc-4bc4-83fd-bf81e90a6aaf",
 		"name": "Works uploader",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -18,7 +18,7 @@
 									"listen": "prerequest",
 									"script": {
 										"exec": [
-											"const baseUrl = pm.environment.get(\"baseUrl\");\r",
+											"const baseUrl = pm.environment.get(\"BASE_URL\");\r",
 											"\r",
 											"pm.sendRequest({\r",
 											"    url: `${baseUrl}/works`,\r",
@@ -32,7 +32,7 @@
 											"    const items = response.json().items;\r",
 											"    const target = items[Math.floor(Math.random() * items.length)];\r",
 											"\r",
-											"    pm.environment.set(\"get_target\", target.ID);\r",
+											"    pm.environment.set(\"GET_TARGET\", target.ID);\r",
 											"});"
 										],
 										"type": "text/javascript"
@@ -56,9 +56,9 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{baseUrl}}/works/:id",
+									"raw": "{{BASE_URL}}/works/:id",
 									"host": [
-										"{{baseUrl}}"
+										"{{BASE_URL}}"
 									],
 									"path": [
 										"works",
@@ -67,7 +67,7 @@
 									"variable": [
 										{
 											"key": "id",
-											"value": "{{get_target}}",
+											"value": "{{GET_TARGET}}",
 											"description": "(Required) 作品ID"
 										}
 									]
@@ -80,9 +80,9 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "{{baseUrl}}/works/:id",
+											"raw": "{{BASE_URL}}/works/:id",
 											"host": [
-												"{{baseUrl}}"
+												"{{BASE_URL}}"
 											],
 											"path": [
 												"works",
@@ -113,9 +113,9 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "{{baseUrl}}/works/:id",
+											"raw": "{{BASE_URL}}/works/:id",
 											"host": [
-												"{{baseUrl}}"
+												"{{BASE_URL}}"
 											],
 											"path": [
 												"works",
@@ -151,11 +151,11 @@
 										"exec": [
 											"const now = new Date();\r",
 											"\r",
-											"pm.environment.set(\"update_title\", `hoge${now}`);\r",
-											"pm.environment.set(\"update_description\", `hogehooge${now}`);\r",
-											"pm.environment.set(\"update_content_url\", `https://example.com/${now.getTime()}`);\r",
+											"pm.environment.set(\"UPDATE_TITLE\", `hoge${now}`);\r",
+											"pm.environment.set(\"UPDATE_DESCRIPTION\", `hogehooge${now}`);\r",
+											"pm.environment.set(\"UPDATE_CONTENT_URL\", `https://example.com/${now.getTime()}`);\r",
 											"\r",
-											"const baseUrl = pm.environment.get(\"baseUrl\");\r",
+											"const baseUrl = pm.environment.get(\"BASE_URL\");\r",
 											"\r",
 											"pm.sendRequest({\r",
 											"    url: `${baseUrl}/works`,\r",
@@ -169,8 +169,8 @@
 											"    const items = response.json().items;\r",
 											"    const target = items[Math.floor(Math.random() * items.length)];\r",
 											"\r",
-											"    pm.environment.set(\"update_target\", target.ID);\r",
-											"    pm.environment.set(\"update_target_version\", target.Version);\r",
+											"    pm.environment.set(\"UPDATE_TARGET\", target.ID);\r",
+											"    pm.environment.set(\"UPDATE_TARGET_VERSION\", target.Version);\r",
 											"});"
 										],
 										"type": "text/javascript"
@@ -196,7 +196,7 @@
 									"bearer": [
 										{
 											"key": "token",
-											"value": "{{access_token}}",
+											"value": "{{ACCESS_TOKEN}}",
 											"type": "string"
 										}
 									]
@@ -219,33 +219,33 @@
 										},
 										{
 											"key": "title",
-											"value": "{{update_title}}",
+											"value": "{{UPDATE_TITLE}}",
 											"description": "(Required) タイトル",
 											"type": "text"
 										},
 										{
 											"key": "description",
-											"value": "{{update_description}}",
+											"value": "{{UPDATE_DESCRIPTION}}",
 											"description": "説明文",
 											"type": "text"
 										},
 										{
 											"key": "url",
-											"value": "{{update_content_url}}",
+											"value": "{{UPDATE_CONTENT_URL}}",
 											"description": "作品本体のURL",
 											"type": "text"
 										},
 										{
 											"key": "version",
-											"value": "{{update_target_version}}",
+											"value": "{{UPDATE_TARGET_VERSION}}",
 											"type": "text"
 										}
 									]
 								},
 								"url": {
-									"raw": "{{baseUrl}}/works/:id",
+									"raw": "{{BASE_URL}}/works/:id",
 									"host": [
-										"{{baseUrl}}"
+										"{{BASE_URL}}"
 									],
 									"path": [
 										"works",
@@ -254,7 +254,7 @@
 									"variable": [
 										{
 											"key": "id",
-											"value": "{{update_target}}",
+											"value": "{{UPDATE_TARGET}}",
 											"description": "(Required) 作品ID"
 										}
 									]
@@ -273,9 +273,9 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/works/:id",
+											"raw": "{{BASE_URL}}/works/:id",
 											"host": [
-												"{{baseUrl}}"
+												"{{BASE_URL}}"
 											],
 											"path": [
 												"works",
@@ -312,9 +312,9 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/works/:id",
+											"raw": "{{BASE_URL}}/works/:id",
 											"host": [
-												"{{baseUrl}}"
+												"{{BASE_URL}}"
 											],
 											"path": [
 												"works",
@@ -351,9 +351,9 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/works/:id",
+											"raw": "{{BASE_URL}}/works/:id",
 											"host": [
-												"{{baseUrl}}"
+												"{{BASE_URL}}"
 											],
 											"path": [
 												"works",
@@ -387,12 +387,12 @@
 									"listen": "prerequest",
 									"script": {
 										"exec": [
-											"const baseUrl = pm.environment.get(\"baseUrl\");\r",
+											"const baseUrl = pm.environment.get(\"BASE_URL\");\r",
 											"\r",
 											"pm.sendRequest({\r",
 											"    url: `${baseUrl}/works`,\r",
 											"    method: 'POST',\r",
-											"    header: `Content-Type:application/json\\nAuthorization: Bearer ${pm.environment.get(\"access_token\")}`,\r",
+											"    header: `Content-Type:application/json\\nAuthorization: Bearer ${pm.environment.get(\"ACCESS_TOKEN\")}`,\r",
 											"    body: {\r",
 											"        mode: 'formdata',\r",
 											"        formdata: [\r",
@@ -407,7 +407,7 @@
 											"        console.log(err)\r",
 											"    }\r",
 											"    const res = response.json();\r",
-											"    pm.environment.set(\"delete_target\", res.ID);\r",
+											"    pm.environment.set(\"DELETE_TARGET\", res.ID);\r",
 											"});\r",
 											"\r",
 											""
@@ -426,8 +426,8 @@
 											"});\r",
 											"\r",
 											"pm.test(`Specified work was deleted`, () => {\r",
-											"    const baseUrl = pm.environment.get(\"baseUrl\");\r",
-											"    const target = pm.environment.get(\"delete_target\");\r",
+											"    const baseUrl = pm.environment.get(\"BASE_URL\");\r",
+											"    const target = pm.environment.get(\"DELETE_TARGET\");\r",
 											"    \r",
 											"    pm.sendRequest({\r",
 											"        url: `${baseUrl}/works`,\r",
@@ -464,7 +464,7 @@
 									"bearer": [
 										{
 											"key": "token",
-											"value": "{{access_token}}",
+											"value": "{{ACCESS_TOKEN}}",
 											"type": "string"
 										}
 									]
@@ -472,9 +472,9 @@
 								"method": "DELETE",
 								"header": [],
 								"url": {
-									"raw": "{{baseUrl}}/works/:id",
+									"raw": "{{BASE_URL}}/works/:id",
 									"host": [
-										"{{baseUrl}}"
+										"{{BASE_URL}}"
 									],
 									"path": [
 										"works",
@@ -483,7 +483,7 @@
 									"variable": [
 										{
 											"key": "id",
-											"value": "{{delete_target}}",
+											"value": "{{DELETE_TARGET}}",
 											"description": "(Required) 作品ID"
 										}
 									]
@@ -502,9 +502,9 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/works/:id",
+											"raw": "{{BASE_URL}}/works/:id",
 											"host": [
-												"{{baseUrl}}"
+												"{{BASE_URL}}"
 											],
 											"path": [
 												"works",
@@ -541,9 +541,9 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/works/:id",
+											"raw": "{{BASE_URL}}/works/:id",
 											"host": [
-												"{{baseUrl}}"
+												"{{BASE_URL}}"
 											],
 											"path": [
 												"works",
@@ -610,9 +610,9 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/works?offset={{works_offset}}&limit={{works_limit}}",
+							"raw": "{{BASE_URL}}/works?offset={{WORKS_OFFSET}}&limit={{WORKS_LIMIT}}",
 							"host": [
-								"{{baseUrl}}"
+								"{{BASE_URL}}"
 							],
 							"path": [
 								"works"
@@ -620,12 +620,12 @@
 							"query": [
 								{
 									"key": "offset",
-									"value": "{{works_offset}}",
+									"value": "{{WORKS_OFFSET}}",
 									"description": "開始行数"
 								},
 								{
 									"key": "limit",
-									"value": "{{works_limit}}",
+									"value": "{{WORKS_LIMIT}}",
 									"description": "取得件数"
 								}
 							]
@@ -638,9 +638,9 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{baseUrl}}/works?offset=0&limit=200",
+									"raw": "{{BASE_URL}}/works?offset=0&limit=200",
 									"host": [
-										"{{baseUrl}}"
+										"{{BASE_URL}}"
 									],
 									"path": [
 										"works"
@@ -675,9 +675,9 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{baseUrl}}/works?offset=0&limit=200",
+									"raw": "{{BASE_URL}}/works?offset=0&limit=200",
 									"host": [
-										"{{baseUrl}}"
+										"{{BASE_URL}}"
 									],
 									"path": [
 										"works"
@@ -746,9 +746,9 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/works?offset={{works_offset}}",
+							"raw": "{{BASE_URL}}/works?offset={{WORKS_OFFSET}}",
 							"host": [
-								"{{baseUrl}}"
+								"{{BASE_URL}}"
 							],
 							"path": [
 								"works"
@@ -756,7 +756,7 @@
 							"query": [
 								{
 									"key": "offset",
-									"value": "{{works_offset}}",
+									"value": "{{WORKS_OFFSET}}",
 									"description": "開始行数"
 								}
 							]
@@ -769,9 +769,9 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{baseUrl}}/works?offset=0&limit=200",
+									"raw": "{{BASE_URL}}/works?offset=0&limit=200",
 									"host": [
-										"{{baseUrl}}"
+										"{{BASE_URL}}"
 									],
 									"path": [
 										"works"
@@ -806,9 +806,9 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{baseUrl}}/works?offset=0&limit=200",
+									"raw": "{{BASE_URL}}/works?offset=0&limit=200",
 									"host": [
-										"{{baseUrl}}"
+										"{{BASE_URL}}"
 									],
 									"path": [
 										"works"
@@ -877,9 +877,9 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/works?limit={{works_limit}}",
+							"raw": "{{BASE_URL}}/works?limit={{WORKS_LIMIT}}",
 							"host": [
-								"{{baseUrl}}"
+								"{{BASE_URL}}"
 							],
 							"path": [
 								"works"
@@ -887,7 +887,7 @@
 							"query": [
 								{
 									"key": "limit",
-									"value": "{{works_limit}}",
+									"value": "{{WORKS_LIMIT}}",
 									"description": "取得件数"
 								}
 							]
@@ -900,9 +900,9 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{baseUrl}}/works?offset=0&limit=200",
+									"raw": "{{BASE_URL}}/works?offset=0&limit=200",
 									"host": [
-										"{{baseUrl}}"
+										"{{BASE_URL}}"
 									],
 									"path": [
 										"works"
@@ -937,9 +937,9 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{baseUrl}}/works?offset=0&limit=200",
+									"raw": "{{BASE_URL}}/works?offset=0&limit=200",
 									"host": [
-										"{{baseUrl}}"
+										"{{BASE_URL}}"
 									],
 									"path": [
 										"works"
@@ -1008,9 +1008,9 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/works",
+							"raw": "{{BASE_URL}}/works",
 							"host": [
-								"{{baseUrl}}"
+								"{{BASE_URL}}"
 							],
 							"path": [
 								"works"
@@ -1024,9 +1024,9 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{baseUrl}}/works?offset=0&limit=200",
+									"raw": "{{BASE_URL}}/works?offset=0&limit=200",
 									"host": [
-										"{{baseUrl}}"
+										"{{BASE_URL}}"
 									],
 									"path": [
 										"works"
@@ -1061,9 +1061,9 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{baseUrl}}/works?offset=0&limit=200",
+									"raw": "{{BASE_URL}}/works?offset=0&limit=200",
 									"host": [
-										"{{baseUrl}}"
+										"{{BASE_URL}}"
 									],
 									"path": [
 										"works"
@@ -1115,7 +1115,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "{{access_token}}",
+									"value": "{{ACCESS_TOKEN}}",
 									"type": "string"
 								}
 							]
@@ -1157,9 +1157,9 @@
 							]
 						},
 						"url": {
-							"raw": "{{baseUrl}}/works",
+							"raw": "{{BASE_URL}}/works",
 							"host": [
-								"{{baseUrl}}"
+								"{{BASE_URL}}"
 							],
 							"path": [
 								"works"
@@ -1179,9 +1179,9 @@
 									}
 								],
 								"url": {
-									"raw": "{{baseUrl}}/works?type=1&title=Hoge&description=Upload with URL&url=https://example.com",
+									"raw": "{{BASE_URL}}/works?type=1&title=Hoge&description=Upload with URL&url=https://example.com",
 									"host": [
-										"{{baseUrl}}"
+										"{{BASE_URL}}"
 									],
 									"path": [
 										"works"
@@ -1243,7 +1243,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "{{access_token}}",
+									"value": "{{ACCESS_TOKEN}}",
 									"type": "string"
 								}
 							]
@@ -1279,9 +1279,9 @@
 							]
 						},
 						"url": {
-							"raw": "{{baseUrl}}/works",
+							"raw": "{{BASE_URL}}/works",
 							"host": [
-								"{{baseUrl}}"
+								"{{BASE_URL}}"
 							],
 							"path": [
 								"works"
@@ -1301,9 +1301,9 @@
 									}
 								],
 								"url": {
-									"raw": "{{baseUrl}}/works",
+									"raw": "{{BASE_URL}}/works",
 									"host": [
-										"{{baseUrl}}"
+										"{{BASE_URL}}"
 									],
 									"path": [
 										"works"
@@ -1345,7 +1345,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "{{access_token}}",
+									"value": "{{ACCESS_TOKEN}}",
 									"type": "string"
 								}
 							]
@@ -1392,9 +1392,9 @@
 							]
 						},
 						"url": {
-							"raw": "{{baseUrl}}/works",
+							"raw": "{{BASE_URL}}/works",
 							"host": [
-								"{{baseUrl}}"
+								"{{BASE_URL}}"
 							],
 							"path": [
 								"works"
@@ -1414,9 +1414,9 @@
 									}
 								],
 								"url": {
-									"raw": "{{baseUrl}}/works?type=2&title=Hoge&description=Upload with URL&thumbnail=thumbnail&content=content",
+									"raw": "{{BASE_URL}}/works?type=2&title=Hoge&description=Upload with URL&thumbnail=thumbnail&content=content",
 									"host": [
-										"{{baseUrl}}"
+										"{{BASE_URL}}"
 									],
 									"path": [
 										"works"
@@ -1482,7 +1482,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "{{access_token}}",
+									"value": "{{ACCESS_TOKEN}}",
 									"type": "string"
 								}
 							]
@@ -1524,9 +1524,9 @@
 							]
 						},
 						"url": {
-							"raw": "{{baseUrl}}/works",
+							"raw": "{{BASE_URL}}/works",
 							"host": [
-								"{{baseUrl}}"
+								"{{BASE_URL}}"
 							],
 							"path": [
 								"works"
@@ -1546,9 +1546,9 @@
 									}
 								],
 								"url": {
-									"raw": "{{baseUrl}}/works",
+									"raw": "{{BASE_URL}}/works",
 									"host": [
-										"{{baseUrl}}"
+										"{{BASE_URL}}"
 									],
 									"path": [
 										"works"
@@ -1609,9 +1609,9 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{baseUrl}}/activities",
+					"raw": "{{BASE_URL}}/activities",
 					"host": [
-						"{{baseUrl}}"
+						"{{BASE_URL}}"
 					],
 					"path": [
 						"activities"
@@ -1633,9 +1633,9 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/activities?offset=0&limit=200&user=amet in commo",
+							"raw": "{{BASE_URL}}/activities?offset=0&limit=200&user=amet in commo",
 							"host": [
-								"{{baseUrl}}"
+								"{{BASE_URL}}"
 							],
 							"path": [
 								"activities"
@@ -1708,9 +1708,9 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{baseUrl}}/activities?user=t99KheiHum0wUBnRLJ8gPgvDTmiC8sCr@clients",
+					"raw": "{{BASE_URL}}/activities?user=t99KheiHum0wUBnRLJ8gPgvDTmiC8sCr@clients",
 					"host": [
-						"{{baseUrl}}"
+						"{{BASE_URL}}"
 					],
 					"path": [
 						"activities"
@@ -1731,9 +1731,9 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/activities?offset=0&limit=200&user=amet in commo",
+							"raw": "{{BASE_URL}}/activities?offset=0&limit=200&user=amet in commo",
 							"host": [
-								"{{baseUrl}}"
+								"{{BASE_URL}}"
 							],
 							"path": [
 								"activities"
@@ -1776,12 +1776,12 @@
 					"script": {
 						"exec": [
 							"const envKeys = {\r",
-							"    accessToken: 'callback_token',\r",
-							"    expires: 'callback_token_expires_in',\r",
-							"    auth0Audience: 'auth0_audience',\r",
-							"    auth0Domain: 'auth0_domain',\r",
-							"    auth0ClientId: 'callback_client_id',\r",
-							"    auth0ClientSecret: 'callback_client_secret',\r",
+							"    accessToken: 'CALLBACK_TOKEN',\r",
+							"    expires: 'CALLBACK_TOKEN_EXPIRES_IN',\r",
+							"    auth0Audience: 'AUTH0_AUDIENCE',\r",
+							"    auth0Domain: 'AUTH0_DOMAIN',\r",
+							"    auth0ClientId: 'CALLBACK_CLIENT_ID',\r",
+							"    auth0ClientSecret: 'CALLBACK_CLIENT_SECRET',\r",
 							"}\r",
 							"\r",
 							"const now = new Date();\r",
@@ -1835,7 +1835,7 @@
 					"bearer": [
 						{
 							"key": "token",
-							"value": "{{callback_token}}",
+							"value": "{{CALLBACK_TOKEN}}",
 							"type": "string"
 						}
 					]
@@ -1852,9 +1852,9 @@
 					}
 				},
 				"url": {
-					"raw": "{{baseUrl}}/users",
+					"raw": "{{BASE_URL}}/users",
 					"host": [
-						"{{baseUrl}}"
+						"{{BASE_URL}}"
 					],
 					"path": [
 						"users"
@@ -1871,13 +1871,13 @@
 				"type": "text/javascript",
 				"exec": [
 					"const envKeys = {",
-					"    accessToken: 'access_token',",
-					"    expires: 'access_token_expires_in',",
-					"    auth0Audience: 'auth0_audience',",
-					"    auth0Domain: 'auth0_domain',",
-					"    auth0ClientId: 'auth0_client_id',",
-					"    auth0ClientSecret: 'auth0_client_secret',",
-					"    worksOffset: 'works_offset'",
+					"    accessToken: 'ACCESS_TOKEN',",
+					"    expires: 'ACCESS_TOKEN_EXPIRES_IN',",
+					"    auth0Audience: 'AUTH0_AUDIENCE',",
+					"    auth0Domain: 'AUTH0_DOMAIN',",
+					"    auth0ClientId: 'AUTH0_CLIENT_ID',",
+					"    auth0ClientSecret: 'AUTH0_CLIENT_SECRET',",
+					"    worksOffset: 'WORKS_OFFSET'",
 					"}",
 					"",
 					"const now = new Date();",
@@ -1908,7 +1908,7 @@
 					"    });",
 					"}",
 					"",
-					"const baseUrl = pm.environment.get(\"baseUrl\");",
+					"const baseUrl = pm.environment.get(\"BASE_URL\");",
 					"",
 					"pm.sendRequest({",
 					"    url: `${baseUrl}/works`,",
@@ -1930,7 +1930,7 @@
 					"        pm.sendRequest({",
 					"            url: `${baseUrl}/works`,",
 					"            method: 'POST',",
-					"            header: `Content-Type:application/json\\nAuthorization: Bearer ${pm.environment.get(\"access_token\")}`,",
+					"            header: `Content-Type:application/json\\nAuthorization: Bearer ${pm.environment.get(\"ACCESS_TOKEN\")}`,",
 					"            body: {",
 					"                mode: 'formdata',",
 					"                formdata: [",
@@ -1959,7 +1959,7 @@
 	],
 	"variable": [
 		{
-			"key": "baseUrl",
+			"key": "BASE_URL",
 			"value": "/"
 		}
 	]

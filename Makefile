@@ -12,22 +12,30 @@ mocks:
 	mockgen -source internal/lib/file_uploader.go -destination internal/mocks/file_uploader.go --package mocks
 	mockgen -source internal/lib/uuid_generator.go -destination internal/mocks/uuid_generator.go --package mocks
 
-.PHONY: dev
-dev:
+.PHONY: dev_front
+dev_front:
 	yarn dev
 
-.PHONY: run
-run: public
+.PHONY: dev_back
+dev_back: public
 	air
 
-.PHONY: test
-test:
+.PHONY: test_unit
+test_unit:
 	go test -coverprofile=cover.out -v ./...
 	go tool cover -html=cover.out -o cover.html
 	yarn test
+
+.PHONY: test_api
+test_api:
+	newman run ./test/works-uploader.postman_collection.json
 
 public: nuxt.config.js web
 	yarn run generate
 
 wu:
 	go build cmd/wu/main.go
+
+.PHONY: run
+run:
+	go run cmd/wu/main.go
