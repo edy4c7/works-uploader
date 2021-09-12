@@ -68,6 +68,8 @@ jobs:
           make run &
           make test_api
         env:
+          POSTMAN_API_KEY: ${{ secrets.POSTMAN_API_KEY }}
+          POSTMAN_COLLECTION_ID: ${{ secrets.POSTMAN_COLLECTION_ID }}
           DB_HOST: localhost
           DB_PORT: 5432
           AUTH0_AUDIENCE: works-uploader

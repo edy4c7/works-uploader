@@ -26,9 +26,18 @@ test_unit:
 	go tool cover -html=cover.out -o cover.html
 	yarn test
 
+test_dir=.test
 .PHONY: test_api
 test_api:
-	newman run ./test/works-uploader.postman_collection.json
+	mkdir -p $(test_dir)
+	curl https://api.getpostman.com/collections/$(POSTMAN_COLLECTION_ID)?apikey=$(POSTMAN_API_KEY) > $(test_dir)/api.json
+	curl https://api.getpostman.com/environments/$(POSTMAN_ENVIRONMENT_ID)?apikey=$(POSTMAN_API_KEY) > $(test_dir)/env.json
+	touch $(test_dir)/test_thumb.jpg
+	touch $(test_dir)/test_content.jpg
+	newman run $(test_dir)/api.json -e $(test_dir)/env.json --working-dir $(test_dir);\
+	result=$$?;\
+	rm -rf $(test_dir);\
+	exit $$result
 
 public: nuxt.config.js web
 	yarn run generate
