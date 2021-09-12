@@ -28,7 +28,13 @@ test_unit:
 
 .PHONY: test_api
 test_api:
-	newman run ./test/works-uploader.postman_collection.json
+	mkdir -p .test
+	curl https://api.getpostman.com/collections/$(POSTMAN_COLLECTION_ID)?apikey=$(POSTMAN_API_KEY) > .test/api.json
+	curl https://api.getpostman.com/environments/$(POSTMAN_ENVIRONMENT_ID)?apikey=$(POSTMAN_API_KEY) > .test/env.json
+	touch .test/test_thumb.jpg
+	touch .test/test_content.jpg
+	-@newman run .test/api.json -e .test/env.json --working-dir .test
+	rm -rf .test
 
 public: nuxt.config.js web
 	yarn run generate
