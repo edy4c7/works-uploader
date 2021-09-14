@@ -147,4 +147,7 @@ __debug_bin
 
 public
 tmp
+
 .test
+
+.aws

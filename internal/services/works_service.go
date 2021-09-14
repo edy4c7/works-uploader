@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"path/filepath"
 
 	"github.com/edy4c7/works-uploader/internal/beans"
 	"github.com/edy4c7/works-uploader/internal/common/constants"
@@ -39,7 +40,7 @@ type WorksServiceImpl struct {
 	worksRepository      repositories.WorksRepository
 	activitiesRepository repositories.ActivitiesRepository
 	uuidGenerator        lib.UUIDGenerator
-	fileUploader         lib.FileUploader
+	fileUploader         lib.StorageClient
 }
 
 //NewWorksServiceImpl は、TransuctionRunner、リポジトリオブジェクトを指定し、WorksServiceImplの新しいインスタンスを生成する
@@ -48,7 +49,7 @@ func NewWorksServiceImpl(
 	worksRepo repositories.WorksRepository,
 	activitiesRepo repositories.ActivitiesRepository,
 	uuidGenerator lib.UUIDGenerator,
-	fileUploader lib.FileUploader,
+	fileUploader lib.StorageClient,
 ) *WorksServiceImpl {
 
 	if tranRnr == nil {
@@ -140,13 +141,19 @@ func (r *WorksServiceImpl) Create(ctx context.Context, bean *beans.WorksFormBean
 	}
 
 	if bean.Type == constants.ContentTypeFile {
-		thumbURL, err := r.fileUploader.Upload(r.uuidGenerator.Generate(), bean.Thumbnail)
+		thumbURL, err := r.fileUploader.Upload(
+			fmt.Sprintf("%s%s", r.uuidGenerator.Generate(), filepath.Ext(bean.Thumbnail.Filename)),
+			bean.Thumbnail,
+		)
 		if err != nil {
 			return nil, myErr.NewApplicationError(myErr.Code(myErr.WUE99), myErr.Cause(err))
 		}
 		w.ThumbnailURL = thumbURL
 
-		contentURL, err := r.fileUploader.Upload(r.uuidGenerator.Generate(), bean.Content)
+		contentURL, err := r.fileUploader.Upload(
+			fmt.Sprintf("%s%s", r.uuidGenerator.Generate(), filepath.Ext(bean.Content.Filename)),
+			bean.Content,
+		)
 		if err != nil {
 			return nil, myErr.NewApplicationError(myErr.Code(myErr.WUE99), myErr.Cause(err))
 		}
@@ -198,12 +205,18 @@ func (r *WorksServiceImpl) Update(ctx context.Context, id uint64, bean *beans.Wo
 	var contentURL string
 	if bean.Type == constants.ContentTypeFile {
 		var err error
-		thumbURL, err = r.fileUploader.Upload(r.uuidGenerator.Generate(), bean.Thumbnail)
+		thumbURL, err = r.fileUploader.Upload(
+			fmt.Sprintf("%s%s", r.uuidGenerator.Generate(), filepath.Ext(bean.Thumbnail.Filename)),
+			bean.Thumbnail,
+		)
 		if err != nil {
 			return nil, myErr.NewApplicationError(myErr.Code(myErr.WUE99), myErr.Cause(err))
 		}
 
-		contentURL, err = r.fileUploader.Upload(r.uuidGenerator.Generate(), bean.Content)
+		contentURL, err = r.fileUploader.Upload(
+			fmt.Sprintf("%s%s", r.uuidGenerator.Generate(), filepath.Ext(bean.Content.Filename)),
+			bean.Content,
+		)
 		if err != nil {
 			return nil, myErr.NewApplicationError(myErr.Code(myErr.WUE99), myErr.Cause(err))
 		}
@@ -268,29 +281,16 @@ func (r *WorksServiceImpl) Update(ctx context.Context, id uint64, bean *beans.Wo
 
 //DeleteByID は、指定したIDの作品を削除する
 func (r *WorksServiceImpl) DeleteByID(ctx context.Context, id uint64) error {
-	w, err := r.worksRepository.FindByID(ctx, id)
+	err := r.transactionRunner.Run(ctx, func(ctx context.Context) error {
+		return r.worksRepository.DeleteByID(ctx, id)
+	})
+
 	if err != nil {
 		var dbErr *myErr.RecordNotFoundError
 		if errors.As(err, &dbErr) {
 			return myErr.NewApplicationError(myErr.Code(myErr.WUE01), myErr.Cause(err))
 		}
 
-		return myErr.NewApplicationError(myErr.Code(myErr.WUE99), myErr.Cause(err))
-	}
-
-	err = r.transactionRunner.Run(ctx, func(ctx context.Context) error {
-		return r.worksRepository.DeleteByID(ctx, id)
-	})
-
-	if err != nil {
-		return myErr.NewApplicationError(myErr.Code(myErr.WUE99), myErr.Cause(err))
-	}
-
-	if err := r.fileUploader.Delete(w.ThumbnailURL); err != nil {
-		return myErr.NewApplicationError(myErr.Code(myErr.WUE99), myErr.Cause(err))
-	}
-
-	if err := r.fileUploader.Delete(w.ContentURL); err != nil {
 		return myErr.NewApplicationError(myErr.Code(myErr.WUE99), myErr.Cause(err))
 	}
 
