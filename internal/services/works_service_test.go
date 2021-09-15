@@ -26,7 +26,7 @@ func TestNewWorksServiceImpl(t *testing.T) {
 		workRepo := mocks.NewMockWorksRepository(ctrl)
 		actRepo := mocks.NewMockActivitiesRepository(ctrl)
 		uuidGenerator := mocks.NewMockUUIDGenerator(ctrl)
-		uploader := mocks.NewMockFileUploader(ctrl)
+		uploader := mocks.NewMockStorageClient(ctrl)
 
 		service := NewWorksServiceImpl(tr, workRepo, actRepo, uuidGenerator, uploader)
 
@@ -43,7 +43,7 @@ func TestNewWorksServiceImpl(t *testing.T) {
 		workRepo := mocks.NewMockWorksRepository(ctrl)
 		actRepo := mocks.NewMockActivitiesRepository(ctrl)
 		uuidGenerator := mocks.NewMockUUIDGenerator(ctrl)
-		uploader := mocks.NewMockFileUploader(ctrl)
+		uploader := mocks.NewMockStorageClient(ctrl)
 
 		assert.Panics(t, func() {
 			NewWorksServiceImpl(nil, workRepo, actRepo, uuidGenerator, uploader)
@@ -56,7 +56,7 @@ func TestNewWorksServiceImpl(t *testing.T) {
 		tr := mocks.NewMockTransactionRunner(ctrl)
 		actRepo := mocks.NewMockActivitiesRepository(ctrl)
 		uuidGenerator := mocks.NewMockUUIDGenerator(ctrl)
-		uploader := mocks.NewMockFileUploader(ctrl)
+		uploader := mocks.NewMockStorageClient(ctrl)
 
 		assert.Panics(t, func() {
 			NewWorksServiceImpl(tr, nil, actRepo, uuidGenerator, uploader)
@@ -69,7 +69,7 @@ func TestNewWorksServiceImpl(t *testing.T) {
 		tr := mocks.NewMockTransactionRunner(ctrl)
 		workRepo := mocks.NewMockWorksRepository(ctrl)
 		uuidGenerator := mocks.NewMockUUIDGenerator(ctrl)
-		uploader := mocks.NewMockFileUploader(ctrl)
+		uploader := mocks.NewMockStorageClient(ctrl)
 
 		assert.Panics(t, func() {
 			NewWorksServiceImpl(tr, workRepo, nil, uuidGenerator, uploader)
@@ -82,7 +82,7 @@ func TestNewWorksServiceImpl(t *testing.T) {
 		tr := mocks.NewMockTransactionRunner(ctrl)
 		workRepo := mocks.NewMockWorksRepository(ctrl)
 		actRepo := mocks.NewMockActivitiesRepository(ctrl)
-		uploader := mocks.NewMockFileUploader(ctrl)
+		uploader := mocks.NewMockStorageClient(ctrl)
 
 		assert.Panics(t, func() {
 			NewWorksServiceImpl(tr, workRepo, actRepo, nil, uploader)
@@ -270,7 +270,7 @@ func TestCreate(t *testing.T) {
 		}
 
 		uuidGenerator := mocks.NewMockUUIDGenerator(ctrl)
-		fileUploader := mocks.NewMockFileUploader(ctrl)
+		fileUploader := mocks.NewMockStorageClient(ctrl)
 
 		tranRunner := mocks.NewMockTransactionRunner(ctrl)
 		tranRunner.
@@ -337,7 +337,7 @@ func TestCreate(t *testing.T) {
 
 		uuidGenerator := mocks.NewMockUUIDGenerator(ctrl)
 		uuidGenerator.EXPECT().Generate().Return(thumbnailFileName)
-		fileUploader := mocks.NewMockFileUploader(ctrl)
+		fileUploader := mocks.NewMockStorageClient(ctrl)
 		fileUploader.EXPECT().Upload(thumbnailFileName, form.Thumbnail).Return(thumbnailURL, nil)
 
 		uuidGenerator.EXPECT().Generate().Return(contentFileName)
@@ -463,7 +463,7 @@ func TestCreate(t *testing.T) {
 
 		uuidGenerator := mocks.NewMockUUIDGenerator(ctrl)
 		uuidGenerator.EXPECT().Generate()
-		fileUploader := mocks.NewMockFileUploader(ctrl)
+		fileUploader := mocks.NewMockStorageClient(ctrl)
 		fileUploader.EXPECT().Upload(gomock.Any(), gomock.Any()).Return("", expect)
 
 		service := &WorksServiceImpl{
@@ -505,7 +505,7 @@ func TestCreate(t *testing.T) {
 
 		uuidGenerator := mocks.NewMockUUIDGenerator(ctrl)
 		uuidGenerator.EXPECT().Generate()
-		fileUploader := mocks.NewMockFileUploader(ctrl)
+		fileUploader := mocks.NewMockStorageClient(ctrl)
 		fileUploader.EXPECT().Upload(gomock.Any(), gomock.Any()).Return("https://example.com", nil)
 
 		uuidGenerator.EXPECT().Generate()
@@ -549,7 +549,7 @@ func TestCreate(t *testing.T) {
 
 		uuidGenerator := mocks.NewMockUUIDGenerator(ctrl)
 		uuidGenerator.EXPECT().Generate().AnyTimes()
-		fileUploader := mocks.NewMockFileUploader(ctrl)
+		fileUploader := mocks.NewMockStorageClient(ctrl)
 		fileUploader.EXPECT().Upload(gomock.Any(), gomock.Any()).AnyTimes()
 
 		tranRunner := mocks.NewMockTransactionRunner(ctrl)
@@ -594,7 +594,7 @@ func TestCreate(t *testing.T) {
 		}
 
 		uuidGenerator := mocks.NewMockUUIDGenerator(ctrl)
-		fileUploader := mocks.NewMockFileUploader(ctrl)
+		fileUploader := mocks.NewMockStorageClient(ctrl)
 		uuidGenerator.EXPECT().Generate().AnyTimes()
 		fileUploader.EXPECT().Upload(gomock.Any(), gomock.Any()).AnyTimes()
 
@@ -645,7 +645,7 @@ func TestCreate(t *testing.T) {
 		}
 
 		uuidGenerator := mocks.NewMockUUIDGenerator(ctrl)
-		fileUploader := mocks.NewMockFileUploader(ctrl)
+		fileUploader := mocks.NewMockStorageClient(ctrl)
 		uuidGenerator.EXPECT().Generate().AnyTimes()
 		fileUploader.EXPECT().Upload(gomock.Any(), gomock.Any()).AnyTimes()
 
@@ -699,7 +699,7 @@ func TestUpdate(t *testing.T) {
 		var id uint64 = 12345
 
 		uuidGenerator := mocks.NewMockUUIDGenerator(ctrl)
-		fileUploader := mocks.NewMockFileUploader(ctrl)
+		fileUploader := mocks.NewMockStorageClient(ctrl)
 
 		tranRunner := mocks.NewMockTransactionRunner(ctrl)
 		tranRunner.
@@ -763,7 +763,7 @@ func TestUpdate(t *testing.T) {
 
 		uuidGenerator := mocks.NewMockUUIDGenerator(ctrl)
 		uuidGenerator.EXPECT().Generate().Return(thumbnailFileName)
-		fileUploader := mocks.NewMockFileUploader(ctrl)
+		fileUploader := mocks.NewMockStorageClient(ctrl)
 		fileUploader.EXPECT().Upload(thumbnailFileName, form.Thumbnail).Return(thumbnailURL, nil)
 
 		uuidGenerator.EXPECT().Generate().Return(contentFileName)
@@ -825,7 +825,7 @@ func TestUpdate(t *testing.T) {
 		var id uint64 = 12345
 
 		uuidGenerator := mocks.NewMockUUIDGenerator(ctrl)
-		fileUploader := mocks.NewMockFileUploader(ctrl)
+		fileUploader := mocks.NewMockStorageClient(ctrl)
 
 		tranRunner := mocks.NewMockTransactionRunner(ctrl)
 		tranRunner.
@@ -942,7 +942,7 @@ func TestUpdate(t *testing.T) {
 
 		uuidGenerator := mocks.NewMockUUIDGenerator(ctrl)
 		uuidGenerator.EXPECT().Generate()
-		fileUploader := mocks.NewMockFileUploader(ctrl)
+		fileUploader := mocks.NewMockStorageClient(ctrl)
 		fileUploader.EXPECT().Upload(gomock.Any(), gomock.Any()).Return("", expect)
 
 		service := &WorksServiceImpl{
@@ -984,7 +984,7 @@ func TestUpdate(t *testing.T) {
 
 		uuidGenerator := mocks.NewMockUUIDGenerator(ctrl)
 		uuidGenerator.EXPECT().Generate()
-		fileUploader := mocks.NewMockFileUploader(ctrl)
+		fileUploader := mocks.NewMockStorageClient(ctrl)
 		fileUploader.EXPECT().Upload(gomock.Any(), gomock.Any()).Return("https://example.com", nil)
 
 		uuidGenerator.EXPECT().Generate()
@@ -1028,7 +1028,7 @@ func TestUpdate(t *testing.T) {
 
 		uuidGenerator := mocks.NewMockUUIDGenerator(ctrl)
 		uuidGenerator.EXPECT().Generate().AnyTimes()
-		fileUploader := mocks.NewMockFileUploader(ctrl)
+		fileUploader := mocks.NewMockStorageClient(ctrl)
 		fileUploader.EXPECT().Upload(gomock.Any(), gomock.Any()).AnyTimes()
 
 		tranRunner := mocks.NewMockTransactionRunner(ctrl)
@@ -1074,7 +1074,7 @@ func TestUpdate(t *testing.T) {
 
 		uuidGenerator := mocks.NewMockUUIDGenerator(ctrl)
 		uuidGenerator.EXPECT().Generate().AnyTimes()
-		fileUploader := mocks.NewMockFileUploader(ctrl)
+		fileUploader := mocks.NewMockStorageClient(ctrl)
 		fileUploader.EXPECT().Upload(gomock.Any(), gomock.Any()).AnyTimes()
 
 		tranRunner := mocks.NewMockTransactionRunner(ctrl)
@@ -1125,7 +1125,7 @@ func TestUpdate(t *testing.T) {
 
 		uuidGenerator := mocks.NewMockUUIDGenerator(ctrl)
 		uuidGenerator.EXPECT().Generate().AnyTimes()
-		fileUploader := mocks.NewMockFileUploader(ctrl)
+		fileUploader := mocks.NewMockStorageClient(ctrl)
 		fileUploader.EXPECT().Upload(gomock.Any(), gomock.Any()).AnyTimes()
 
 		tranRunner := mocks.NewMockTransactionRunner(ctrl)
@@ -1176,7 +1176,7 @@ func TestUpdate(t *testing.T) {
 
 		uuidGenerator := mocks.NewMockUUIDGenerator(ctrl)
 		uuidGenerator.EXPECT().Generate().AnyTimes()
-		fileUploader := mocks.NewMockFileUploader(ctrl)
+		fileUploader := mocks.NewMockStorageClient(ctrl)
 		fileUploader.EXPECT().Upload(gomock.Any(), gomock.Any()).AnyTimes()
 
 		tranRunner := mocks.NewMockTransactionRunner(ctrl)
@@ -1228,7 +1228,7 @@ func TestUpdate(t *testing.T) {
 
 		uuidGenerator := mocks.NewMockUUIDGenerator(ctrl)
 		uuidGenerator.EXPECT().Generate().AnyTimes()
-		fileUploader := mocks.NewMockFileUploader(ctrl)
+		fileUploader := mocks.NewMockStorageClient(ctrl)
 		fileUploader.EXPECT().Upload(gomock.Any(), gomock.Any()).AnyTimes()
 
 		tranRunner := mocks.NewMockTransactionRunner(ctrl)
@@ -1273,12 +1273,6 @@ func TestDeleteByID(t *testing.T) {
 		ctx = setupContext(ctx)
 
 		var id uint64 = 1
-		thumbFileName := "abcde12345"
-		contentFileName := "fghij67890"
-
-		fileUploader := mocks.NewMockFileUploader(ctrl)
-		fileUploader.EXPECT().Delete(thumbFileName)
-		fileUploader.EXPECT().Delete(contentFileName)
 
 		tranRunner := mocks.NewMockTransactionRunner(ctrl)
 		tranRunner.
@@ -1289,14 +1283,9 @@ func TestDeleteByID(t *testing.T) {
 			})
 
 		worksRepo := mocks.NewMockWorksRepository(ctrl)
-		worksRepo.EXPECT().FindByID(gomock.Eq(ctx), id).Return(&entities.Work{
-			ThumbnailURL: thumbFileName,
-			ContentURL:   contentFileName,
-		}, nil)
 		worksRepo.EXPECT().DeleteByID(gomock.Eq(ctx), id)
 
 		service := &WorksServiceImpl{
-			fileUploader:      fileUploader,
 			transactionRunner: tranRunner,
 			worksRepository:   worksRepo,
 		}
@@ -1308,16 +1297,21 @@ func TestDeleteByID(t *testing.T) {
 		ctrl, ctx := gomock.WithContext(context.Background(), t)
 		defer ctrl.Finish()
 
-		fileUploader := mocks.NewMockFileUploader(ctrl)
-		fileUploader.EXPECT().Upload(gomock.Any(), gomock.Any()).AnyTimes()
+		tranRunner := mocks.NewMockTransactionRunner(ctrl)
+		tranRunner.
+			EXPECT().
+			Run(gomock.Eq(ctx), gomock.Any()).
+			DoAndReturn(func(ctx context.Context, tranFunc repositories.TransactionFunction) error {
+				return tranFunc(ctx)
+			})
 
 		worksRepo := mocks.NewMockWorksRepository(ctrl)
 		expect := myErr.NewRecordNotFoundError("", nil)
-		worksRepo.EXPECT().FindByID(gomock.Any(), gomock.Any()).Return(nil, expect)
+		worksRepo.EXPECT().DeleteByID(gomock.Any(), gomock.Any()).Return(expect)
 
 		service := &WorksServiceImpl{
-			fileUploader:    fileUploader,
-			worksRepository: worksRepo,
+			transactionRunner: tranRunner,
+			worksRepository:   worksRepo,
 		}
 
 		actual := service.DeleteByID(ctx, 1)
@@ -1336,89 +1330,21 @@ func TestDeleteByID(t *testing.T) {
 		defer ctrl.Finish()
 		ctx = setupContext(ctx)
 
-		expect := errors.New("Failed to delete")
-
-		worksRepo := mocks.NewMockWorksRepository(ctrl)
-		worksRepo.EXPECT().FindByID(gomock.Any(), gomock.Any()).Return(nil, expect)
-
-		service := &WorksServiceImpl{
-			worksRepository: worksRepo,
-		}
-
-		actual := service.DeleteByID(ctx, 1)
-
-		assert.True(t, errors.Is(actual, expect))
-		var appErr *myErr.ApplicationError
-		if errors.As(actual, &appErr) {
-			assert.Equal(t, myErr.WUE99, appErr.Code())
-		} else {
-			assert.Failf(t, "Invalid error type", "%w", actual)
-		}
-	})
-
-	t.Run("Fail to delete thumbnail", func(t *testing.T) {
-		ctrl, ctx := gomock.WithContext(context.Background(), t)
-		defer ctrl.Finish()
-		ctx = setupContext(ctx)
-
 		tranRunner := mocks.NewMockTransactionRunner(ctrl)
 		tranRunner.
 			EXPECT().
-			Run(gomock.Any(), gomock.Any()).
+			Run(gomock.Eq(ctx), gomock.Any()).
 			DoAndReturn(func(ctx context.Context, tranFunc repositories.TransactionFunction) error {
 				return tranFunc(ctx)
 			})
 
-		worksRepo := mocks.NewMockWorksRepository(ctrl)
-		worksRepo.EXPECT().FindByID(gomock.Any(), gomock.Any()).Return(&entities.Work{}, nil)
-		worksRepo.EXPECT().DeleteByID(gomock.Any(), gomock.Any())
-
-		fileUploader := mocks.NewMockFileUploader(ctrl)
 		expect := errors.New("Failed to delete")
-		fileUploader.EXPECT().Delete(gomock.Any()).Return(expect)
+
+		worksRepo := mocks.NewMockWorksRepository(ctrl)
+		worksRepo.EXPECT().DeleteByID(gomock.Any(), gomock.Any()).Return(expect)
 
 		service := &WorksServiceImpl{
 			transactionRunner: tranRunner,
-			fileUploader:      fileUploader,
-			worksRepository:   worksRepo,
-		}
-
-		actual := service.DeleteByID(ctx, 1)
-
-		assert.True(t, errors.Is(actual, expect))
-		var appErr *myErr.ApplicationError
-		if errors.As(actual, &appErr) {
-			assert.Equal(t, myErr.WUE99, appErr.Code())
-		} else {
-			assert.Failf(t, "Invalid error type", "%w", actual)
-		}
-	})
-
-	t.Run("Fail to delete content", func(t *testing.T) {
-		ctrl, ctx := gomock.WithContext(context.Background(), t)
-		defer ctrl.Finish()
-		ctx = setupContext(ctx)
-
-		tranRunner := mocks.NewMockTransactionRunner(ctrl)
-		tranRunner.
-			EXPECT().
-			Run(gomock.Any(), gomock.Any()).
-			DoAndReturn(func(ctx context.Context, tranFunc repositories.TransactionFunction) error {
-				return tranFunc(ctx)
-			})
-
-		fileUploader := mocks.NewMockFileUploader(ctrl)
-		expect := errors.New("Failed to delete")
-		fileUploader.EXPECT().Delete(gomock.Any()).Return(nil)
-		fileUploader.EXPECT().Delete(gomock.Any()).Return(expect)
-
-		worksRepo := mocks.NewMockWorksRepository(ctrl)
-		worksRepo.EXPECT().FindByID(gomock.Any(), gomock.Any()).Return(&entities.Work{}, nil)
-		worksRepo.EXPECT().DeleteByID(gomock.Any(), gomock.Any())
-
-		service := &WorksServiceImpl{
-			transactionRunner: tranRunner,
-			fileUploader:      fileUploader,
 			worksRepository:   worksRepo,
 		}
 
@@ -1437,18 +1363,13 @@ func TestDeleteByID(t *testing.T) {
 		ctrl, ctx := gomock.WithContext(context.Background(), t)
 		defer ctrl.Finish()
 
-		fileUploader := mocks.NewMockFileUploader(ctrl)
-		fileUploader.EXPECT().Delete(gomock.Any()).AnyTimes()
-
 		worksRepo := mocks.NewMockWorksRepository(ctrl)
-		worksRepo.EXPECT().FindByID(gomock.Any(), gomock.Any()).Return(&entities.Work{}, nil)
 
 		tranRunner := mocks.NewMockTransactionRunner(ctrl)
 		expect := errors.New("error")
 		tranRunner.EXPECT().Run(gomock.Eq(ctx), gomock.Any()).Return(expect)
 
 		service := &WorksServiceImpl{
-			fileUploader:      fileUploader,
 			transactionRunner: tranRunner,
 			worksRepository:   worksRepo,
 		}
@@ -1468,12 +1389,6 @@ func TestDeleteByID(t *testing.T) {
 		ctrl, ctx := gomock.WithContext(context.Background(), t)
 		defer ctrl.Finish()
 
-		worksRepo := mocks.NewMockWorksRepository(ctrl)
-		worksRepo.EXPECT().FindByID(gomock.Any(), gomock.Any()).Return(&entities.Work{}, nil)
-
-		fileUploader := mocks.NewMockFileUploader(ctrl)
-		fileUploader.EXPECT().Delete(gomock.Any()).AnyTimes()
-
 		tranRunner := mocks.NewMockTransactionRunner(ctrl)
 		expect := errors.New("error")
 		tranRunner.
@@ -1483,10 +1398,10 @@ func TestDeleteByID(t *testing.T) {
 				return tranFunc(ctx)
 			})
 
+		worksRepo := mocks.NewMockWorksRepository(ctrl)
 		worksRepo.EXPECT().DeleteByID(gomock.Eq(ctx), gomock.Any()).Return(expect)
 
 		service := &WorksServiceImpl{
-			fileUploader:      fileUploader,
 			transactionRunner: tranRunner,
 			worksRepository:   worksRepo,
 		}

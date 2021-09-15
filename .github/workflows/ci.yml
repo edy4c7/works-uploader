@@ -76,3 +76,4 @@ jobs:
           AUTH0_ISSUER: https://works-uploader-dev.us.auth0.com/
           AUTH0_JWK: https://works-uploader-dev.us.auth0.com/.well-known/jwks.json
           BASE_URL: http://localhost:8000/api/v1
+          S3_BUCKET: works-uploader-dev

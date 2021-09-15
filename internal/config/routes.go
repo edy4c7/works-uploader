@@ -20,7 +20,7 @@ func InitRoutes(r *gin.Engine, db *gorm.DB) {
 	actRepo := infrastructures.NewActivitiesRepositoryImpl(db)
 	userRepo := infrastructures.NewUserRepositoryImpl(db)
 	uuidGen := &infrastructures.UUIDGeneratorImpl{}
-	fileUploader := &infrastructures.FileUploaderImpl{}
+	fileUploader := infrastructures.NewStorageClientImpl()
 
 	worksService := services.NewWorksServiceImpl(tranRnr, worksRepo, actRepo, uuidGen, fileUploader)
 	worksCtrl := controllers.NewWorksController(worksService)
