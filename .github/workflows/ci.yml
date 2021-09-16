@@ -62,14 +62,22 @@ jobs:
 
       - name: Run unit tests 🧪
         run: make test_unit
-        
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-1
+       
       - name: Run API tests
         run: 
-          make run &
+          make run > /dev/null &
           make test_api
         env:
           POSTMAN_API_KEY: ${{ secrets.POSTMAN_API_KEY }}
           POSTMAN_COLLECTION_ID: ${{ secrets.POSTMAN_COLLECTION_ID }}
+          POSTMAN_ENVIRONMENT_ID: ${{ secrets.POSTMAN_ENVIRONMENT_ID }}
           DB_HOST: localhost
           DB_PORT: 5432
           AUTH0_AUDIENCE: works-uploader
@@ -77,3 +85,6 @@ jobs:
           AUTH0_JWK: https://works-uploader-dev.us.auth0.com/.well-known/jwks.json
           BASE_URL: http://localhost:8000/api/v1
           S3_BUCKET: works-uploader-dev
+          PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
+          PIXABAY_ID_THUMBNAIL: 6202621
+          PIXABAY_ID_CONTENT: 190056

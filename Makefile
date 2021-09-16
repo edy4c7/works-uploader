@@ -30,10 +30,10 @@ test_dir=.test
 .PHONY: test_api
 test_api:
 	mkdir -p $(test_dir)
-	curl https://api.getpostman.com/collections/$(POSTMAN_COLLECTION_ID)?apikey=$(POSTMAN_API_KEY) > $(test_dir)/api.json
-	curl https://api.getpostman.com/environments/$(POSTMAN_ENVIRONMENT_ID)?apikey=$(POSTMAN_API_KEY) > $(test_dir)/env.json
-	touch $(test_dir)/test_thumb.jpg
-	touch $(test_dir)/test_content.jpg
+	@curl -f https://api.getpostman.com/collections/$(POSTMAN_COLLECTION_ID)?apikey=$(POSTMAN_API_KEY) > $(test_dir)/api.json
+	@curl -f https://api.getpostman.com/environments/$(POSTMAN_ENVIRONMENT_ID)?apikey=$(POSTMAN_API_KEY) > $(test_dir)/env.json
+	@curl -f -G -d 'key=$(PIXABAY_API_KEY)&id=$(PIXABAY_ID_THUMBNAIL)' https://pixabay.com/api/ | jq -r '.hits[0].largeImageURL' | xargs -I@ curl -o .test/test_thumb.jpg @
+	@curl -f -G -d 'key=$(PIXABAY_API_KEY)&id=$(PIXABAY_ID_CONTENT)' https://pixabay.com/api/ | jq -r '.hits[0].largeImageURL' | xargs -I@ curl -o .test/test_content.jpg @
 	newman run $(test_dir)/api.json -e $(test_dir)/env.json --working-dir $(test_dir);\
 	result=$$?;\
 	rm -rf $(test_dir);\
