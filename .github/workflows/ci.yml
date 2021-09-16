@@ -60,20 +60,15 @@ jobs:
       - name: Install dependencies 👨🏻‍💻
         run: cd web && yarn
 
-      - name: Run unit tests 🧪
-        run: make test_unit
-
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-northeast-1
-       
-      - name: Run API tests
-        run: 
-          make run > /dev/null &
-          make test_api
+
+      - name: Run tests 🧪
+        run: make test
         env:
           POSTMAN_API_KEY: ${{ secrets.POSTMAN_API_KEY }}
           POSTMAN_COLLECTION_ID: ${{ secrets.POSTMAN_COLLECTION_ID }}
