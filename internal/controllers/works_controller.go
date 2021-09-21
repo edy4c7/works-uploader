@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/edy4c7/works-uploader/internal/beans"
 	"github.com/edy4c7/works-uploader/internal/common"
@@ -83,33 +82,6 @@ func (ctrl *WorksController) Post(c *gin.Context) {
 
 	c.Header("Location", fmt.Sprintf("%s://%s%s/%d", scheme, c.Request.Host, c.FullPath(), res.ID))
 	c.JSON(http.StatusCreated, res)
-}
-
-func (ctrl *WorksController) Put(c *gin.Context) {
-	id, err := extractWorksID(c)
-	if err != nil {
-		c.Error(errors.NewApplicationError(errors.Code(errors.WUE01), errors.Cause(err)))
-		return
-	}
-
-	form := &beans.WorksFormBean{}
-	if err := c.Bind(form); err != nil {
-		c.Error(errors.NewBadRequestError(err.Error(), err))
-		return
-	}
-
-	res, err := ctrl.service.Update(c.Request.Context(), id, form)
-	if err != nil {
-		c.Error(err)
-		return
-	}
-
-	scheme := common.GetScheme(c.Request)
-
-	locaton := fmt.Sprintf("%s://%s%s", scheme, c.Request.Host, strings.Replace(c.FullPath(), ":id", fmt.Sprint(res.ID), -1))
-
-	c.Header("Location", locaton)
-	c.JSON(http.StatusOK, res)
 }
 
 func (ctrl *WorksController) Delete(c *gin.Context) {

@@ -43,9 +43,9 @@ func (r *WorksRepositoryImpl) FindByID(ctx context.Context, id uint64) (*entitie
 	return &work, err
 }
 
-func (r *WorksRepositoryImpl) Save(ctx context.Context, work *entities.Work) error {
+func (r *WorksRepositoryImpl) Create(ctx context.Context, work *entities.Work) error {
 	if tx, ok := ctx.Value(transactionKey).(*gorm.DB); ok {
-		return tx.WithContext(ctx).Save(work).Error
+		return tx.WithContext(ctx).Create(work).Error
 	}
 	return errors.New(notInTransactionMessage)
 }

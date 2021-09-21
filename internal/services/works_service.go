@@ -30,7 +30,6 @@ type WorksService interface {
 	GetAll(ctx context.Context, offset int, limit int) (*beans.PaginationBean, error)
 	FindByID(context.Context, uint64) (*entities.Work, error)
 	Create(context.Context, *beans.WorksFormBean) (*entities.Work, error)
-	Update(context.Context, uint64, *beans.WorksFormBean) (*entities.Work, error)
 	DeleteByID(context.Context, uint64) error
 }
 
@@ -163,7 +162,7 @@ func (r *WorksServiceImpl) Create(ctx context.Context, bean *beans.WorksFormBean
 	}
 
 	err := r.transactionRunner.Run(ctx, func(ctx context.Context) error {
-		if err := r.worksRepository.Save(ctx, w); err != nil {
+		if err := r.worksRepository.Create(ctx, w); err != nil {
 			return err
 		}
 
@@ -184,99 +183,6 @@ func (r *WorksServiceImpl) Create(ctx context.Context, bean *beans.WorksFormBean
 	}
 
 	return w, nil
-}
-
-//Update は、作品の投稿及び更新を行う
-func (r *WorksServiceImpl) Update(ctx context.Context, id uint64, bean *beans.WorksFormBean) (*entities.Work, error) {
-	token, ok := ctx.Value(userKey).(*jwt.Token)
-	if !ok {
-		return nil, myErr.NewApplicationError(myErr.Code(myErr.WUE99))
-	}
-	clm, ok := token.Claims.(jwt.MapClaims)
-	if !ok {
-		return nil, myErr.NewApplicationError(myErr.Code(myErr.WUE99))
-	}
-	author, ok := clm[subjectKey].(string)
-	if !ok {
-		return nil, myErr.NewApplicationError(myErr.Code(myErr.WUE99))
-	}
-
-	var thumbURL string
-	var contentURL string
-	if bean.Type == constants.ContentTypeFile {
-		var err error
-		thumbURL, err = r.fileUploader.Upload(
-			fmt.Sprintf("%s%s", r.uuidGenerator.Generate(), filepath.Ext(bean.Thumbnail.Filename)),
-			bean.Thumbnail,
-		)
-		if err != nil {
-			return nil, myErr.NewApplicationError(myErr.Code(myErr.WUE99), myErr.Cause(err))
-		}
-
-		contentURL, err = r.fileUploader.Upload(
-			fmt.Sprintf("%s%s", r.uuidGenerator.Generate(), filepath.Ext(bean.Content.Filename)),
-			bean.Content,
-		)
-		if err != nil {
-			return nil, myErr.NewApplicationError(myErr.Code(myErr.WUE99), myErr.Cause(err))
-		}
-	} else {
-		contentURL = bean.ContentURL
-	}
-
-	var work *entities.Work
-
-	err := r.transactionRunner.Run(ctx, func(ctx context.Context) error {
-		w, err := r.worksRepository.FindByID(ctx, id)
-
-		if err != nil {
-			var rnfErr *myErr.RecordNotFoundError
-			if errors.As(err, &rnfErr) {
-				return myErr.NewApplicationError(myErr.Code(myErr.WUE01), myErr.Cause(err))
-			}
-
-			return myErr.NewApplicationError(myErr.Code(myErr.WUE99), myErr.Cause(err))
-		}
-
-		if w.Version != bean.Version {
-			return myErr.NewApplicationError(myErr.Code(myErr.WUE02))
-		}
-
-		w.Type = bean.Type
-		w.Author = author
-		w.Title = bean.Title
-		w.Description = bean.Description
-		w.ThumbnailURL = thumbURL
-		w.ContentURL = contentURL
-		w.Version = w.Version + 1
-
-		if err := r.worksRepository.Save(ctx, w); err != nil {
-			return myErr.NewApplicationError(myErr.Code(myErr.WUE99), myErr.Cause(err))
-		}
-
-		act := &entities.Activity{
-			Type: constants.ActivityUpdated,
-			User: author,
-			Work: w,
-		}
-		if err := r.activitiesRepository.Create(ctx, act); err != nil {
-			return myErr.NewApplicationError(myErr.Code(myErr.WUE99), myErr.Cause(err))
-		}
-
-		work = w
-
-		return nil
-	})
-
-	if err != nil {
-		var appErr *myErr.ApplicationError
-		if errors.As(err, &appErr) {
-			return nil, err
-		}
-		return nil, myErr.NewApplicationError(myErr.Code(myErr.WUE99), myErr.Cause(err))
-	}
-
-	return work, nil
 }
 
 //DeleteByID は、指定したIDの作品を削除する

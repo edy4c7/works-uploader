@@ -38,7 +38,6 @@ func InitRoutes(r *gin.Engine, db *gorm.DB) {
 	worksRoutes.GET("", worksCtrl.Get)
 	worksRoutes.GET("/:id", worksCtrl.FindByID)
 	worksRoutes.POST("", worksCtrl.Post)
-	worksRoutes.PUT("/:id", worksCtrl.Put)
 	worksRoutes.DELETE("/:id", worksCtrl.Delete)
 
 	actsRoutes := v1.Group("/activities")
