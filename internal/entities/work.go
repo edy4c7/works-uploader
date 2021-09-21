@@ -10,9 +10,9 @@ import (
 type Work struct {
 	ID           uint64
 	Type         constants.WorkType
-	Title        string
+	Title        string `size:"40"`
 	Author       string
-	Description  string
+	Description  string `size:"200"`
 	ThumbnailURL string
 	ContentURL   string
 	Version      uint
