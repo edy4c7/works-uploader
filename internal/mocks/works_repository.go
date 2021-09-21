@@ -79,18 +79,18 @@ func (mr *MockWorksRepositoryMockRecorder) FindByID(arg0, arg1 interface{}) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByID", reflect.TypeOf((*MockWorksRepository)(nil).FindByID), arg0, arg1)
 }
 
-// Save mocks base method
-func (m *MockWorksRepository) Save(arg0 context.Context, arg1 *entities.Work) error {
+// Create mocks base method
+func (m *MockWorksRepository) Create(arg0 context.Context, arg1 *entities.Work) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Save", arg0, arg1)
+	ret := m.ctrl.Call(m, "Create", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// Save indicates an expected call of Save
-func (mr *MockWorksRepositoryMockRecorder) Save(arg0, arg1 interface{}) *gomock.Call {
+// Create indicates an expected call of Create
+func (mr *MockWorksRepositoryMockRecorder) Create(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Save", reflect.TypeOf((*MockWorksRepository)(nil).Save), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockWorksRepository)(nil).Create), arg0, arg1)
 }
 
 // DeleteByID mocks base method

@@ -80,21 +80,6 @@ func (mr *MockWorksServiceMockRecorder) Create(arg0, arg1 interface{}) *gomock.C
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockWorksService)(nil).Create), arg0, arg1)
 }
 
-// Update mocks base method
-func (m *MockWorksService) Update(arg0 context.Context, arg1 uint64, arg2 *beans.WorksFormBean) (*entities.Work, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", arg0, arg1, arg2)
-	ret0, _ := ret[0].(*entities.Work)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Update indicates an expected call of Update
-func (mr *MockWorksServiceMockRecorder) Update(arg0, arg1, arg2 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockWorksService)(nil).Update), arg0, arg1, arg2)
-}
-
 // DeleteByID mocks base method
 func (m *MockWorksService) DeleteByID(arg0 context.Context, arg1 uint64) error {
 	m.ctrl.T.Helper()
