@@ -8,7 +8,7 @@ import (
 
 type WorksFormBean struct {
 	Type        constants.WorkType    `form:"type" binding:"required"`
-	Title       string                `form:"title" binding:"required"`
+	Title       string                `form:"title" binding:"required,max=40"`
 	Description string                `form:"description" binding:"max=200"`
 	ContentURL  string                `form:"url" binding:"required_if=Type 1,omitempty,url"`
 	Thumbnail   *multipart.FileHeader `form:"thumbnail" binding:"required_if=Type 2"`

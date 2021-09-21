@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math/rand"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -327,8 +328,8 @@ func TestPostWorksWithURL(t *testing.T) {
 	const endpoint = "/"
 
 	contentType := constants.WorkType(constants.ContentTypeURL)
-	title := "foo"
-	description := "aaaaaaaaaaaaaa"
+	title := gererateRandString(40)
+	description := gererateRandString(200)
 	url := "https://example.com"
 
 	t.Run("Is valid", func(t *testing.T) {
@@ -490,6 +491,36 @@ func TestPostWorksWithURL(t *testing.T) {
 		assert.Nil(t, err, "%T %v", err, err)
 	})
 
+	t.Run("description over than 200 charcters", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		w := httptest.NewRecorder()
+		ginCtx, r := gin.CreateTestContext(w)
+
+		buff := new(bytes.Buffer)
+		mw := multipart.NewWriter(buff)
+		description := gererateRandString(201)
+		createWorksFormRequestBody(mw, contentType, title, description, url, nil, nil, 0)
+		mw.Close()
+		req, _ := http.NewRequest(http.MethodPost, endpoint, buff)
+		req.Header.Set(contentTypeKey, mw.FormDataContentType())
+		ginCtx.Request = req
+		service := mocks.NewMockWorksService(ctrl)
+		workCtrl := NewWorksController(service)
+		r.POST("/", workCtrl.Post)
+
+		r.HandleContext(ginCtx)
+
+		errActual := ginCtx.Errors.Last()
+		if errActual != nil {
+			var bre *myErr.BadRequestError
+			assert.True(t, errors.As(errActual.Err, &bre))
+		} else {
+			assert.Fail(t, "%v", errActual)
+		}
+	})
+
 	t.Run("Missing to Title", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
@@ -500,6 +531,36 @@ func TestPostWorksWithURL(t *testing.T) {
 		buff := new(bytes.Buffer)
 		mw := multipart.NewWriter(buff)
 		createWorksFormRequestBody(mw, contentType, "", description, url, nil, nil, 0)
+		mw.Close()
+		req, _ := http.NewRequest(http.MethodPost, endpoint, buff)
+		req.Header.Set(contentTypeKey, mw.FormDataContentType())
+		ginCtx.Request = req
+		service := mocks.NewMockWorksService(ctrl)
+		workCtrl := NewWorksController(service)
+		r.POST("/", workCtrl.Post)
+
+		r.HandleContext(ginCtx)
+
+		errActual := ginCtx.Errors.Last()
+		if errActual != nil {
+			var bre *myErr.BadRequestError
+			assert.True(t, errors.As(errActual.Err, &bre))
+		} else {
+			assert.Fail(t, "%v", errActual)
+		}
+	})
+
+	t.Run("title over than 40 characters", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		w := httptest.NewRecorder()
+		ginCtx, r := gin.CreateTestContext(w)
+
+		buff := new(bytes.Buffer)
+		mw := multipart.NewWriter(buff)
+		title := gererateRandString(41)
+		createWorksFormRequestBody(mw, contentType, title, description, url, nil, nil, 0)
 		mw.Close()
 		req, _ := http.NewRequest(http.MethodPost, endpoint, buff)
 		req.Header.Set(contentTypeKey, mw.FormDataContentType())
@@ -826,6 +887,16 @@ func TestDeleteWorks(t *testing.T) {
 			assert.Fail(t, "%v", errActual)
 		}
 	})
+}
+
+var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+func gererateRandString(n int) string {
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+	}
+	return string(b)
 }
 
 func createWorksFormRequestBody(w *multipart.Writer, contentType constants.WorkType, title string, description string, url string, thumbnail []byte, content []byte, version uint) error {
