@@ -10,6 +10,9 @@ module.exports = {
     '^.+\\.js$': 'babel-jest',
     '.*\\.(vue)$': 'vue-jest',
   },
+  transformIgnorePatterns: [
+    '<rootDir>/node_modules/(?!vee-validate/dist/rules)',
+  ],
   collectCoverage: true,
   collectCoverageFrom: [
     '<rootDir>/components/**/*.vue',

@@ -1,0 +1,11 @@
+validations:
+  messages:
+    required: '{_field_}は必ず入力して下さい'
+    required_if: '{_field_}は必ず入力して下さい'
+    max: '{_field_}は{length}文字以内で入力して下さい'
+fields:
+  title: タイトル
+  content-url: URL
+  thumbnail: サムネイル
+  content: 作品
+  description: 説明文

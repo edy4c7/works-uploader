@@ -20,11 +20,17 @@ dev_front:
 dev_back: public
 	air
 
-.PHONY: test_unit
-test_unit:
+.PHONY: test_unit_back
+test_unit_back:
 	go test -coverprofile=cover.out -v ./...
 	go tool cover -html=cover.out -o cover.html
+
+.PHONY: test_unit_front
+test_unit_front:
 	yarn test
+
+.PHONY: test_unit
+test_unit: test_unit_back test_unit_front
 
 test_dir=.test
 .PHONY: test_api

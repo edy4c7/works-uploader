@@ -142,7 +142,7 @@ export default defineComponent({
         contentUrl: '',
         createdAt: new Date(),
         updatedAt: new Date(),
-      },
+      } as IWork,
     })
 
     function showWorkModal(content: IWork) {
