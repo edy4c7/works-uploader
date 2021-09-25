@@ -17,14 +17,16 @@ export default {
 
   env: {
     apiUrl:
-      process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3001',
+      process.env.NODE_ENV === 'production'
+        ? ''
+        : 'http://localhost:8000/api/v1',
   },
 
   // Global CSS (https://go.nuxtjs.dev/config-css)
   css: ['@/assets/main.css'],
 
   // Plugins to run before rendering page (https://go.nuxtjs.dev/config-plugins)
-  plugins: ['@/plugins/api'],
+  plugins: ['@/plugins/api', '@/plugins/validation'],
 
   // Auto import components (https://go.nuxtjs.dev/config-components)
   components: true,
@@ -44,10 +46,36 @@ export default {
   modules: [
     // https://go.nuxtjs.dev/axios
     '@nuxtjs/axios',
+    '@nuxtjs/i18n',
   ],
 
   // Axios module configuration (https://go.nuxtjs.dev/config-axios)
-  axios: {},
+  axios: {
+    proxy: true,
+  },
+
+  i18n: {
+    locales: [
+      { code: 'ja', iso: 'ja_JP', file: 'ja.yaml' },
+      { code: 'en', iso: 'en-US', file: 'en.yaml' },
+    ],
+    defaultLocale: 'ja',
+    detectBrowserLanguage: {
+      useCookie: true,
+      cookieKey: 'i18n_redirected',
+      fallbackLocale: 'en',
+      redirectOn: 'root',
+    },
+    lazy: true,
+    langDir: '@/i18n/',
+  },
+
+  proxy: {
+    '/api/':
+      process.env.NODE_ENV === 'production'
+        ? ''
+        : 'http://localhost:8000/api/v1',
+  },
 
   // Vuetify module configuration (https://go.nuxtjs.dev/config-vuetify)
   vuetify: {
@@ -69,7 +97,16 @@ export default {
   },
 
   // Build Configuration (https://go.nuxtjs.dev/config-build)
-  build: {},
+  build: {
+    transpile: ['vee-validate/dist/rules'],
+    extend(config, _) {
+      config.module.rules.push({
+        test: /\.ya?ml$/,
+        type: 'json', // Required by Webpack v4
+        use: 'yaml-loader',
+      })
+    },
+  },
 
   srcDir: 'web/',
 

@@ -1,0 +1,11 @@
+validations:
+  messages:
+    required: '{_field_}is required'
+    required_if: '{_field_}is required'
+    max: '{_field_} is {length} characters or less'
+fields:
+  title: title
+  content-url: URL
+  thumbnail: thumbnail
+  content: content
+  description: description

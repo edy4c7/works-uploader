@@ -13,6 +13,15 @@ export interface Work {
   updatedAt: Date
 }
 
+export interface WorkForm {
+  type: string
+  title: string
+  contentUrl?: string
+  thumbnail?: File
+  content?: File
+  description: string
+}
+
 export interface ApiClient {
   getWorks(): Promise<Work[]>
 }
@@ -100,7 +109,7 @@ const apiClient: ApiClient = {
 }
 
 const apiPlugin: Plugin = ({ $axios }, inject) => {
-  $axios.setBaseURL(process.env.apiUrl!)
+  $axios.setBaseURL('/api/'!)
   // inject('api', new ApiClientImpl($axios))
   inject('api', apiClient)
 }
