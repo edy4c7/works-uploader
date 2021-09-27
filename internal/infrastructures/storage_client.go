@@ -1,6 +1,7 @@
 package infrastructures
 
 import (
+	"fmt"
 	"mime/multipart"
 	"os"
 
@@ -31,16 +32,19 @@ func (r *StorageClientImpl) Upload(fileName string, fh *multipart.FileHeader) (s
 		return "", err
 	}
 
-	uo, err := r.uploader.Upload(&s3manager.UploadInput{
-		ACL:    aws.String(s3.BucketCannedACLPublicRead),
-		Bucket: aws.String(r.bucketName),
-		Key:    aws.String(fileName),
-		Body:   body,
+	_, err = r.uploader.Upload(&s3manager.UploadInput{
+		ACL:                aws.String(s3.BucketCannedACLPublicRead),
+		Bucket:             aws.String(r.bucketName),
+		Key:                aws.String(fileName),
+		ContentDisposition: aws.String(fmt.Sprintf("attachment;filename=\"%s\"", fh.Filename)),
+		Body:               body,
 	})
 
-	if uo != nil {
-		return uo.Location, err
+	if err != nil {
+		return "", err
 	}
 
-	return "", err
+	cdn := os.Getenv("CDN_DOMAIN")
+
+	return fmt.Sprintf("https://%s/%s", cdn, fileName), nil
 }
