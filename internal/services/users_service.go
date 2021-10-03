@@ -26,6 +26,7 @@ func (r *UsersServiceImpl) Save(ctx context.Context, form *beans.UserFormBean) e
 		ID:       form.ID,
 		Nickname: form.Nickname,
 		Name:     form.Name,
+		Picture:  form.Picture,
 	}
 
 	if err := r.repository.Save(ctx, user); err != nil {

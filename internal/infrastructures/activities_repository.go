@@ -20,13 +20,13 @@ func NewActivitiesRepositoryImpl(db *gorm.DB) *ActivitiesRepositoryImpl {
 
 func (r *ActivitiesRepositoryImpl) GetAll(ctx context.Context, limit int) ([]*entities.Activity, error) {
 	acts := make([]*entities.Activity, 0)
-	err := r.db.WithContext(ctx).Preload("Work").Limit(limit).Order("created_at desc").Find(&acts).Error
+	err := r.db.WithContext(ctx).Preload("User").Preload("Work").Limit(limit).Order("created_at desc").Find(&acts).Error
 	return acts, err
 }
 
 func (r *ActivitiesRepositoryImpl) FindByUserID(ctx context.Context, userID string, limit int) ([]*entities.Activity, error) {
 	acts := make([]*entities.Activity, 0)
-	err := r.db.WithContext(ctx).Preload("Work").Limit(limit).Where("activities.user = ?", userID).Order("created_at desc").Find(&acts).Error
+	err := r.db.WithContext(ctx).Preload("User").Preload("Work").Limit(limit).Where("activities.user_id = ?", userID).Order("created_at desc").Find(&acts).Error
 	return acts, err
 }
 

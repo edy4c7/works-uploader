@@ -3,6 +3,9 @@ validations:
     required: '{_field_}is required'
     required_if: '{_field_}is required'
     max: '{_field_} is {length} characters or less'
+activities:
+  added: '{user} added {title}'
+  updated: '{user} updated {title}'
 fields:
   title: title
   content-url: URL

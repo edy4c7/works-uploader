@@ -133,7 +133,7 @@ func (r *WorksServiceImpl) Create(ctx context.Context, bean *beans.WorksFormBean
 
 	w := &entities.Work{
 		Type:        bean.Type,
-		Author:      author,
+		AuthorID:      author,
 		Title:       bean.Title,
 		Description: bean.Description,
 		Version:     initialVersion,
@@ -168,7 +168,7 @@ func (r *WorksServiceImpl) Create(ctx context.Context, bean *beans.WorksFormBean
 
 		act := &entities.Activity{
 			Type: constants.ActivityAdded,
-			User: author,
+			UserID: author,
 			Work: w,
 		}
 		if err := r.activitiesRepository.Create(ctx, act); err != nil {

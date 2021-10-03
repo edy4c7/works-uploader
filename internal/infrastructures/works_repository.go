@@ -23,7 +23,7 @@ func NewWorksRepositoryImpl(db *gorm.DB) *WorksRepositoryImpl {
 
 func (r *WorksRepositoryImpl) GetAll(ctx context.Context, offset int, limit int) ([]*entities.Work, error) {
 	works := make([]*entities.Work, 0)
-	err := r.db.WithContext(ctx).Offset(offset).Limit(limit).Find(&works).Error
+	err := r.db.WithContext(ctx).Preload("Author").Offset(offset).Limit(limit).Find(&works).Error
 	return works, err
 }
 
@@ -36,7 +36,7 @@ func (r *WorksRepositoryImpl) CountAll(ctx context.Context) (int64, error) {
 
 func (r *WorksRepositoryImpl) FindByID(ctx context.Context, id uint64) (*entities.Work, error) {
 	var work entities.Work
-	err := r.db.WithContext(ctx).First(&work, id).Error
+	err := r.db.WithContext(ctx).Preload("Author").First(&work, id).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, wuErr.NewRecordNotFoundError(err.Error(), err)
 	}

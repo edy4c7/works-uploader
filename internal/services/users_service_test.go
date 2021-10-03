@@ -19,14 +19,16 @@ func TestSave(t *testing.T) {
 
 		form := &beans.UserFormBean{
 			ID:       "hogehoge",
-			Name: "Fugafugao",
+			Name:     "Fugafugao",
 			Nickname: "hogetaro",
+			Picture:  "https://example.com/picture.png",
 		}
 
 		user := &entities.User{
 			ID:       form.ID,
-			Name: form.Name,
+			Name:     form.Name,
 			Nickname: form.Nickname,
+			Picture:  form.Picture,
 		}
 
 		repo := mocks.NewMockUsersRepository(ctrl)
@@ -44,8 +46,9 @@ func TestSave(t *testing.T) {
 
 		form := &beans.UserFormBean{
 			ID:       "hogehoge",
-			Name: "Fugafugao",
+			Name:     "Fugafugao",
 			Nickname: "hogetaro",
+			Picture:  "https://example.com/picture.png",
 		}
 
 		repo := mocks.NewMockUsersRepository(ctrl)
