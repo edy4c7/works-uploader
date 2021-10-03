@@ -17,7 +17,7 @@ var activitiesTestData = []*entities.Activity{
 	{
 		ID:     1,
 		Type:   constants.ActivityAdded,
-		User:   "hogeuser",
+		UserID:   "hogeuser",
 		WorkID: 2,
 		Work: &entities.Work{
 			ID:           2,
@@ -30,7 +30,7 @@ var activitiesTestData = []*entities.Activity{
 	{
 		ID:     3,
 		Type:   constants.ActivityUpdated,
-		User:   "fugauser",
+		UserID:   "fugauser",
 		WorkID: 4,
 		Work: &entities.Work{
 			ID:           4,

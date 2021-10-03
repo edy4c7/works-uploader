@@ -284,7 +284,7 @@ func TestCreate(t *testing.T) {
 		work := &entities.Work{
 			Type:        form.Type,
 			Title:       form.Title,
-			Author:      subject,
+			AuthorID:      subject,
 			Description: form.Description,
 			ContentURL:  form.ContentURL,
 			Version:     initialVersion,
@@ -294,7 +294,7 @@ func TestCreate(t *testing.T) {
 		actRepo := mocks.NewMockActivitiesRepository(ctrl)
 		actRepo.EXPECT().Create(gomock.Eq(ctx), &entities.Activity{
 			Type: constants.ActivityAdded,
-			User: subject,
+			UserID: subject,
 			Work: work,
 		})
 
@@ -355,7 +355,7 @@ func TestCreate(t *testing.T) {
 		work := &entities.Work{
 			Type:         form.Type,
 			Title:        form.Title,
-			Author:       subject,
+			AuthorID:       subject,
 			Description:  form.Description,
 			ThumbnailURL: thumbnailURL,
 			ContentURL:   contentURL,
@@ -366,7 +366,7 @@ func TestCreate(t *testing.T) {
 		actRepo := mocks.NewMockActivitiesRepository(ctrl)
 		actRepo.EXPECT().Create(gomock.Eq(ctx), &entities.Activity{
 			Type: constants.ActivityAdded,
-			User: subject,
+			UserID: subject,
 			Work: work,
 		})
 

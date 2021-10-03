@@ -3,6 +3,9 @@ validations:
     required: '{_field_}は必ず入力して下さい'
     required_if: '{_field_}は必ず入力して下さい'
     max: '{_field_}は{length}文字以内で入力して下さい'
+activities:
+  added: '{user} added {title}'
+  updated: '{user} updated {title}'
 fields:
   title: タイトル
   content-url: URL

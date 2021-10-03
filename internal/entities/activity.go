@@ -9,8 +9,9 @@ import (
 type Activity struct {
 	ID        uint64
 	Type      constants.ActivityType
-	User      string
-	WorkID    uint64
+	UserID    string `json:"-"`
+	User      *User
+	WorkID    uint64 `json:"-"`
 	Work      *Work
 	CreatedAt time.Time
 }
