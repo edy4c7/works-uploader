@@ -18,7 +18,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from '@nuxtjs/composition-api'
-import { Work } from '~/plugins/api'
+import { Work } from '~/store/works'
 
 export default defineComponent({
   props: {
