@@ -18,15 +18,6 @@ export interface Work {
   updatedAt: Date
 }
 
-export interface WorkForm {
-  type: WorkType
-  title: string
-  contentUrl?: string
-  thumbnail?: File
-  content?: File
-  description: string
-}
-
 export interface State {
   works: Work[]
 }
@@ -52,6 +43,15 @@ export const mutations: MutationTree<State> = {
   setWorks(s, payload: { works: Work[] }) {
     s.works = payload.works
   },
+}
+
+export interface WorkForm {
+  type: WorkType
+  title: string
+  contentUrl?: string
+  thumbnail?: File
+  content?: File
+  description: string
 }
 
 export interface PostWorkPayload {
