@@ -1,7 +1,6 @@
 import Vuex from 'vuex'
 import { createLocalVue } from '@vue/test-utils'
-import { State, getters, mutations, actions } from '~/store/'
-import { Work, ApiClient } from '~/plugins/api'
+import { State, getters, Work } from '~/store/works'
 
 const data: Work[] = [
   {
@@ -26,10 +25,6 @@ const data: Work[] = [
   },
 ]
 
-const ApiMock = jest.fn<ApiClient, []>().mockImplementation(() => ({
-  getWorks: jest.fn().mockResolvedValue(data),
-}))
-
 const localVue = createLocalVue()
 localVue.use(Vuex)
 
@@ -45,24 +40,5 @@ describe('getters', () => {
     const result = store.getters.getWorkById('001') as Work
 
     expect(result.id).toEqual('001')
-  })
-})
-
-describe('actions', () => {
-  it('fetch works', async () => {
-    const store = new Vuex.Store<State>({
-      state: () => ({
-        works: [],
-      }),
-      mutations,
-      actions,
-    })
-    store.$api = new ApiMock()
-
-    await store.dispatch('fetchWorks')
-    expect(store.state.works).toEqual(data)
-
-    await store.dispatch('fetchWorks')
-    expect(store.state.works).toEqual(data)
   })
 })

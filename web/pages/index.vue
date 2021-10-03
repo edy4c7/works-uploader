@@ -116,7 +116,7 @@ import {
   reactive,
 } from '@nuxtjs/composition-api'
 import Work from '~/components/Work.vue'
-import { Work as IWork } from '~/plugins/api'
+import { Work as IWork } from '~/store/works'
 import Modal from '~/components/Modal.vue'
 
 export default defineComponent({
@@ -126,11 +126,11 @@ export default defineComponent({
   },
   setup() {
     const self = getCurrentInstance()
-    const items = computed(() => self?.$store.state.works)
+    const items = computed(() => self?.$store.state.works.works)
     const currentIndex = computed(() =>
-      self?.$store.state.works.indexOf(localState.modalContent)
+      self?.$store.state.works.works.indexOf(localState.modalContent)
     )
-    const countOfItems = computed(() => self?.$store.state.works.length)
+    const countOfItems = computed(() => self?.$store.state.works.works.length)
     const localState = reactive({
       isWorkModalVisible: false,
       modalContent: {
@@ -152,7 +152,7 @@ export default defineComponent({
 
     function seek(delta: number) {
       localState.modalContent =
-        self?.$store.state.works[currentIndex.value + delta]
+        self?.$store.state.works.works[currentIndex.value + delta]
     }
 
     return {

@@ -115,8 +115,7 @@ import Vue, { PropType } from 'vue'
 import { extend, ValidationProvider, ValidationObserver } from 'vee-validate'
 // eslint-disable-next-line camelcase
 import { required, required_if, max } from 'vee-validate/dist/rules'
-import { WorkForm } from '~/plugins/api'
-import { WorkType } from '~/store'
+import { WorkType, WorkForm } from '~/store/works'
 
 extend('required', required)
 extend('required_if', required_if)

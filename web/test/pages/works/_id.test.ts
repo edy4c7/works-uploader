@@ -3,7 +3,7 @@ import Vuex from 'vuex'
 import Vuetify from 'vuetify'
 import { createLocalVue, shallowMount } from '@vue/test-utils'
 import Works from '~/pages/works/_id.vue'
-import { Work as IWork } from '~/plugins/api'
+import { Work as IWork } from '~/store'
 
 Vue.use(Vuetify)
 

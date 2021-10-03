@@ -4,7 +4,7 @@ import Vuetify from 'vuetify'
 import flushPromises from 'flush-promises'
 import { createLocalVue, mount } from '@vue/test-utils'
 import WorkForm from '~/components/WorkForm.vue'
-import { WorkType } from '~/store'
+import { WorkType } from '~/store/works'
 
 const localVue = createLocalVue()
 Vue.use(Vuetify)
