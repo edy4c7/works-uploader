@@ -5,10 +5,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@nuxtjs/composition-api'
+import Vue from 'vue'
 import WorksForm from '~/components/WorkForm.vue'
 
-export default defineComponent({
+export default Vue.extend({
   components: {
     WorksForm,
   },
