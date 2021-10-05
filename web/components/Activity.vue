@@ -19,6 +19,7 @@ import Vue, { PropType } from 'vue'
 import { Activity, ActivityType } from '~/store/activities'
 
 export default Vue.extend({
+  name: 'Activity',
   props: {
     value: {
       type: Object as PropType<Activity>,
